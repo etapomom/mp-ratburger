@@ -25,3 +25,8 @@ This mod aims to recreate Blood's gameplay in GZDoom using the voodoo arts of ZS
 - Blood's monsters
 - Also its armor system
 	- It's way too complex and it would be impossible to make it compatible with every custom damagetype out there.
+### Credits
+- Sprites mostly from Monolith.
+- Sounds too.
+- [Marisa Kirisame](https://github.com/OrdinaryMagician) for the DoExplosion and DoKnockback functions.
+- [KeksDose](https://forum.zdoom.org/viewtopic.php?f=105&t=64566) for libeye.
