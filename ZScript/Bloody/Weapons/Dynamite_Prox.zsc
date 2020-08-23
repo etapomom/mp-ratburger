@@ -1,0 +1,37 @@
+Class BloodyDynamite_Prox : BloodyThrowable
+{
+	Default
+	{
+		Tag "TNT Bundle (Proximity)";
+		Inventory.PickupMessage "Picked up a Proximity bomb.";
+		Obituary "%o stood too close to %k's proximity bomb.";
+		Weapon.SlotNumber 6;
+		Weapon.SelectionOrder 3;
+		Weapon.AmmoType "RocketAmmo";
+		Weapon.AmmoType2 "RocketAmmo";
+		Weapon.AmmoUse 1;
+		Weapon.AmmoGive 1;
+		Weapon.AmmoUse2 1;
+		-WEAPON.CHEATNOTWEAPON
+	}
+	States
+	{
+	Spawn: TNT1 A 1; Stop;
+	Select: TNTD A 0 Overlay(RightFX1, "Radar"); Goto SelectLoop;
+	Deselect: TNTD A 0; Goto DeselectLoop;
+	Ready:
+		TNTD A 1 A_WeaponReady2();
+		Loop;
+	Fire:
+		TNTD A 1 A_WeaponReady2(WRF_DISABLE;
+		Goto Ready;
+	
+	Radar:
+		TNT1 A 0 Overlay(RightGlow1, "RadarGlow", 0.75);
+		TNTD BBBCCCDDDEEEFFFBBBBBB 1 OverlayOffset(RightFX1, (0, 0));
+		Loop;
+	RadarGlow:
+		TNTD BBBCCCDDDEEEFFFBBBBBB 1 BRIGHT OverlayOffset(RightGlow1, (0, 0));
+		Loop;
+	}
+}

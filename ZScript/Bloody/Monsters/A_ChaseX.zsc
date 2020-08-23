@@ -1,0 +1,59 @@
+Extend Class BloodyMonster
+{
+	Enum ChaseTypes
+	{
+		CHASE_Strafe 		= 0,
+		CHASE_Melee			= 1,
+		CHASE_Kite			= 2,
+		CHASE_Doom			= 3,
+		CHASE_DoomFast		= 4,
+	}	
+	
+	Void BloodyChase(	StateLabel Melee = "Melee",
+						StateLabel Missile = "Missile",
+						int BuildUp = 18,
+						double MaxSpeed = 8.,
+						double MaxTurn = 30.,
+						int Type = 0,
+						int ActiveLoops = 1,
+						int KitingRange = 192
+						)
+					
+	{
+		//Double MoveSpeed; //= Clamp((Run * BuildUp) + InitialSpeed, InitialSpeed, MaxSpeed);
+		
+		Double MoveSpeed;
+		MoveSpeed = Min(MaxSpeed * (Run / BuildUp), MaxSpeed);
+		
+		if (!Target || Target.bKilled)
+		{
+			A_Chase(null, null);
+			return;
+		}
+		
+		if (Target && Target.Health > 0 && CheckSight(Target,SF_IGNOREVISIBILITY)) // Use regular A_Chase if cannot see.
+		{
+			bool good = false;
+			double ang = angle;
+			A_Face(Target, Max(0.01, MaxTurn), 0, flags: FAF_MIDDLE);
+			If(Target)
+			{
+				Vector2 nmpos = Vec2Angle(MoveSpeed, Angle);
+				If(TryMove(nmpos, bDROPOFF)) good = true;
+				
+				if (good)
+				{
+					vector3 x, y, z, fast;
+					[x, y, z] = dt_coordutil.GetAxes(pitch, angle, roll);
+					fast = (MaxSpeed,0,0)+y;
+					Vel.X = fast.x * (cos(Angle)) - fast.y * (sin(Angle));
+					Vel.Y = fast.x * (sin(Angle)) + fast.y * (cos(Angle));
+					A_Chase(Melee, Missile, CHF_DONTMOVE|CHF_DONTTURN|CHF_NODIRECTIONTURN|CHF_NOPOSTATTACKTURN);
+					Return;
+				}
+			}
+		}
+		
+		A_Chase(Melee, Missile);
+	}
+}

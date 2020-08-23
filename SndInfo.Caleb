@@ -1,0 +1,46 @@
+$PitchShiftRange 2
+$PLAYERALIAS 			Player Male *death 		Death
+$PLAYERALIAS 			Player Male *falling 	Falling
+$PLAYERALIAS 			Player Male *pain100 	Ouch
+$PLAYERALIAS			player male *surface	Surface
+$PLAYERSOUNDDUP 		Player Male *pain75 	*pain100
+$PLAYERSOUNDDUP 		Player Male *pain50 	*pain100
+$PLAYERSOUNDDUP 		Player Male *pain25 	*pain100
+$PLAYERSOUNDDUP			Player Male	*xdeath		*death
+$PLAYERSOUNDDUP			Player Male *gibbed		*death
+Death					DIE1
+$RANDOM Ouch { pain1 pain2 pain3 }
+pain1					PAIN1
+pain2					PAIN2
+pain3					PAIN3
+Drown					PAIN4
+Choke					PLAYCHOK
+Choked					PLAYCHK2
+Falling					FALL
+Surface					EMERGE
+Dive					SUBMERGE
+Swim					SWIM
+SwimUW					SWIMUW
+$Singular Drown
+$Limit Drown 1
+GoBeast					GOBEAST4
+$RANDOM BurningSensation { burn1 burn2 }
+burn1					BURN1_CAL
+burn2					BURN2_CAL
+$Singular BurningSensation
+$Limit BurningSensation 1
+
+Ping					PING
+
+//Beast related
+$RANDOM BeastReady { bready1 bready2 bready3 bready4 }
+bready1					BBREADY1
+bready2					BBREADY2
+bready3					BBREADY3
+bready4					BBREADY4
+
+$RANDOM BeastStart { bstart1 bstart2 bstart3 bstart4 }
+bstart1					BBSTART1
+bstart2					BBSTART2
+bstart3					BBSTART3
+bstart4					BBSTART4

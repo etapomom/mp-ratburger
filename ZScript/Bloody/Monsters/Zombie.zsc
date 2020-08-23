@@ -1,0 +1,336 @@
+Class AxeZombie : BloodyMonster replaces Demon
+{
+	Default
+	{
+		Health 80;
+		Scale 0.455;
+		Mass 200;
+		Height 56;
+		Radius 20;
+		Speed 8;
+		MONSTER;
+		+FLOORCLIP
+		Species "Zombie";
+		Tag "Zombie";
+		MeleeRange 96;
+		PainChance 96;
+		PainChance "Shock", 156;
+		PainChance "Explosive", 192;
+		DamageFactor "Fire", 1.25;
+		DamageFactor "RadiusFire", 1.25;
+		Obituary "%o was beheaded by a Zombie.";
+		SeeSound "ZombieSee";
+		PainSound "ZombiePain";
+		DeathSound "ZombieDeath";
+		ActiveSound "ZombieRoam";
+		GibHealth 120;
+	}
+	
+	int odd;
+	Override void Tick()
+	{
+		Super.Tick();
+		If(CountInv("QueuedHeadshot") && !IsFrozen())
+		{
+			If(odd++ >= 2)
+			{
+				odd = 0;
+				A_TakeInventory("QueuedHeadshot");
+			}
+		}
+	}
+	
+	Action Void A_ZombieChase()
+	{
+		A_Chase(Null,Null,CHF_DONTMOVE|CHF_DONTTURN);
+		A_Chase(Null,Null,CHF_DONTMOVE|CHF_DONTTURN);
+		Invoker.BloodyChase("Melee", Null, 0.025, 0.075, 0.67, 1, 0, 2);
+	}
+	
+	Action Void A_ZombieMelee()
+	{
+		//A_FaceTarget();
+		If(Distance3D(Target) <= 64 && Target && Target.Health > 0 && Target.bSHOOTABLE)
+		{
+			Target.DamageMObj(self,self,(random(29,31)),'Melee',DMG_USEANGLE,(self.AngleTo(target)-180));
+			If(!Target.bNOBLOOD) Target.SpawnBlood(Target.Pos + (0,0,Target.Height * 0.5),angle,(random(24,26)));
+			A_PlaySound("ZombieHit",CHAN_BODY);
+		}
+	}
+	
+	Override int DamageMObj(Actor Inflictor, Actor Source, Int Damage, Name MOD, Int Flags, Double Angle)
+	{
+		If(Inflictor && Inflictor.Pos.Z >= Self.GetZAt(0,0) + (Self.Height - 12) && !(Flags & DMG_EXPLOSION || DamageTypeReceived == "Massacre"))
+		{
+			A_GiveInventory("QueuedHeadshot",5);
+		}
+		Return Super.DamageMObj(Inflictor,Source,Damage,MOD,Flags,Angle);
+	}
+	
+	States
+	{
+	Spawn:
+		E06R K 1 A_Look();
+		Loop;
+	See:
+		E06W AAAAABBBBBCCCCCDDDDDEEEEEFFFFF 1 BloodyChase("Melee", Null, 18, 2.5, 45., 0, 3);
+		Loop;
+	Idle:
+		E06W AAAAABBBBBCCCCCDDDDDEEEEEFFFFF 1 A_Wander();
+		Loop;
+	Melee:
+		E06A A 3 { A_FaceTarget(); A_ChangeVelocity(6,0,0,CVF_RELATIVE); }
+		E06A B 3; //A_FaceTarget();
+		E06A C 4 { /*A_FaceTarget();*/ A_PlaySound("ZombieSwing",CHAN_WEAPON); }
+		E06A D 3 A_ZombieMelee();
+		E06A EF 4; //A_FaceTarget();
+		Goto See;
+	Pain:
+		E06P A 2;
+		E06P A 6 A_Pain();
+		//E06P A 0 A_JumpIf(Self.Pos.Z > Self.FloorZ, "Fall");
+		Goto See;
+	/*Pain.Shock:
+		E06P A 0;
+		Goto Super::Shocked;*/
+	Fall:
+		E06P A 0 { bNOPAIN = 1; }
+		//E06D A 6 A_Pain();
+		E06D B 6;
+		E06D C 5 A_ChangeLinkFlags(1);
+		E06D D 4;
+		E06D E 1 A_CheckFloor("Fallen");
+		Wait;
+	Fallen:
+		E06S ABC 4;
+		E06S D 4 { A_ChangeLinkFlags(0); A_PlaySound("ZombieStand",CHAN_WEAPON); }
+		E06S E 4;
+		E06S F 4 { bNOPAIN = 0; }
+		Goto See;
+	Death:
+		//E06P A 0 A_JumpIf(Health < 100, "Headshot");
+		E06P A 0 A_JumpIf(CountInv("QueuedHeadshot"),"Headshot");
+		E06P A 1;
+		E06D A 6 A_Scream();
+		E06D B 6;
+		E06D C 5 A_Fall();
+		E06D D 4;
+		E06D E -1;
+		Stop;
+	Headshot:
+		E06X A 1; //A_SpawnItemEx("AxeZombieHead",0,0,52,frandom(-2,2),frandom(-2,2),frandom(8,12),frandom(0,359),SXF_NOCHECKPOSITION|SXF_TRANSFERTRANSLATION,0);
+		E06X A 6 A_Scream();
+		E06X BC 8;
+		E06X D 8 A_Fall();
+		E06X EFG 8;
+		E06X H -1;
+		Stop;
+	/*Death.Fire:
+	Death.Burning:
+	Death.Lava:
+		TNT1 A 1
+		{
+			A_Fall();
+			A_SpawnItemEx(Invoker.BurnClass,0,0,0,vel.x,vel.y,vel.z,angle,SXF_NOCHECKPOSITION|SXF_TRANSFERPOINTERS,0);
+		}
+		Stop;*/
+	Death.RadiusFire:
+	XDeath:
+		E06P A 2;
+		E06P A 3 A_Scream();
+		E06G A 5 A_PlaySound("Gibbed",CHAN_BODY);
+		E06G BC 5;
+		E06G D 4 A_Fall();
+		E06G EFG 4;
+		E06G H -1;
+		Stop;
+	Death.Spirit:
+	Death.RadiusSpirit:
+		E06P A 2;
+		E06P A 3 A_Scream();
+		E06V ABC 5;
+		E06V D 4 A_Fall();
+		E06V EFGH 4;
+		E06V I -1;
+		Stop;
+	}
+}
+
+Class ZombieSpectre : AxeZombie replaces Spectre { Default { Renderstyle "OptFuzzy"; } }
+
+Class QueuedHeadshot : Inventory { Default { Inventory.MaxAmount 5; } }
+/*Class AxeZombieHead : Actor
+{
+	Default
+	{
+		Radius 16;
+		Height 16;
+		Speed 16;
+		Scale 0.5;
+		Gravity 0.67;
+		Health 40;
+		DamageFunction (0);
+		PROJECTILE;
+		+SOLID
+		+SHOOTABLE
+		+RANDOMIZE
+		-NOGRAVITY
+		+BOUNCEONWALLS	
+		+BOUNCEONFLOORS	
+		+BOUNCEONCEILINGS
+		+ALLOWBOUNCEONACTORS	
+		+BOUNCEONACTORS
+		+CANBOUNCEWATER	
+		+LOOKALLAROUND
+		+CANBOUNCEWATER
+		+USEBOUNCESTATE
+		+FLOORCLIP
+		+THRUSPECIES
+		Species "Zombie";
+		BounceCount 350;
+		BounceFactor 0.5;
+		WallBounceFactor 0.5;
+		Tag "Zombie Head";
+	} int Bounces, Bounces2, Bounced;
+	
+	Override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		A_SpawnItemEx("CorpseHitbox",0,0,0,0,0,0,0,SXF_NOCHECKPOSITION|SXF_TRANSFERPOINTERS|SXF_TRANSFERTRANSLATION|SXF_ORIGINATOR|SXF_SETMASTER,0);
+	}
+	
+	Override void Tick()
+	{
+		Super.Tick();
+		
+		If(IsFrozen()) Return;
+		
+		If(Self.Pos.Z > Self.FloorZ) 
+		{ 
+			A_SpawnItemEx("Blood",-8,0,8,0,0,0,0,SXF_NOCHECKPOSITION|SXF_TRANSFERTRANSLATION,0);
+		}
+		
+		If(Bounces2 >= 32 || bCORPSE == 1)
+		{
+			A_PlaySound("Gibbed",CHAN_BODY);
+			SpawnBlood(Self.Pos+(frandom(-8,8),frandom(-8,8),frandom(-8,8)),frandom(0,359),15);
+			SpawnBlood(Self.Pos+(frandom(-8,8),frandom(-8,8),frandom(-8,8)),frandom(0,359),15);
+			SpawnBlood(Self.Pos+(frandom(-8,8),frandom(-8,8),frandom(-8,8)),frandom(0,359),15);
+			SpawnBlood(Self.Pos+(frandom(-8,8),frandom(-8,8),frandom(-8,8)),frandom(0,359),15);
+			Destroy();
+		}
+		Bounced--;
+	}
+	
+	Override bool CanCollideWith(Actor Other, Bool Passive)
+	{
+		If(Passive)
+		{
+			If(!Other)
+				Return False;
+			
+			If(Other && Other is 'CorpseHitbox')
+				Return False;
+		}
+		
+		If(!Passive)
+		{
+			If(!Other || !bSPECIALFIREDAMAGE || Bounced > 0)
+			{ Return False; }
+			
+			Else
+			{
+				If(!Other.Player || Other is 'CorpseHitbox') { Return False; }
+				If(!bSPECIALFIREDAMAGE) { Return False; }
+				
+				Double NewVelX = BloodyHandler.GetRelativeX(Other,-4);
+				Double NewVelY = BloodyHandler.GetRelativeY(Other,-4);
+				Double NewVelZ = Max(NewVelX, NewVelY) * 0.25;
+				Double NewVelXY = Max(NewVelX, NewVelY);
+				
+				NewVelXY = Clamp(NewVelXY, 16, 32);
+				NewVelZ  = Clamp(NewVelZ,  8, 24);
+				
+				Self.AngleTo(Other);
+				A_ChangeVelocity(NewVelXY, 0, NewVelZ, CVF_RELATIVE, 0);
+				A_SetAngle(Angle - 180);
+				
+				If(Self.Pos.Z >= Other.Height) { Vel.Z *= -1; }
+				
+				If(abs(Vel.X+Vel.Y+Vel.Z) > 64) { Bounces2 = 32; }
+				A_PlaySound("Kick",CHAN_BODY);
+				Bounces = 0;
+				Bounces2++;
+				Bounced = 10;
+				bSPECIALFIREDAMAGE = 0;
+				Return True;
+			}
+		}
+		Return True;
+	}		
+	
+	States
+	{
+	Spawn:
+		E06H ABCDEFGH 4
+		{
+			If((Invoker.Bounces >= 4 && Self.Pos.Z <= Self.FloorZ + 8) || Abs(Vel.Z) == 0) 
+			{
+				Vel.Z = 0; 
+				Return ResolveState("Grounded"); 
+			}
+			Return ResolveState(Null);
+		}
+		Loop;
+	Bounce:
+		TNT1 A 0
+		{
+			Invoker.Bounces++;
+			If((Invoker.Bounces >= 4 && Self.Pos.Z <= Self.FloorZ + 8) || Abs(Vel.Z) == 0) 
+			{
+				Vel.Z = 0; 
+				Return ResolveState("Grounded"); 
+			}
+			Return ResolveState(Null);
+		}
+		Goto Spawn;
+	Grounded:
+		E06H A 1 { bSPECIALFIREDAMAGE = 1; Vel.X *= 0.9; Vel.Y *= 0.9; }
+		E06H A 0 A_CheckFloor("Grounded");
+		Goto Spawn;
+	Death:
+		TNT1 AAA 0 SpawnBlood(Self.Pos,frandom(0,359),15);
+		Stop;
+	}
+}*/
+
+Class TankZombie : AxeZombie
+{
+	Default { Health 1000; Speed 6; }
+	States
+	{
+	See:
+		E06W AAAAABBBBBCCCCCDDDDDEEEEEFFFFF 1 A_Chase(Null,Null);
+		Loop;
+	Melee:
+		E06P A 0 A_Jump(256,"See");
+		Stop;
+	}
+}
+/*
+Class FlameGuyZombie : FlameGuy
+{
+	Default
+	{
+		Tag "Zombie";
+		Health 80;
+		Scale 0.5;
+		Mass 200;
+		Height 56;
+		Radius 20;
+		Speed 8;
+		DeathSound "ZombieDeath";
+	}
+	Override void PostBeginPlay()
+	{ Super.PostBeginPlay(); A_PlaySound("ZombiePain",CHAN_VOICE); }
+}*/

@@ -1,0 +1,207 @@
+Class CasingBase : Actor
+{	
+	Default
+	{
+		PROJECTILE;
+		+RIPPER
+		+PAINLESS
+		+FORCEDECAL
+		+BLOODLESSIMPACT
+		+NOTELEPORT
+		+FORCEXYBILLBOARD
+		+BOUNCEONWALLS
+		+BOUNCEONFLOORS
+		+BOUNCEONCEILINGS
+		+ALLOWBOUNCEONACTORS
+		+BOUNCEONACTORS
+		+CANBOUNCEWATER
+		+USEBOUNCESTATE
+		+INTERPOLATEANGLES
+		+ROLLSPRITE
+		+MOVEWITHSECTOR
+		+SLIDESONWALLS
+		-NOGRAVITY
+		BounceCount 3;
+		Speed 6;
+		Radius 1;
+		Height 1;
+		Mass 1;
+		DamageFunction 0;
+	}
+	
+	Override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		A_SetRoll(frandom(0,359));
+	}
+	
+	int ticker; bool fading, stopped;
+	Override void Tick()
+	{
+		Super.Tick();
+		
+		If(!Target) Fading = True;
+		
+		If(	(Ticker >= 1050) ||
+			(Ticker >= 525 && Target && !Target.CheckSight(Self,SF_IGNOREVISIBILITY)) || 
+			Fading)
+		{
+			Fading = True;
+			//Scale.X *= 0.9; Scale.Y = Scale.X;
+			A_FadeOut(0.015, 1);
+		}
+		
+		Ticker++;
+		
+		If(IsFrozen()) Return;
+		
+		If(InStateSequence(CurState, ResolveState("Spawn")))
+		{
+			If((vel.x != 0 || vel.y != 0 || vel.z != 0) && !WaterLevel) 
+				A_SetRoll(roll + 8*(max(abs(vel.x),abs(vel.y)) + abs(vel.z)));
+			
+			If((vel.x != 0 || vel.y != 0 || vel.z != 0) && WaterLevel)
+			{
+				A_SetRoll(roll + (max(abs(vel.x),abs(vel.y)) + abs(vel.z)));
+				Vel.X *= 0.95; Vel.Y *= 0.95;
+				If(Self.Pos.Z > Self.FloorZ) Vel.Z -= 0.125;
+			}
+		}
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+Class RifleCasing : CasingBase
+{ 
+	Default
+	{
+		Speed 6;
+		BounceFactor 0.55;
+		WallBounceFactor 0.55;
+		Scale 0.125;
+	}
+	States
+	{
+	Spawn: 
+		D3S3 A 1; 
+		Loop;
+	Bounce: 
+		TNT1 A 0 
+		{ 
+			If(Max(abs(Vel.X), abs(Vel.Y)) < 2 || abs(Vel.Z) < 2) SetState(ResolveState("Death"));
+			A_SetRoll(frandom(0,359)); 
+			If(!WaterLevel &&( Max(abs(Vel.X), abs(Vel.Y)) < 2 || abs(Vel.Z) < 2)) A_PlaySound("TommyGround",CHAN_BODY,0.25); 
+		} 
+		Goto Spawn;
+	Death:
+		D3S3 A -1 
+		{ 
+			A_SetRoll(0);
+			//If(!WaterLevel) A_PlaySound("TommyGround",CHAN_BODY,0.5);
+			bSPRITEFLIP = Random(0,1);
+		}
+		Wait;
+	}
+}
+
+Class ShotgunCasing : RifleCasing
+{ 
+	Default
+	{
+		Speed 4;
+		BounceFactor 0.5;
+		WallBounceFactor 0.5;
+		Scale 0.175;
+	}
+	
+	Vector3 A, B, AB;
+	
+	/*Override void Tick()
+	{
+		Super.Tick();
+		If(IsFrozen()) Return;
+		
+		If(!WaterLevel && InStateSequence(CurState, ResolveState("Spawn"))) 
+		{
+			A = Self.Pos - Self.Vel;
+			B = Self.Pos;
+			AB = A - B;
+			Let Dist = AB.Length();
+			AB /= Dist;
+			
+			A_SpawnItemEx("CasingSmoke",0,0,0,frandom(-0.03,0.03),frandom(-0.03,0.03),frandom(-0.03,0.03),frandom(0,359),SXF_NOCHECKPOSITION,0);
+			A_SpawnItemEx("CasingSmoke",AB.X,AB.Y,AB.Z,frandom(-0.03,0.03),frandom(-0.03,0.03),frandom(-0.03,0.03),frandom(0,359),SXF_NOCHECKPOSITION|SXF_ABSOLUTEPOSITION,0);
+		}
+	}	*/
+	
+	States
+	{
+	Spawn: 
+		D3S2 A 1;
+		Loop;
+	Bounce: 
+		TNT1 A 0 
+		{ 
+			If(Max(abs(Vel.X), abs(Vel.Y)) < 2 || abs(Vel.Z) < 2) SetState(ResolveState("Death"));
+			A_SetRoll(frandom(0,359)); 
+			If(!WaterLevel &&( Max(abs(Vel.X), abs(Vel.Y)) < 2 || abs(Vel.Z) < 2)) 
+				A_PlaySound("ShotgunGround",CHAN_BODY,0.5); 
+		} 
+		Goto Spawn;
+	Death:
+		D3S2 A -1 
+		{ 
+			A_SetRoll(0);
+			//If(!WaterLevel) A_PlaySound("ShotgunGround");
+			bSPRITEFLIP = Random(0,1);
+		}
+		Wait;
+	}
+}
+
+Class CasingSmoke : BulletSmoke { Default { Scale 0.067; } }
+
+Class CasingSpawner1 : Actor
+{
+	Default { PROJECTILE; Speed 16; +NOINTERACTION Radius 0.1; Height 0.1; }
+	States
+	{
+	Spawn:
+		TNT1 A 0 NoDelay A_SpawnProjectile("RifleCasing",0,0,frandom(-100,-130),10,frandom(-30,-55));
+		Stop;
+	}
+}
+
+Class CasingSpawner1b : CasingSpawner1
+{
+	Default { PROJECTILE; Speed 16; +NOINTERACTION Radius 0.1; Height 0.1; }
+	States
+	{
+	Spawn:
+		TNT1 A 0 NoDelay A_SpawnProjectile("RifleCasing",0,0,frandom(100,130),10,frandom(-30,-55));
+		Stop;
+	}
+}
+
+Class CasingSpawner3 : CasingSpawner1
+{
+	Default { PROJECTILE; Speed 16; +NOINTERACTION }
+	States
+	{
+	Spawn:
+		TNT1 A 0 NoDelay A_SpawnProjectile("ShotgunCasing",0,0,frandom(-100,-130),10,frandom(-55,-80));
+		Stop;
+	}
+}
+
+Class CasingSpawner3b : CasingSpawner1
+{
+	Default { PROJECTILE; Speed 16; +NOINTERACTION }
+	States
+	{
+	Spawn:
+		TNT1 A 0 NoDelay A_SpawnProjectile("ShotgunCasing",0,0,frandom(100,130),10,frandom(-55,-80));
+		Stop;
+	}
+}

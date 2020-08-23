@@ -1,0 +1,74 @@
+clearskills
+skill KidMode
+{
+	SpawnFilter = 2
+	ACSReturn = 1
+	Name = "Still Kicking"
+	Key = "s"
+	DamageFactor = 0.5
+	AmmoFactor = 2.0
+	TextColor = "White"
+	EasyBossBrain
+	EasyKey
+	AutoUseHealth
+}
+skill Easy
+{
+	SpawnFilter = 3
+	ACSReturn = 2
+	Name = "Pink on the Inside"
+	Key = "p"
+	TextColor = "White"
+}
+skill Normal
+{
+	SpawnFilter = 4
+	ACSReturn = 3
+	Name = "Lightly Broiled"
+	Key = "l"
+	Aggressiveness = 1.0
+	DefaultSkill
+	TextColor = "White"
+}
+skill Hard
+{
+	SpawnFilter = 4
+	ACSReturn = 4
+	Name = "Well Done"
+	Key = "w"
+	DamageFactor = 1.5
+	Aggressiveness = 1.0
+	TextColor = "White"
+}
+skill VHard
+{
+	SpawnFilter = 5
+	ACSReturn = 5
+	Name = "Extra Crispy!"
+	Key = "e"
+	DamageFactor = 2.0
+	MonsterHealth = 1.5
+	Aggressiveness = 1.0
+	AmmoFactor = 2.0
+	HealthFactor = 0.5
+	ArmorFactor = 0.5
+	FastMonsters
+	//DisableCheats
+	TextColor = "White"
+	MustConfirm
+}
+
+gameinfo
+{
+	titlepage = "BLOOD2"
+	creditpage = "BLOOD2"
+	titlemusic = "D_UNHOLY"
+	intermissionmusic = "D_DM2INT"
+	finalemusic = "MUZAK22"
+	dimcolor = "FF 00 00"
+	dimamount = 0.9
+	playerclasses = "ChosenPlayer"
+	quitsound = "TchernobogDeath"
+	addeventhandlers = "BloodyHandler"
+	statusbarclass = "bloodystatusbar"
+}

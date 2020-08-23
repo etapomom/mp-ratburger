@@ -1,0 +1,197 @@
+Class BloodhoundRevolver : BloodWeapon replaces Pistol
+{	
+	Default
+	{
+		Tag "Bloodhound";
+		Inventory.PickupMessage "Picked up a Bloodhound.";
+		Obituary "%o was mauled by %k's Bloodhound.";
+		Weapon.SlotNumber 2;
+		Weapon.SelectionOrder 7;
+		Weapon.AmmoType "SilverBullets";
+		Weapon.AmmoType2 "SilverBullets";
+		Weapon.AmmoUse 1;
+		Weapon.AmmoGive 12;
+		Weapon.AmmoUse2 1;
+		//Weapon.SisterWeapon "AkRevolver";
+		+WEAPON.NOAUTOFIRE
+		Scale 0.4;
+	}
+	States
+	{
+	Spawn: SAAP A 0; Goto SpawnLoop;
+	Select: SAAG A 0; Goto SelectLoop;
+	Deselect: SAAG A 0; Goto DeselectLoop;
+	Ready: SAAG A 1 A_WeaponReady2(); Loop;
+	AltFire:
+	Fire:
+		SAAG N 1
+		{
+			A_BloodhoundFire();
+				
+			//A_FireProjectile("WeaponSmoker",0,0,4,6,0,0);
+			//A_FireProjectile("WeaponSmoker",0,0,4,6,0,0);
+			
+			A_Overlay(10, "Glow");
+			A_Overlay(-10, "MuzzleFlash"); 
+			
+			A_WeaponReady2(WRF_DISABLE, 3, 3);
+			A_TakeInventory("SilverBullets",1,TIF_NOTAKEINFINITE);
+			A_GunFlash("Flash");
+			//BloodyHandler.DoSwing(Self, (frandom(-0.075, -0.05), frandom(-0.25, -0.2)), 8, -1.5, 6, SWING_Spring, 1, 2);
+			A_SpawnItemEx("LightShotgun",0,0,0,0,0,0,0,SXF_NOCHECKPOSITION|SXF_SETMASTER,0); 
+		}
+		SAAG N 1 A_WeaponReady2(WRF_DISABLE, 1.5, 1.5);
+		SAAG C 1 A_WeaponReady2(WRF_DISABLE, 0, 0, 0, 0);
+		SAAG C 1 A_WeaponReady2(WRF_DISABLE, 2, -2);
+		SAAG D 1 A_WeaponReady2(WRF_DISABLE, 0, 0, 0, 0);
+		SAAG D 1 A_WeaponReady2(WRF_DISABLE, 0.5, -0.5);
+		SAAG E 1 { A_WeaponReady2(WRF_DISABLE, 0, 0, 0, 0); A_PlaySound("SAAPull",CHAN_AUTO); }
+		SAAG E 1 A_WeaponReady2(WRF_DISABLE, 0.5, -0.5);
+		SAAG F 1 A_WeaponReady2(WRF_DISABLE, 0, 0, 0, 0);
+		SAAG F 1 A_WeaponReady2(WRF_DISABLE, -0.5, 0.5);
+		SAAG G 1 A_WeaponReady2(WRF_DISABLE, 0, 0, 0, 0);
+		SAAG G 1 A_WeaponReady2(WRF_DISABLE, -2, 2);
+		SAAG H 1 A_WeaponReady2(WRF_DISABLE, 0, 0, 0, 0);
+		SAAG H 1 A_WeaponReady2(WRF_DISABLE, -2, 2);
+		SAAG H 1 A_WeaponReady2(WRF_DISABLE, -3, 3);
+		SAAG A 1 A_WeaponReady2(WRF_DISABLE, 1, -1, 0, 0);
+		SAAG AAA 1 A_WeaponReady2(WRF_DISABLE, 0, 0);
+		SAAG A 1 { A_WeaponReady2(WRF_NOSWITCH,0,0); A_ReFire("Fire"); }
+		Goto Ready;
+	
+	/*AltFire:
+		SAAG N 1
+		{
+			A_PlaySound("CultistShotgun",CHAN_WEAPON,2.0); A_AlertMonsters();
+			
+			If(!GetCVar("Blood_Hitscan"))
+				A_FireProjectile("SAABullet",frandom(-6,6),0,4,0,0,frandom(-3,3));
+			Else 
+				A_FireBullets(6, 3, -1, (random(19,21)), "BulletPuff", FBF_NORANDOM, 0);
+				
+			A_FireProjectile("WeaponSmoker",0,0,4,6,0,0);
+			A_FireProjectile("WeaponSmoker",0,0,4,6,0,0);
+			
+			A_Overlay(10, "AltGlow");
+			A_Overlay(-10, "MuzzleFlash"); 
+			
+			A_WeaponReady2(WRF_DISABLE, 3, 3);
+			A_TakeInventory("SilverBullets",1,TIF_NOTAKEINFINITE);
+			A_GunFlash("Flash"); A_Overlay(-69,"Recoil");
+			A_SpawnItemEx("LightShotgun",0,0,0,0,0,0,0,SXF_NOCHECKPOSITION|SXF_SETMASTER,0); 
+		}
+		SAAG N 1 A_WeaponReady2(WRF_DISABLE, 1.5, 1.5);
+		SAAG I 1 A_WeaponReady2(WRF_DISABLE, 0, 0, 0, 0);
+		SAAG I 1 A_WeaponReady2(WRF_DISABLE, 2, -2);
+		SAAG J 1 A_WeaponReady2(WRF_DISABLE, 0, 0, 0, 0);
+		SAAG J 1 A_WeaponReady2(WRF_DISABLE, 0.5, -0.5);
+		SAAG K 1 { A_PlaySound("SAAPull",CHAN_AUTO); A_WeaponReady2(WRF_DISABLE, 0, 0, 0, 0); }
+		SAAG K 1 A_WeaponReady2(WRF_NOSWITCH, 0.5, -0.5);
+		SAAG L 1 A_WeaponReady2(WRF_NOSWITCH, 0, 0, 0, 0);
+		SAAG L 1 A_WeaponReady2(WRF_NOSWITCH, -0.5, 0.5);
+		SAAG M 1 A_WeaponReady2(WRF_NOSWITCH, 0, 0, 0, 0);
+		SAAG M 1 A_WeaponReady2(WRF_NOSWITCH, -2, 2);
+		SAAG H 1 A_WeaponReady2(WRF_NOSWITCH, 0, 0, 0, 0);
+		SAAG H 1 A_WeaponReady2(WRF_NOSWITCH, -2, 2);
+		SAAG H 1 A_WeaponReady2(WRF_NOSWITCH, -3, 3);
+		SAAG A 1 A_WeaponReady2(WRF_NOSWITCH, 1, -1, 0, 0);
+		SAAG A 1 A_WeaponReady2(WRF_NOSWITCH, 0, 0);
+		SAAG A 1 { A_WeaponReady2(WRF_NOSWITCH,0,0); A_ReFire("AltFire"); }
+		Goto Ready;*/
+	
+	MuzzleFlash: 
+		SAAG O 1 BRIGHT
+		{
+			A_OverlayFlags(-10, PSPF_RENDERSTYLE|PSPF_ALPHA, 1);
+			A_OverlayRenderStyle(-10, STYLE_ADD);
+			A_OverlayFlags(-10, PSPF_ADDWEAPON, 0);
+			A_OverlayOffset(-10, 0, 24);
+		}
+		SAAG O 1 BRIGHT A_OverlayAlpha(-10, 0.75);
+		SAAG O 1 BRIGHT A_OverlayAlpha(-10, 0.5);
+		SAAG O 1 BRIGHT A_OverlayAlpha(-10, 0.25);
+		SAAG O 1 BRIGHT A_OverlayAlpha(-10, 0.1);
+		Stop;
+	Glow:
+		SAAG B 1 BRIGHT 
+		{
+			A_OverlayFlags(10, PSPF_RENDERSTYLE|PSPF_ALPHA, 1);
+			A_OverlayRenderStyle(10, STYLE_TRANSLUCENT);
+			A_OverlayAlpha(10, 0.75);
+		}
+		SAAG B 1 BRIGHT A_OverlayAlpha(10, 0.725);
+		SAAG C 1 BRIGHT A_OverlayAlpha(10, 0.75);
+		SAAG C 1 BRIGHT A_OverlayAlpha(10, 0.675);
+		SAAG D 1 BRIGHT A_OverlayAlpha(10, 0.65);
+		SAAG D 1 BRIGHT A_OverlayAlpha(10, 0.625);
+		SAAG E 1 BRIGHT A_OverlayAlpha(10, 0.6);
+		SAAG E 1 BRIGHT A_OverlayAlpha(10, 0.5);
+		SAAG F 1 BRIGHT A_OverlayAlpha(10, 0.4);
+		SAAG F 1 BRIGHT A_OverlayAlpha(10, 0.3);
+		SAAG G 1 BRIGHT A_OverlayAlpha(10, 0.2);
+		SAAG G 1 BRIGHT A_OverlayAlpha(10, 0.1);
+		Stop;
+	AltGlow:
+		SAAG B 1 BRIGHT 
+		{
+			A_OverlayFlags(10, PSPF_RENDERSTYLE|PSPF_ALPHA, 1);
+			A_OverlayRenderStyle(10, STYLE_TRANSLUCENT);
+			A_OverlayAlpha(10, 0.75);
+		}
+		SAAG B 1 BRIGHT A_OverlayAlpha(10, 0.725);
+		SAAG I 1 BRIGHT A_OverlayAlpha(10, 0.75);
+		SAAG I 1 BRIGHT A_OverlayAlpha(10, 0.675);
+		SAAG J 1 BRIGHT A_OverlayAlpha(10, 0.65);
+		SAAG J 1 BRIGHT A_OverlayAlpha(10, 0.625);
+		SAAG K 1 BRIGHT A_OverlayAlpha(10, 0.6);
+		SAAG K 1 BRIGHT A_OverlayAlpha(10, 0.5);
+		SAAG L 1 BRIGHT A_OverlayAlpha(10, 0.4);
+		SAAG L 1 BRIGHT A_OverlayAlpha(10, 0.3);
+		SAAG M 1 BRIGHT A_OverlayAlpha(10, 0.2);
+		SAAG M 1 BRIGHT A_OverlayAlpha(10, 0.1);
+		Stop;
+	
+	Flash:
+		TNT1 A 1 A_Light(6);
+		TNT1 A 1 A_Light(4);
+		TNT1 A 1 A_Light(2);
+		TNT1 A 1 A_Light(1);
+		Goto LightDone;
+		
+	Recoil:
+		TNT1 A 1 A_SetPitch(Pitch + 1, SPF_INTERPOLATE);
+		TNT1 A 1 A_SetPitch(Pitch + 0.5, SPF_INTERPOLATE);
+		TNT1 AAA 1 A_SetPitch(Pitch - 0.5, SPF_INTERPOLATE);
+		Stop;
+	}
+	
+	action void A_BloodhoundFire()
+	{
+		A_QuakeEx(1,1,1,4,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:0.5);
+		A_StartSound("CultistShotgun", CHAN_WEAPON, CHANF_OVERLAP);
+		A_AlertMonsters();
+		A_FireWeapon(random[Blood](19,21), 1, 0.005, 'Normal', -4);
+	}
+}
+
+Class SilverBullets : Ammo
+{
+	Default
+	{
+		Scale .65;
+		Inventory.PickupMessage "Picked up a Silver Bullet.";
+		inventory.pickupsound "GotAmmo";
+		Inventory.Amount 1;
+		Inventory.MaxAmount 150;
+		Ammo.BackpackAmount 24;
+		Ammo.BackpackMaxAmount 240;
+		Inventory.Icon "SAAPC0";
+		+DONTSPLASH
+	}
+	States
+	{
+	Spawn:
+		SAAP C -1;
+		Loop;
+	}
+}

@@ -1,0 +1,19 @@
+BLUDFONT
+{
+	0 FBLD0
+	1 FBLD1
+	2 FBLD2
+	3 FBLD3
+	4 FBLD4
+	5 FBLD5
+	6 FBLD6
+	7 FBLD7
+	8 FBLD8
+	9 FBLD9
+	//- FBLDMIN    
+	NOTRANSLATION 109	// don't touch the shadow color!
+}
+
+DBigFont 	{ Template BLBIG%03d }
+BigFont		{ Template BLBIG%03d }
+SmallFont	{ Template BLSMA%03d }

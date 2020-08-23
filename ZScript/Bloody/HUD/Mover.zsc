@@ -1,0 +1,27 @@
+Extend Class BloodyStatusBar
+{
+	double CurX, CurY;
+	Private void HUDMover()
+	{
+		If(FirstTic) { CurX = -160.; CurY = -120.; }
+		
+		Double XDelta = (-CurX) / 7;
+		Double YDelta = (-CurY) / 7;
+		
+		If(CPlayer.mo.Health > 0)
+		{
+			If(!CPlayer.mo.FindInventory("IsBloodbath") && !CheckWeaponSelected("BloodbathClaws")) { CurX += XDelta; CurY -= (120. + CurY) / 7; }
+			Else 
+			{ 
+				If(CheckWeaponSelected("BloodbathClaws")) CurX -= (160. + CurX) / 7; 
+				If(CPlayer.mo.FindInventory("IsBloodbath")) CurY += YDelta; 
+			}
+		}
+		
+		Else
+		{
+			CurX -= (160. + CurX) / 7;
+			CurY -= (120. + CurY) / 7;
+		}
+	}
+}

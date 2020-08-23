@@ -1,0 +1,41 @@
+decal BulletHit
+{
+	pic ZBCHIP1
+	x-scale 0.15
+	y-scale 0.15
+	randomflipx
+	randomflipy
+}
+
+fader GoAway3
+{
+	DecayStart	3.0
+	DecayTime	6.0
+}
+
+decal TeslaLightning1
+{
+	pic BFGLITE1
+	shade "b0 b0 ff"
+	fullbright
+	randomflipx
+	animator GoAway3
+	lowerdecal BFGScorch
+}
+
+decal TeslaLightning2
+{
+	pic BFGLITE2
+	shade "b0 b0 ff"
+	fullbright
+	randomflipy
+	randomflipx
+	animator GoAway3
+	lowerdecal BFGScorch
+}
+
+decalgroup TeslaLightning
+{
+	TeslaLightning1	1
+	TeslaLightning2	1
+}

@@ -1,0 +1,300 @@
+Class ThisMonsterIsBloody : Inventory
+{
+	Default
+	{
+		Inventory.MaxAmount 1;
+		+INVENTORY.UNDROPPABLE
+		+INVENTORY.UNTOSSABLE
+		+EXTREMEDEATH
+		+FORCEPAIN
+	}
+	
+	Void Drop(Class<Actor> cls)
+	{
+		If(!Owner) Return;
+		
+		ThinkerIterator p = ThinkerIterator.Create();
+		Actor z, b; Bool Can;
+		While(z = Actor(p.Next()))
+		{
+			If(!z || !(z is 'CorpseHitbox') || (z is 'CorpseHitbox' && z.Master != Owner)) Continue;
+			If(z && z is 'CorpseHitbox' && z.Master == Owner) { can = True; b = z; Break; }
+		}
+		
+		If(!b || !Can) Return;
+		
+		Actor a = Spawn(cls, Owner.Pos + (0, 0, Owner.Height * 4), ALLOW_REPLACE);
+		If(a)
+		{
+			a.vel = b.vel * 0.75;
+			a.vel.x += frandom(-Owner.Radius * 0.175, Owner.Radius * 0.175);
+			a.vel.y += frandom(-Owner.Radius * 0.175, Owner.Radius * 0.175);
+			a.vel.z += frandom(0, Owner.Height * 0.8);
+			a.angle = random(0, 359);
+		}
+	}
+	
+	Int Ticker, HealthTicker, PrevHP, CurHP, HealCD;
+	Bool Init, bAuraEnchanted;
+	
+	Override void DoEffect()
+	{
+		Super.DoEffect();
+		
+		If(!Owner || (Owner && !Owner.bISMONSTER) || IsFrozen()) Return;
+		
+		Bool drop, leech, chasinginnocent;
+		Int a, b, c, d, e, ogpain, falldamage;
+		Double hearts, pain2, i;
+		CVar dynpain, drophealth, falldam;
+		
+		DynPain = CVar.FindCVar("Blood_DynamicPainChance");
+		DropHealth = CVar.FindCVar("Blood_DropHealth");
+		FallDam = CVar.FindCVar("Blood_MonsterFallDamage");
+		
+		If(!Init)
+		{
+			ogpain = Owner.PainChance;
+			hearts = Owner.GetSpawnHealth() * 0.005;
+			Init = True;
+			Drop = True;
+			Owner.bSLIDESONWALLS = True;
+			Owner.bQUICKTORETALIATE = True;
+			Owner.bALLOWPAIN = True;
+			Owner.bCAUSEPAIN = True;
+		}
+		
+		If(Init)
+		{
+			If(Owner.Health > 0) Ticker = 0;
+			
+			If(HealthTicker >= 1)
+			{
+				CurHP = Owner.Health;
+				If(CurHP > PrevHP && HealCD <= 0)
+				{
+					Actor aura = Spawn("HealAura", Owner.Pos);
+					If(aura)
+					{
+						aura.Master = Owner;
+						HealCD = 18;
+					}
+				}
+				HealthTicker = 0;
+			}
+		
+			If(HealthTicker == 0) { PrevHP = Owner.Health; HealthTicker++; }
+			
+			/*If(DynPain.GetBool())
+			{
+				pain2 = (Owner.Health * 100) / Owner.GetSpawnHealth();
+				pain2 = 100 - pain2;
+				pain2 *= 0.02;
+				pain2 = Clamp(pain2, 0.25, 2.0);
+				Owner.PainChance = OGPain * Pain2;
+			}
+			Else Owner.PainChance = OGPain;*/
+			
+			If(FallDam.GetBool() && Owner.Health > 0 && !Owner.bFLOAT && !Owner.bNOGRAVITY)
+			{
+				If(Owner.Pos.Z > Owner.FloorZ)
+				{
+					If(Owner.Vel.Z < 0)
+					{
+						Owner.A_SetInventory("QueuedFall", abs(Owner.Vel.Z));
+					}
+				}
+				
+				If(Owner.Pos.Z == Owner.FloorZ && Owner.CountInv("QueuedFall"))
+				{
+					If(GetCVar("SV_FallingDamage") == 1 && Owner.CountInv("QueuedFall") >= 19)
+					{
+						FallDamage = Owner.CountInv("QueuedFall") * Owner.CountInv("QueuedFall");
+						FallDamage *= 11;
+						FallDamage /= 128;
+						FallDamage -= 30;
+						FallDamage /= 2;
+						If(FallDamage < 1) FallDamage = 1;
+					}
+					
+					If(GetCVar("SV_FallingDamage") == 2 && Owner.CountInv("QueuedFall") >= 23)
+					{
+						FallDamage = Owner.CountInv("QueuedFall") * 16;
+						FallDamage /= 32;
+						FallDamage *= FallDamage;
+						FallDamage /= 10;
+						FallDamage -= 24;
+						If(FallDamage >= Owner.Health && Owner.CountInv("QueuedFall") <= 39) 
+							FallDamage = Owner.Health - 1;
+					}
+					
+					If(GetCVar("SV_FallingDamage") == 3 && Owner.CountInv("QueuedFall") >= 20)
+					{
+						FallDamage = Owner.CountInv("QueuedFall") * 2.62144;
+					}
+					
+					FallDamage = Floor(FallDamage);
+					If(FallDamage > 0 && GetCVar("SV_FallingDamage") != 0)
+						Owner.DamageMObj(Owner, Owner, FallDamage*2, 'Falling', DMG_THRUSTLESS, 0);
+					Owner.A_SetInventory("QueuedFall", 0);
+				}
+			}
+			
+			If(Owner.Health <= 0 && Ticker == 1)
+			{
+				i = hearts * 100;
+				a = Ceil(hearts); a = Clamp(a, 1, 100);
+				b = i - (a * 100);
+				c = b * 2.56;
+				d = 128; //* (ACS_ScriptCall("BLUD_CheckSkill") * 0.2);
+				e = floor(a/5);
+				If(Random(c, 256) >= 256) a++;
+				If(e) a -= e*5;
+				
+				For(a; a > 0; a--)
+				{
+					If(Random(0, 255) <= d) Drop("Stimpack");
+				}
+				
+				For(e; e > 0; e--)
+				{
+					Drop("Soulsphere");
+				}
+				
+				/*ThinkerIterator p = ThinkerIterator.Create();
+				Actor z;
+				While(z = Actor(p.Next()))
+				{
+					If(!z || z.Health <= 0) Continue;
+					If(z.CountInv("LifeLeech") || z is "LeechTurret") 
+					{ leech = True; Break; }
+				}
+				
+				If(Leech)
+				{
+					a = Owner.GetSpawnHealth() * 0.075;
+					If(a > 26) a = 26;
+					d = 204 * (ACS_ScriptCall("BLUD_CheckSkill") * 0.2);
+					For(a; a > 0; a--)
+					{
+						If(Random(0, 255) <= d) Drop("LeechDrop");
+					}
+				}*/
+			}
+			
+			/*If(!(Owner is 'BloodyInnocent') && Level.Time % 7 == 0 && Owner.Health > 0 && !Owner.bBOSS)
+			{
+				ThinkerIterator Civs = ThinkerIterator.Create();
+				Actor mo;
+				While(mo = Actor(Civs.Next()))
+				{
+					If(	!mo || mo.Health <= 0 || !mo.bISMONSTER || 
+						!mo.bSHOOTABLE || mo.Distance2D(Owner) > 512 || 
+						!mo.CheckSight(Owner,SF_IGNOREVISIBILITY))
+							Continue;
+				
+					If(	mo && mo.Health > 0 && mo.Distance2D(Owner) <= 512 && 
+						mo.bISMONSTER && mo.bSHOOTABLE && mo.CheckSight(Owner,SF_IGNOREVISIBILITY) && 
+						mo is 'BloodyInnocent')
+						{
+							Owner.Target = mo;
+							If(Owner.InStateSequence(CurState, ResolveState("Spawn")) || Owner.InStateSequence(CurState, ResolveState("Idle")))
+								Owner.SetState(ResolveState("See"));
+							Break;
+						}
+				}
+			}
+			
+			If(Owner.Target) 
+			{
+				If(Owner.Target is 'BloodyInnocent')
+					ChasingInnocent = True;
+				
+				Else ChasingInnocent = False;
+			}
+			
+			If(!Owner.Target && ChasingInnocent) Owner.A_LookEx(0, 0, 0, 0, 360, "See");
+			
+			If(Level.Time % 7 == 0 && Owner.CountInv("MightAura") && bAuraEnchanted && Owner.Health > 0)
+			{
+				ThinkerIterator minions = ThinkerIterator.Create();
+				Actor mi;
+				While(mi = Actor(Minions.Next()))
+				{
+					If(	!mi || mi.Health <= 0 || !mi.bISMONSTER || 
+						!mi.bSHOOTABLE || mi.Distance2D(Owner) > 512 || 
+						!mi.CheckSight(Owner, SF_IGNOREVISIBILITY))
+							Continue;
+					
+					If(	mi && mi.Health > 0 && mi.bISMONSTER && mi.bSHOOTABLE && 
+						mi.Distance2D(Owner) > 512 && mi.CheckSight(Owner, SF_IGNOREVISIBILITY))
+						{
+							mi.A_GiveInventory("MightAura", 70);
+						}
+				}
+			}*/
+			
+			If(Owner.Health <= 0) Ticker++;
+			HealCD--;
+		}
+	}
+}
+
+Class BloodyDeath : Inventory { Default { Inventory.MaxAmount 1; } }
+
+Class MightAura : Inventory
+{
+	Default
+	{
+		Inventory.MaxAmount 70;
+	}
+	
+	Bool Init;
+	
+	Override void DoEffect()
+	{
+		Super.DoEffect();
+		If(!Owner || (Owner && Owner.Health <= 0)) { Destroy(); Return; }
+		
+		If(!Init)
+		{
+			Init = True;
+			Owner.A_PlaySound("Might", CHAN_AUTO);
+			Owner.DamageMultiply = 2;
+			Actor a = Spawn("MightAuraFX", Owner.Pos);
+			If(a)
+			{
+				a.Master = Owner;
+				a.Scale.X = Owner.Radius * 0.0067;
+				a.Scale.Y = Owner.Radius * 0.0067;
+			}
+		}
+	}
+}
+
+Class MightAuraFX : Actor
+{
+	Default
+	{
+		+NOINTERACTION
+		+FLATSPRITE
+		Renderstyle "Add";
+	}
+	
+	Override void Tick() 
+	{ 
+		Super.Tick(); 
+		If(Master && Master.Health > 0) SetOrigin(Master.Pos, 1); 
+		Else { Destroy(); Return; } 
+	}
+	
+	States
+	{
+	Spawn:
+		A_01 A 0 NoDelay BRIGHT A_SetPitch(0);
+	Loopy:
+		A_01 ABCDEFGHIJKLMNOPQ 2 BRIGHT;
+		Loop;
+	}
+}
+			

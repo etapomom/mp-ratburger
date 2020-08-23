@@ -1,0 +1,96 @@
+Extend Class BloodyStatusBar
+{
+	Void DrawHUDStuff(double TicFrac)
+	{
+		If(!CPlayer || !CPlayer.mo) Return;
+		
+		DrawImage("HUD1C", (0 + CurX, 0), DI_BOTTOMLEFT);
+		DrawImage("HUD2C", (0 - CurX, 0), DI_BOTTOMRIGHT);
+		
+		DrawHealthBar(HealthNumber.GetValue());
+		DrawAmmo();
+		//DrawArmorBar();
+		DrawKeys();
+		DrawBeastMeter();
+		DrawBeastHUD();
+	}
+	
+	Private void DrawHealthBar(int Health)
+	{	
+		DrawString(BigFont, FormatNumber(Health, 1, 3), (123 + CurX, -21), DI_TEXT_ALIGN_RIGHT|DI_BOTTOMLEFT, Font.CR_RED);
+		If(GetAmountOnly("BeastMeter") >= 5000) DrawString(BigFont, FormatNumber(Health, 1, 3), (123 + CurX, -21), DI_TEXT_ALIGN_RIGHT|DI_BOTTOMLEFT, Font.CR_GOLD);
+		DrawBar("HEALTH_A", "HEALTH_B", Health, 100, (98 + CurX, -2), 0, SHADER_HORZ, DI_BOTTOMLEFT, 0.5);
+	}
+	
+	Private void DrawAmmo()
+	{
+		inventory ammotype1, ammotype2;
+		[ammotype1, ammotype2] = GetCurrentAmmo();
+		If(AmmoType1 != NULL)
+		{
+			DrawString(BigFont, FormatNumber(AmmoType1.Amount, 1, 3), (-96 - CurX, -21), DI_TEXT_ALIGN_RIGHT|DI_BOTTOMRIGHT, Font.CR_LIGHTBLUE);
+			If(GetAmountOnly("BeastMeter") >= 5000) DrawString(BigFont, FormatNumber(AmmoType1.Amount, 1, 3), (-96 - CurX, -21), DI_TEXT_ALIGN_RIGHT|DI_BOTTOMRIGHT, Font.CR_WHITE);
+		}
+	}
+	
+	Private void DrawKeys()
+	{
+		bool keys[6];
+		For(int i = 0; i < 6; i++) keys[i] = CPlayer.mo.CheckKeys(i+1, false, true);
+		
+		If(keys[0]) DrawImage("KEYCR", (-4 - CurX, -24), DI_BOTTOMRIGHT);
+		If(keys[1]) DrawImage("KEYCB", (-4 - CurX, -13), DI_BOTTOMRIGHT);
+		If(keys[2]) DrawImage("KEYCY", (-4 - CurX,  -2), DI_BOTTOMRIGHT);
+		
+		If(keys[3]) DrawImage("KEYSR", ( 3 + CurX, -24), DI_BOTTOMLEFT);
+		If(keys[4]) DrawImage("KEYSB", ( 3 + CurX, -13), DI_BOTTOMLEFT);
+		If(keys[5]) DrawImage("KEYSY", ( 3 + CurX,  -2), DI_BOTTOMLEFT);
+	}
+	
+	Private void DrawArmorBar()
+	{
+		Let Armor = CPlayer.mo.FindInventory("BodyArmor");
+		If(Armor)
+		{
+			DrawString(BigFont, FormatNumber(Armor.Amount, 1, 3), (180, -120), DI_TEXT_ALIGN_RIGHT|DI_BOTTOMLEFT, Font.CR_GREEN, Scale: (2, 2));
+			DrawBar("BLUEBAR", "NULLA0", Armor.Amount, 100, (80, -54), 0, 0, DI_BOTTOMLEFT);
+			If(Armor.Amount > 100) DrawBar("BLUEBA2", "NULLA0", Armor.Amount - 100, 100, (80, -54), 0, 0, DI_BOTTOMLEFT);
+		}
+		
+		Armor = CPlayer.mo.FindInventory("FireArmor");
+		If(Armor)
+		{
+			//DrawString(BigFont, FormatNumber(Armor.Amount, 1, 3), (180, -120), DI_TEXT_ALIGN_RIGHT|DI_BOTTOMLEFT, Font.CR_GREEN, Scale: (2, 2));
+			DrawBar("REDABAR", "NULLA0", Armor.Amount, 100, (80, -89), 0, 0, DI_BOTTOMLEFT);
+			If(Armor.Amount > 100) DrawBar("REDABA2", "NULLA0", Armor.Amount - 100, 100, (80, -54), 0, 0, DI_BOTTOMLEFT);
+		}
+		
+		Armor = CPlayer.mo.FindInventory("ShockArmor");
+		If(Armor)
+		{
+			//DrawString(BigFont, FormatNumber(Armor.Amount, 1, 3), (180, -120), DI_TEXT_ALIGN_RIGHT|DI_BOTTOMLEFT, Font.CR_GREEN, Scale: (2, 2));
+			DrawBar("GRENBAR", "NULLA0", Armor.Amount, 100, (80, -19), 0, 0, DI_BOTTOMLEFT);
+			If(Armor.Amount > 100) DrawBar("GRENBA2", "NULLA0", Armor.Amount - 100, 100, (80, -54), 0, 0, DI_BOTTOMLEFT);
+		}
+	}
+	
+	Private void DrawBeastMeter()
+	{
+		Let Meter = GetAmountOnly("BeastMeter");
+		DrawBar("BEAST_A1", "BEAST_A0", BeastBar.GetValue(), 2500, (126 + CurX, 0), 0, SHADER_VERT|SHADER_REVERSE, DI_BOTTOMLEFT, 0.67);
+		DrawBar("BEAST_A1", "BEAST_A0", BeastBar.GetValue(), 2500, (-127 - CurX, 0), 0, SHADER_VERT|SHADER_REVERSE, DI_BOTTOMRIGHT|DI_MIRROR, 0.67);
+		If(Meter >= 2500) 
+		{
+			DrawBar("BEAST_B1", "BEAST_B0", BeastBar.GetValue() - 2500, 2500, (89 + CurX, -24), 0, SHADER_HORZ|SHADER_REVERSE, DI_BOTTOMLEFT, 0.67);
+			DrawBar("BEAST_B1", "BEAST_B0", BeastBar.GetValue() - 2500, 2500, (-90 - CurX, -24), 0, SHADER_HORZ, DI_BOTTOMRIGHT|DI_MIRROR, 0.67);
+		}
+		
+		If(Meter >= 5000)
+		{
+			DrawImage("BEAST_D1", (126 + CurX, 0), DI_BOTTOMLEFT, 0.85);
+			DrawImage("BEAST_D1", (-127 - CurX, 0), DI_BOTTOMRIGHT|DI_MIRROR, 0.85);
+			DrawImage("BEAST_E1", (89 + CurX, -24), DI_BOTTOMLEFT, 0.85);
+			DrawImage("BEAST_E1", (-90 - CurX, -24), DI_BOTTOMRIGHT|DI_MIRROR, 0.85);
+		}
+	}
+}

@@ -1,0 +1,372 @@
+Class BurnDOT : Inventory
+{
+	Color LightColor, DarkColor;
+	Property Colors : LightColor, DarkColor;
+	
+	Default 
+	{ 
+		+BLOODLESSIMPACT
+		+NODAMAGETHRUST
+		+PAINLESS
+		+INVENTORY.UNTOSSABLE 
+		+INVENTORY.UNDROPPABLE 
+		Inventory.MaxAmount 3500; 
+		DamageType "Fire";
+		BurnDOT.Colors 0xffff73, 0xffde00;
+	}
+	
+	bool init, bleed, pain;
+	Override Void DoEffect()
+	{
+		Super.DoEffect();
+		If(!Owner) { Destroy(); Return; }
+		If(IsFrozen()) Return;
+		
+		If(GetClassName() == 'BurnDOT') //Default burn
+		{
+			If(!Init) Setup();
+			DealDOT();
+			SpawnFireFX();
+			TakeDOT();
+		}
+	}
+	
+	Void Setup(bool Show = True)
+	{
+		Init = True;
+		If(!Owner.Default.bNOBLOOD) Bleed = True;
+		If(Show) Owner.A_GiveInventory("BurnScreenOverlay", 1);
+	}
+	
+	Virtual Void DealDOT(int dam = 2, int interval = 5, bool LifeTap = False, double LifeTapMul = 1)
+	{
+		If(Owner.CountInv(GetClassName()) % Interval == 0)
+		{
+			If(Bleed) Owner.bNOBLOOD = 1;
+			
+			If(Owner.Health > 0) 
+			{
+				If(!Master) Owner.DamageMObj(Self, Owner, (dam), Default.DamageType, DMG_THRUSTLESS, 0);
+				If(Master)
+				{
+					int ownhp = Owner.Health;
+					Owner.DamageMObj(Self, Master, (dam), Default.DamageType, DMG_THRUSTLESS, 0);
+					If(LifeTap && Master.Health < Master.GetSpawnHealth() && Master.Health > 0 && Owner.Health < OwnHP && Owner != Master)
+					{
+						int togive = Min(Dam, Master.GetSpawnHealth() - Master.Health);
+						If(Master.Player) Master.GiveBody(ToGive * LifeTapMul, 100);
+						Else Master.Health += ToGive * LifeTapMul;
+					}
+				}
+			}
+			
+			If(Bleed) Owner.bNOBLOOD = 0;
+		}
+	}
+	
+	Virtual Void SpawnFireFX(Class<Actor> cls = "FireFX", Class<Actor> light = "BurnLight", double pmul = 1, int fchance = 96)
+	{
+		int maxp = Max(4, (Owner.Radius * 0.2)) * (1 + (Owner.bBOSS)); maxp *= pmul;
+		For(int i = 0; i < maxp; i++)
+		{
+			If(Random(0, 255) <= fchance && Cls != Null)
+			{
+				Actor f = Spawn(cls, Owner.Pos + (	frandom[BurnDOT](-Owner.Radius,Owner.Radius), 
+													frandom[BurnDOT](-Owner.Radius,Owner.Radius), 
+													frandom[BurnDOT](0,Owner.Height)));
+				If(f)
+				{
+					f.Master = Owner;
+					//f.vel = Owner.vel;
+					f.vel.z += frandom[BurnDOT](0.15, 1.);
+				}
+			}
+			If(Random[BurnDOT](0, 255) <= fchance) SpawnFireParticle();
+		}
+		
+		/*If(Light != Null) 
+		{	
+			Actor l = Spawn(Light, Owner.Pos);
+			If(l) l.Master = Owner;
+	
+		}*/
+	}
+	
+	Void SpawnFireParticle()
+	{
+		double t = 1 / random[BurnDOT](1, 75);
+		Color col;
+		col = 	int(BloodyHandler.Lerp(LightColor.r, DarkColor.r, t)) << 16 |
+				int(BloodyHandler.Lerp(LightColor.g, DarkColor.g, t)) << 8 |
+				int(BloodyHandler.Lerp(LightColor.b, DarkColor.b, t));
+		
+		Owner.A_SpawnParticle(	col,
+								SPF_RELATIVE|SPF_FULLBRIGHT,
+								frandom[BurnDOT](35, 105),
+								frandom[BurnDOT](3, 6),
+								frandom[BurnDOT](0, 359),
+								frandom[BurnDOT](-Owner.radius, Owner.radius), 0,
+								frandom[BurnDOT](0, Owner.height), 0, 0,
+								frandom[BurnDOT](0.015, 1.015), 0, 0,
+								frandom[BurnDOT](0, 0.01),
+								frandom[BurnDOT](0.8, 1),
+								frandom[BurnDOT](-0.1, -0.25),
+								frandom[BurnDOT](-0.01, -0.05));
+	}
+	
+	Virtual Void TakeDOT(Bool Water = True)
+	{
+		Int ToTake; ToTake = 1;
+		If(Owner.WaterLevel == 0 && Water) { totake = 1; }
+		If(Owner.WaterLevel == 1 && Water) { totake = 7; }
+		If(Owner.WaterLevel == 2 && Water) { totake = 18; }
+		If(Owner.WaterLevel == 3 && Water) { totake = 35; }
+		totake = min(ToTake, owner.countinv(GetClassName()));
+		Owner.A_TakeInventory(GetClassName(), ToTake);
+	}
+}
+
+Class BurnDOTFX : BurnDOT
+{
+	Override Void DoEffect()
+	{
+		Super.DoEffect();
+		If(!Owner) { Destroy(); Return; }
+		If(IsFrozen()) Return;
+		If(!Init) Setup(False);
+		DealDOT(0, 3500, 0, 0);
+		SpawnFireFX();
+		TakeDOT();
+	}
+}
+
+Class FireFX : Actor
+{
+	Default
+	{
+		+NOINTERACTION
+		+NOGRAVITY
+		+WINDTHRUST
+		+RANDOMIZE
+		+FORCEXYBILLBOARD
+		+ROLLSPRITE
+		+ROLLCENTER
+		Scale 0.3;
+		RenderStyle "Add";
+	}
+	Override Void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		A_SetRoll(frandom[BurnDOT](-16,16));
+		Scale.X += frandom[BurnDOT](-0.15,0.15); Scale.Y = Scale.X;
+		A_FadeOut(frandom[BurnDOT](0.0,0.15),0);
+		A_ScaleVelocity(frandom[BurnDOT](1.0,1.15));
+		bSPRITEFLIP = random(0,1);
+	}
+	
+	States
+	{
+	Spawn:
+		FDOT AAAABBBBCCCCDDDD 1 BRIGHT NoDelay A_ScaleVelocity(frandom[BurnDOT](1.0,0.95));
+		FDOT EEEEFFFFGGGGHHHH 1 BRIGHT { A_ScaleVelocity(frandom[BurnDOT](0.95,0.9)); A_FadeOut(0.075, 1); }
+		Wait;
+	}
+}
+
+Class BurnSmoke : Actor
+{
+	Default
+	{
+		+NOINTERACTION
+		+NOGRAVITY
+		RenderStyle "Add";
+		Alpha 1.0;
+		Scale 0.4;
+	}
+	
+	Override void Tick()
+	{
+		Super.Tick();
+		If(!Master || (Master && Master is "CorpseHitbox")) { Destroy(); Return; }
+		If(Master.Health > 0 && !(Master is "CorpseHitBox")) { SetOrigin(Master.Pos+(0,0,Master.Height+8),true); }
+		If(Master.Health <= 0 && !(Master is "CorpseHitBox")) { SetOrigin(Master.Pos+(0,0,Master.DeathHeight+8),true); }
+		If(IsFrozen()) Return;
+		If(Master.CountInv("BurnDot") == 0)
+		{
+			Scale.X *= 0.975; Scale.Y = Scale.X;
+			A_FadeOut(0.05,1);
+		}
+	}
+	
+	States
+	{
+	Spawn:
+		FDOT IJKL 7;
+		Loop;
+	}
+}
+
+Class BurnLight : DynamicLight
+{
+	int cnt;
+	Default
+	{
+		DynamicLight.Type "Point";
+		args 255,192,16,64;
+	}
+	
+	Override void PostBeginPlay() 
+	{ 
+		Super.PostBeginPlay();
+		//If(!Master || (Master && Master is "CorpseHitbox")) { Destroy(); Return; }
+		If(Master && Master.Radius > 0) { args[LIGHT_INTENSITY] = 1 + Master.Radius * frandom[BurnDOT](1.75,2); }
+		Else { args[LIGHT_INTENSITY] = 16; }
+	}
+	
+	Override void Tick()
+	{
+		Super.Tick();
+		If(Master)
+		{
+			SetOrigin(Master.Pos,true);
+			If(cnt++ > 0 && master.countinv("burndot") > 0) { Destroy(); }
+		}
+		If(IsFrozen()) Return;
+		If((Master && Master.CountInv("BurnDot") == 0) || !Master)
+		{
+			args[LIGHT_INTENSITY] *= 0.99999;
+			args[LIGHT_RED] *= 0.925;
+			args[LIGHT_GREEN] *= 0.925;
+			args[LIGHT_BLUE] *= 0.925;
+			If(cnt++ > 70) { Destroy(); }
+		}
+	}
+}
+
+Class FireFXLight : DynamicLight
+{
+	int cnt, size, rr, gg, bb;
+	Default
+	{
+		DynamicLight.Type "Point";
+		args 255,192,16,26;
+	}
+	
+	Override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		If(!Master) { Destroy(); Return; }
+		size = args[LIGHT_INTENSITY] * frandom(0.67, 1.0);
+		rr = args[LIGHT_RED];
+		gg = args[LIGHT_GREEN];
+		bb = args[LIGHT_BLUE];
+	}
+	
+	Override void Tick()
+	{
+		Super.Tick();
+		If(Master) 
+		{
+			SetOrigin(Master.Pos,true);
+			args[LIGHT_RED] = rr*(Master.Alpha+0.1);
+			args[LIGHT_GREEN] = gg*(Master.Alpha+0.1);
+			args[LIGHT_BLUE] = bb*(Master.Alpha+0.1);
+		}
+		If(IsFrozen()) Return;
+		If(!Master) 
+		{ 
+			args[LIGHT_INTENSITY] -= 2;
+			If(cnt++ >= 21) { Destroy(); Return; }
+		}
+		Else
+		{
+			args[LIGHT_INTENSITY] = size*frandom(0.85,1.15);
+		}
+	}
+}
+
+Class BurnScreenOverlay : CustomInventory
+{
+	Default
+	{
+		Inventory.Amount 1;
+		Inventory.MaxAmount 1;
+		+INVENTORY.AUTOACTIVATE
+		+INVENTORY.UNTOSSABLE
+		+INVENTORY.UNDROPPABLE
+	}
+	States
+	{
+	Spawn:
+		TNT1 A -1;
+		Stop;
+	Pickup:
+		TNT1 A 0 PrintPickupMessage(False, "You're burning!");
+		Stop;
+	Use:
+		TNT1 A 3500 
+		{
+			A_Overlay(7749, "Show");
+			For(int i = 0; i != 17; i++)
+			{
+				A_Overlay(7750 + i, "ItBurns");
+				A_OverlayFlags(7750 + i, PSPF_FLIP, random(0, 1));
+			}
+			Return 0;
+		}
+		Wait;
+	Show:
+		TNT1 A 0
+		{
+			For(int a = 0; a != 17; a++)
+			{
+				double x = 24 * a;
+				double y = 206 - (0.125*CountInv("BurnDOT"));
+				y = Clamp(y, 162, 1024);
+				
+				If(a == 0 || a == 16)  { y -= 24; }
+				If(a == 1 || a == 15)  { y -= 16; }
+				If(a == 2 || a == 14)  { y -= 8; }
+				If(a == 3 || a == 13)  { y -= 4; }
+				If(a == 4 || a == 12)  { y -= 2; }
+				
+				A_OverlayOffset(7750 + a, x - 44, y, WOF_INTERPOLATE);
+				A_OverlayFlags(7750 + a, PSPF_ADDWEAPON|PSPF_ADDBOB, 0);
+				A_OverlayFlags(7750 + a, PSPF_ALPHA|PSPF_FORCEALPHA|PSPF_RENDERSTYLE|PSPF_FORCESTYLE, 1);
+				A_OverlayRenderstyle(7750 + a, STYLE_Add);
+				A_OverlayAlpha(7750 + a, CountInv("BurnDOT") * 0.005);
+			}
+		}
+		TNT1 A 1;
+		TNT1 A 0 A_JumpIf(CountInv("BurnDOT") > 0, "Show");
+		TNT1 A 1
+		{
+			For(int b = 0; b != 17; b++)
+			{
+				A_Overlay(7750 + b, "StopOverlay");
+			}
+		}
+		TNT1 A 0 A_TakeInventory("BurnScreenOverlay",1);
+		Stop;
+	ItBurns:
+		TNT1 A 0 A_Jump(1, 1,2,3,4,5,6,7,8,9,10,11,12,13,14);
+		Loop;
+	Burn:
+		FLM2 ABCDEFGHIJKLMN 2 BRIGHT;
+		Loop;
+	StopOverlay:
+		TNT1 A 0;
+		Stop;
+	}
+}
+
+Class BurnScreenInit : Inventory
+{
+	Default { Inventory.MaxAmount 1; }
+	Override void DoEffect()
+	{
+		Super.DoEffect();
+		If(Owner.CountInv("BurnDOT") == 0) 
+		{ Owner.A_TakeInventory("BurnScreenInit",1); Destroy(); Return; }
+	}
+}

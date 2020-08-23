@@ -1,0 +1,55 @@
+Class CorpseHitbox : Actor
+{
+	Default
+	{
+		+SOLID
+		//+SHOOTABLE
+		+CANPASS
+		+THRUSPECIES
+		+SLIDESONWALLS
+		+INVULNERABLE
+		+MOVEWITHSECTOR
+		Radius 1;
+		Height 1;
+		Health 1;
+		Gravity 0.5;
+		Species "CorpseHitbox";
+	}
+	
+	Override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		If(!Master) { Destroy(); Return; }
+		A_SetSize(Master.Radius, Master.Height); 
+		Mass = Master.Mass * 0.25;
+	}
+	
+	int cnt;
+	Override void Tick()
+	{
+		Super.Tick();
+		If(!Master || (Master && Master.Health > 0)) { Destroy(); Return; }
+		Master.SetOrigin(Self.Pos,1);
+		
+		If(IsFrozen()) Return;
+		If(cnt < 35) A_SetSize(Master.Radius, Master.Height*(3.5-(cnt*0.1)));
+		If(cnt >= 35) A_SetSize(Master.Radius, Master.Height);
+		cnt++;
+		
+		If(Self.Pos.Z > Self.FloorZ && Random(0,255) <= Max(abs(vel.x),abs(vel.y),abs(vel.z)) * 4) 
+			SpawnBlood(Self.Pos, Angle, Max(abs(vel.x),abs(vel.y),abs(vel.z)));
+	}
+	
+	Override bool CanCollideWith(Actor Other, Bool Passive) { Return False; }
+	
+	Override int DamageMObj(Actor Inflictor, Actor Source, int Damage, Name MOD, int Flags, double Angle)
+	{
+		Return Super.DamageMObj(Inflictor, Source, 0, MOD, Flags, Angle);
+	}
+	
+	States
+	{
+	Spawn: TNT1 A 1; Loop;
+	Death: TNT1 A 35; Stop;
+	}
+}

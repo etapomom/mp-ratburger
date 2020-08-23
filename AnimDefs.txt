@@ -1,0 +1,70 @@
+texture M_SKULL1
+    pic RATBURG1 tics 6
+	pic RATBURG2 tics 6
+	pic RATBURG3 tics 6
+
+Texture MENUGFXA
+	Pic MENUGFXA Tics 4
+	Pic MENUGFXB Tics 4
+	Pic MENUGFXC Tics 4
+	Pic MENUGFXD Tics 4
+	Pic MENUGFXE Tics 4
+	Pic MENUGFXF Tics 4
+	Pic MENUGFXG Tics 4
+	Pic MENUGFXH Tics 4
+
+Texture MENUGFXI
+	Pic MENUGFXI Tics 4
+	Pic MENUGFXH Tics 105
+	
+Texture BEAST_A1
+	Pic BEAST_A1 Tics 10
+	Pic BEAST_A2 Tics 10
+	Pic BEAST_A3 Tics 10
+	Pic BEAST_A4 Tics 10
+	Pic BEAST_A5 Tics 10
+	Pic BEAST_A6 Tics 10
+	Pic BEAST_A7 Tics 10
+	
+Texture BEAST_B1
+	Pic BEAST_B1 Tics 10
+	Pic BEAST_B2 Tics 10
+	Pic BEAST_B3 Tics 10
+	Pic BEAST_B4 Tics 10
+	Pic BEAST_B5 Tics 10
+	Pic BEAST_B6 Tics 10
+	Pic BEAST_B7 Tics 10
+	
+	Texture BEAST_D1
+		Pic BEAST_D1 Tics 10
+		Pic BEAST_D2 Tics 10
+		Pic BEAST_D3 Tics 10
+		Pic BEAST_D4 Tics 10
+		Pic BEAST_D5 Tics 10
+		Pic BEAST_D6 Tics 10
+		Pic BEAST_D7 Tics 10
+	
+	Texture BEAST_E1
+		Pic BEAST_E1 Tics 10
+		Pic BEAST_E2 Tics 10
+		Pic BEAST_E3 Tics 10
+		Pic BEAST_E4 Tics 10
+		Pic BEAST_E5 Tics 10
+		Pic BEAST_E6 Tics 10
+		Pic BEAST_E7 Tics 10
+
+Texture BBBARA
+	Pic BBBAR1 Tics 10
+	Pic BBBAR2 Tics 9
+	Pic BBBAR3 Tics 8
+	Pic BBBAR1 Tics 7
+	Pic BBBAR2 Tics 6
+	Pic BBBAR3 Tics 5
+	Pic BBBAR1 Tics 4
+	Pic BBBAR2 Tics 3
+	Pic BBBAR3 Tics 2
+
+Texture BBBARB
+	Pic BBBAR1 Tics 1
+	Pic BBBAR2 Tics 1
+	Pic BBBAR3 Tics 1

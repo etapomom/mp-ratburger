@@ -1,0 +1,169 @@
+$RANDOM CultistSee { cscream3 cscream4 cscream5 cscream6 cscream7 cscream8 cscream9 cscream10 }
+$RANDOM CultistRoam { cscream1 cscream2 }
+$RANDOM CultistShotgun { cshot1 cshot2 }
+$RANDOM CultistPain { cpain1 cpain2 }
+$RANDOM CultistDeath { cdeath1 cdeath2 cdeath3 }
+$RANDOM CultistBurn { cfire1 cfire2 cfire3 }
+CultistTommygun 		TCLTATT2
+cscream1				CULTGLO1
+cscream2				CULTGLO2
+cscream3				CULTGLO3
+cscream4				CULTGLO4
+cscream5				CULTROM1
+cscream6				CULTROM2
+cscream7				CULTROM3
+cscream8				CULTROM4
+cscream9				CULTROM5
+cscream10				CULTSPT3
+cshot1					CULTATT1
+cshot2					CULTATT2
+cpain1					CULTPAN1
+cpain2					CULTPAN2
+cpain3					CULTPAN3
+cpain4					CULTPAN4
+cdeath1					CULTDIE1
+cdeath2					CULTDIE2
+cdeath3					CULTDIE3
+cfire1					CULTFIR1
+cfire2					CULTFIR2
+cfire3					CULTFIR3
+$RollOff CultistSee 512 3000
+$RollOff CultistRoam 512 2048
+$RollOff CultistBurn 512 1500
+$RollOff CultistShotgun 512 2800
+$RollOff CultistTommygun 512 2500
+$Limit CultistShotgun 0
+$Limit CultistTommygun 0
+
+$RANDOM ZombieDeath { zombdie1 zombdie2 zombdie3 }
+$RANDOM ZombieRoam { zombact1 zombact2 }
+ZombieSee				AZOMROAM
+ZombieSwing				AZOMSWIP
+ZombiePain				AZOMPAIN
+ZombieRise				AZOMRISE
+ZombieStand				AZOMSTND
+zombdie1				AZOMDIE1
+zombdie2				AZOMDIE2
+zombdie3				AZOMDIE3
+zombact1				AZOMMOAN
+zombact2				AZOMSPOT
+
+$RANDOM BeastSee { broam1 broam2 broam3 }
+$RANDOM BeastPain { bpain1 bpain2 bpain3 }
+$RANDOM BeastMelee { bmelee1 bmelee2 bmelee3 }
+BeastHit				BEASTCLW
+BeastDeath				BESDIE1
+BeastStomp				BEASTSTO
+broam1					BESROAM1
+broam2					BESROAM2
+broam3					BESROAM3
+bpain1					BESPAIN1
+bpain2					BESPAIN2
+bpain3					BESPAIN3
+bmelee1					SLASH1
+bmelee2					SLASH2
+bmelee3					SLASH3
+$Limit BeastSee 0
+$Limit BeastPain 0
+$Limit BeastMelee 0
+$Limit BeastHit 0
+$Limit BeastDeath 0
+$Limit BeastStomp 0
+$RollOff BeastStomp 1024 2500
+
+$RANDOM InnocentRoam { iroam1 iroam2 iroam3 iroam4 }
+$RANDOM InnocentPain { ipain1 ipain2 ipain3 ipain4 }
+$RANDOM InnocentDeath { ipain3 ipain4 }
+iroam1					ICRYING
+iroam2					ICRYING2
+iroam3					INOPLACE
+iroam4					IGOAWAY2
+ipain1					IPLEASE
+ipain2					IGOAWAY3
+ipain3					ISCREAM1
+ipain4					ISCREAM2
+$Limit InnocentRoam 0
+$Limit InnocentPain 0
+$Limit InnocentDeath 0
+$RollOff ipain1 768 1500
+$RollOff ipain3 768 1500
+$RollOff ipain4 768 1500
+
+$RANDOM TchernobogSee  { tcher1 tcher2 }
+$RANDOM TchernobogPain { tcher3 tcher4 tcher5 tcher6 }
+$RANDOM TchernobogRoam { tcher7 tcher8 tcher9 tcher10 tcher11 tcher12 }
+TchernobogDeath			TBDIES
+TchernobogVanish		TBVAPORI
+TchernobogAttack		TBPAIN4
+TchernobogCurse			TBBURN
+TchernobogStomp			TBWALK
+TchernobogCrush			TBCRUSH
+TchernobogSpawn			TBSPAWN
+TchernobogAim			TBAIM
+TchernobogShoot			TBSHOOT
+tcher1					TBLAUGH1
+tcher2					TBLAUGH2
+tcher3					TBPAIN1
+tcher4					TBPAIN2
+tcher5					TBPAIN3
+tcher6					TBPAIN5
+tcher7					TBBOW1
+tcher8					TBBOW2
+tcher9					TBKNEEL1
+tcher10					TBKNEEL2
+tcher11					TBSACRI1
+tcher12					TBWORSH1
+$Limit TchernobogSee 0
+$Limit TchernobogRoam 0
+$Limit TchernobogPain 0
+$Limit TchernobogDeath 0
+$Limit TchernobogVanish 0
+$Limit TchernobogAttack 0
+$Limit TchernobogCurse 0
+$Limit TchernobogStomp 0
+$Limit TchernobogCrush 0
+$Limit TchernobogSpawn 0
+$Limit TchernobogAim 0
+$Limit TchernobogShoot 0
+$RollOff TchernobogPain 768 2048
+$RollOff TchernobogRoam 768 2048
+$RollOff TchernobogStomp 512 1500
+$RollOff TchernobogCrush 768 2000
+$RollOff TchernobogSpawn 768 2000
+$RollOff TchernobogAim 512 1500
+$RollOff TchernobogShoot 768 2000
+
+$RANDOM GhostZombieRoam { gzombact1 gzombact2 gzombact3 }
+GhostZombieSee			GZOMROAM
+GhostZombieDeath		GZOMDIE
+GhostZombiePain			GZOMPAIN
+gzombact1				GZOMMOAN
+gzombact2				GZOMSPOT
+gzombact3				GZOMROAM
+$Limit GhostZombieRoam 0
+$Limit GhostZombieSee 0
+$Limit GhostZombieDeath 0
+$Limit GhostZombiePain 0
+$RollOff GhostZombieRoam 768 1500
+$ROllOff GhostZombieSee 768 1500
+$RollOff GhostZombieDeath 768 1500
+$RollOff GhostZombiePain 768 1500
+
+PhantomSee				PHANSPOT
+PhantomRoam				PHANROAM
+PhantomSwing			PHANATTA
+PhantomHit				PHANHIT
+PhantomPain				PHANPAIN
+PhantomDeath			PHANDTH
+$Limit PhantomSee 0
+$Limit PhantomRoam 0
+$Limit PhantomSwing 0
+$Limit PhantomHit 0
+$Limit PhantomPain 0
+$Limit PhantomDeath 0
+$RollOff PhantomSee 768 2000
+$RollOff PhantomRoam 512 1500
+$RollOff PhantomSwing 512 2000
+$RollOff PhantomHit 512 2000
+$RollOff PhantomPain 768 1500
+$RollOff PhantomDeath 768 1500

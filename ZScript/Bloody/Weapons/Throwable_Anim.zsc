@@ -1,0 +1,135 @@
+Extend Class BloodyThrowable
+{
+	ENum OverlayIDs
+	{
+		// Left side
+		Left 			= 100,
+		LeftFX1 		= 101,
+		LeftFX2 		= 102,
+		LeftFX3 		= 103,
+		LeftFX4 		= 104,
+		LeftGlow1 		= 105,
+		LeftGlow2 		= 106,
+		LeftGlow3 		= 107,
+		LeftGlow4 		= 108,
+		LeftFXGlow1		= 109,
+		LeftFXGlow2		= 110,
+		LeftFXGlow3		= 111,
+		LeftFXGlow4		= 112,
+		
+		// Right side
+		Right 			= 200,
+		RightFX1 		= 201,
+		RightFX2 		= 202,
+		RightFX3 		= 203,
+		RightFX4 		= 204,
+		RightGlow1 		= 205,
+		RightGlow2 		= 206,
+		RightGlow3 		= 207,
+		RightGlow4 		= 208,
+		RightFXGlow1	= 209,
+		RightFXGlow2	= 210,
+		RightFXGlow3	= 211,
+		RightFXGlow4	= 212,
+	}
+	
+	// Common animations n' stuff
+	States
+	{
+	Select: NULL AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 0 A_Raise(); Loop;
+	Deselect: NULL A 12; NULL AAAAAAAAAAAAAAAA 0 A_Lower(); Wait;
+	
+	Ready: 
+		NULL A 11 A_WeaponReady2(WRF_DISABLE);
+		NULL A 0 A_Jump(256, "Idle");
+		Stop;
+	
+	Lighter_Raise:
+		TNTA A 0 OverlayOffset(Left, (-39, 48), 0);
+		TNTA A 1 OverlayOffset(Left, (-39, 48), 0);
+		TNTA A 1 OverlayOffset(Left, (-27, 36));
+		TNTA A 1 OverlayOffset(Left, (-21, 28));
+		TNTA A 1 OverlayOffset(Left, (-15, 20));
+		TNTA B 1 { OverlayOffset(Left, (-9, 12)); A_StartSound("ZippoOpen", CHAN_WEAPON, CHANF_OVERLAP, 1.0, 2.0); }
+		TNTA B 1 OverlayOffset(Left, (-3, 3));
+		TNTA B 1 OverlayOffset(Left, (-2, 2));
+		TNTA B 1 OverlayOffset(Left, (-1.5, 1.5));
+		TNTA C 1 OverlayOffset(Left, (-1, 1));
+		TNTA C 1 OverlayOffset(Left, (-0.5, 0.5));
+		TNTA C 1 OverlayOffset(Left, (-0.25, 0.25));
+		NULL A 0 { Overlay(LeftFX1, "Lighter_Spark"); A_StartSound("ZippoStrike", CHAN_WEAPON, CHANF_OVERLAP, 1.0, 2.0); }
+	Lighter_Idle:
+		TNTA D 1;
+		Loop;
+	Lighter_Lower:
+		TNTA L 1 { OverlayOffset(Left, (-3, 3)); Overlay(LeftFX2, "Lighter_Fire_Stop"); }
+		TNTA L 1 OverlayOffset(Left, (-9, 12));
+		TNTA M 1 OverlayOffset(Left, (-15, 20));
+		TNTA M 1 OverlayOffset(Left, (-21, 28));
+		TNTA N 1 OverlayOffset(Left, (-27, 36));
+		TNTA N 1 OverlayOffset(Left, (-39, 48));
+		Stop;
+	
+	Lighter_Move_Up:
+		TNTA D 1 OverlayOffset(Left, (2, -1));
+		TNTA D 1 OverlayOffset(Left, (4, -2));
+		TNTA D 1 OverlayOffset(Left, (8, -4));
+		TNTA D 1 OverlayOffset(Left, (12, -6));
+		TNTA D 1 OverlayOffset(Left, (14, -7));
+		TNTA D 1 OverlayOffset(Left, (16, -8));
+		TNTA D 1 OverlayOffset(Left, (17, -8.5));
+		TNTA D 1 OverlayOffset(Left, (18, -9));
+		TNTA D 1 OverlayOffset(Left, (19, -9.5));
+		TNTA DDDD 1 OverlayOffset(Left, (20, -10));
+	Lighter_Move_Down:
+		TNTA DDDD 1 OverlayOffset(Left, (20, -10));
+		TNTA D 1 OverlayOffset(Left, (19, -9.5));
+		TNTA D 1 OverlayOffset(Left, (18, -9));
+		TNTA D 1 OverlayOffset(Left, (17, -8.5));
+		TNTA D 1 OverlayOffset(Left, (16, -8));
+		TNTA D 1 OverlayOffset(Left, (14, -7));
+		TNTA D 1 OverlayOffset(Left, (12, -6));
+		TNTA D 1 OverlayOffset(Left, (8, -4));
+		TNTA D 1 OverlayOffset(Left, (4, -2));
+		TNTA D 1 OverlayOffset(Left, (2, -1));
+		TNTA D 0 OverlayOffset(Left, (0, 0));
+		Goto Lighter_Idle;
+		
+	Lighter_Spark:
+		TNTA E 0 Overlay(LeftFX2, "Lighter_Fire");
+		TNTA E 1 BRIGHT A_OverlayAlpha(LeftFX1, 1.);
+		TNTA E 1 BRIGHT A_OverlayAlpha(LeftFX1, .75);
+		TNTA E 1 BRIGHT A_OverlayAlpha(LeftFX1, .5);
+		TNTA E 1 BRIGHT A_OverlayAlpha(LeftFX1, .25);
+		Stop;
+	Lighter_Fire:
+		TNTA FFFGGG 1 BRIGHT 		{ If(Random[Blood](0, 255) < 156) Overlay(LeftGlow1, "Lighter_Glow", frandom[Blood](.05, .25)); }
+		TNTA HHHIIIJJJKKK 1 BRIGHT	{ If(Random[Blood](0, 255) < 156) Overlay(LeftGlow1, "Lighter_Glow", frandom[Blood](.05, .25)); }
+		Goto Lighter_Fire+6;
+	Lighter_Fire_Stop:
+		TNTA G 1 BRIGHT A_OverlayAlpha(LeftFX2, .84);
+		TNTA G 1 BRIGHT A_OverlayAlpha(LeftFX2, .68);
+		TNTA G 1 BRIGHT A_OverlayAlpha(LeftFX2, .52);
+		TNTA F 1 BRIGHT A_OverlayAlpha(LeftFX2, .36);
+		TNTA F 1 BRIGHT A_OverlayAlpha(LeftFX2, .2);
+		TNTA F 1 BRIGHT A_OverlayAlpha(LeftFX2, .04);
+		Stop;
+	Lighter_Glow:
+		TNTA D 1 BRIGHT;
+		Stop;
+	
+	BringBack:
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 39, 48);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 27, 36);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 21, 28);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 15, 20);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 9, 12);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 3, 3);
+		Goto Ready;
+	Holster:
+		TNT1 A 1 { A_WeaponReady(WRF_NOFIRE); ClearOverlay(Left); }
+		Loop;
+	
+	ClearLayer: TNT1 A 1; Stop;
+	}
+}

@@ -1,0 +1,194 @@
+GotWeapon				PICKWEPN
+GotAmmo					PICKAMMO
+GotHealth				PICKHEAL
+GotArmor				PICKARMR
+$RANDOM Ricochet { rico1 rico2 rico3 rico4 rico5 }
+rico1					RICO1
+rico2					RICO2
+rico3					RICO3
+rico4					RICO4
+rico5					RICO5
+Flesh					BODY1
+
+GotPowerup				PICKPOW
+PowerupEnd				ENDPOWER
+Akimbo					AKIMBO
+AkimboLoop				AKIMBOL
+AkimboReset				AKIMBORE
+Anger					ANGER
+AngerLoop				ANGERL
+Willpower				WILL
+WillpowerLoop			WILLL
+
+$Limit Ricochet 0
+$Limit Flesh 0
+
+BloodGround				BLUDSPLT
+$Limit Gibbed 0
+$Limit BloodGround 0
+
+SAA						SAA
+SAAPull					SAAPULL
+$Limit SAA 0
+$LImit SAAPull 0
+$RollOff SAA 768 2048
+
+Shotgun					SHOTFIRE
+ShotgunAlt				SHOTFIR2
+ShotgunReload			SHOTCOCK
+ShotgunGround			SHTSHL4
+$Limit Shotgun 0
+$Limit ShotgunAlt 0
+$Limit ShotgunReload 0
+$Limit ShotgunGround 0
+$RollOff ShotgunGround 64 512
+$RollOff Shotgun 768 1800
+$RollOff ShotgunAlt 1024 2600
+
+Tommygun	 			TOMFIRE
+$RANDOM TommyGround { bground1 bground2 }
+bground1				SHTSHL
+bground2				SHTSHL3
+$Limit Tommygun 0
+$Limit TommyGround 0
+$RollOff TommyGround 64 512
+$RollOff Tommygun 768 1768
+
+FlareGun				FLAREF
+FlareLoop				FLARAIR2
+FlareHit				EXPLODFS
+Flare/Medium			EXPLODFM
+Flare/Big				EXPLODFL
+
+PitchforkSwing	 		PSWING
+PitchforkWall			PSTONE
+PitchforkHit 			PFLESH
+$Limit PitchforkWall 0
+$Limit PitchforkHit 0
+
+TeslaCannon				TESSNGFR
+TeslaCharge				TESLA1
+TeslaBall				TESALTF2
+TeslaAlt				TESALTFR
+TeslaHitWall			TESSNGHT
+TeslaSpray				TESLASPR
+TeslaFly				ELCLOOP1
+TeslaHit				TESALTHT
+$RANDOM TelsaHitThing { tthing1 tthing2 }
+tthing1					TESLAFL1
+tthing2					TESLAFL2
+$Limit TeslaCannon 0
+$Limit TeslaCharge 0
+$Limit TeslaBall 0
+$Limit TeslaAlt 0
+$Limit TeslaHit 0
+$Limit TeslaHitWall 0
+$Limit TeslaHitThing 0
+$Limit TeslaSpray 0
+$Limit TeslaFly 0
+$RollOff TeslaCannon 768 1768
+$RollOff TeslaCharge 512 1800
+$RollOff TeslaAlt 1024 2800
+$RollOff TeslaBall 1024 2800
+$RollOff TeslaHit 1024 2800
+$RollOff TeslaHitWall 512 1512
+$RollOff TeslaHitThing 512 1512
+
+NapalmLauncher			BLASTER
+NapalmLauncherAlt		BLASALT
+NapalmHit				EXPLODCL
+NapalmDivide			NAPLMEX2
+NapalmHit2				EXPLODFL
+NapalmHit3				EXPLODFM
+NapalmHit4				EXPLODFS
+$Limit NapalmLauncher 0
+$Limit NapalmLauncherAlt 0
+$Limit NapalmHit 0
+$Limit NapalmDivide 0
+$Limit NapalmHit2 0
+$Limit NapalmHit3 0
+$Limit NapalmHit4 0
+$RollOff NapalmLauncher 1024 2500
+$RollOff NapalmLauncherAlt 1500 3000
+$RollOff NapalmHit 1000 2500
+$RollOff NapalmDivide 1024 2048
+$RollOff NapalmHit2 1024 2048
+$RollOff NapalmHit3 1024 2048
+$RollOff NapalmHit4 1024 2048
+
+ZippoOpen				ZIPOPEN
+ZippoStrike				ZIPLIGHT
+SprayFire				SPRAYFIR
+Spray/Throw				TNTTOSS
+Spray/Open				ZIPOPEN
+Spray/Close				ZIPOPEN
+Spray/Light				ZIPLIGHT
+Doll/Stab				VOOSTAB
+Doll/Chant				VOOCHANT
+Doll/Laugh				VOOLAUGH
+
+LifeLeech				LALTFR1
+LeechBall				LLSPIT
+LeechHit				LLHIT
+LeechDrop				LLPICK
+LeechReturn				LLPICK
+$Limit LifeLeech 0
+$Limit LeechBall 0
+$Limit LeechHit 0
+$Limit LeechDrop 0
+$Limit LeechReturn 0
+$RollOff LifeLeech 768 2000
+$RollOff LeechHit 1024 2500
+
+VoodooStab				VOOSTAB
+VoodooLaugh				VOOLAUGH
+VoodooSuper				VOOCHANT
+VoodooHit				VOOHIT
+VoodooKill				VOOKILL
+$Limit VoodooStab 0
+$Limit VoodooLaugh 0
+$Limit VoodooChant 0
+$Limit VoodooKill 0
+$Limit VoodooHit 0
+$RollOff VoodooStab 256 768
+$RollOff VoodooChant 512 2000
+$RollOff VoodooKill 512 2000
+$RollOff VoodooHit 256 1500
+
+$Limit PitchforkWall 0
+$Limit PitchforkFlesh 0
+
+TNTFuse					TNTFUSE
+ThrowTNT				TNTTOSS
+Explosion				EXPLODCL
+Burn						BURN
+RainingBlood			BLDSPRY1
+Kick					PUNT
+Thud					THUD
+Stab					STAB
+Gargoyle/Claw			GARGCLAW
+Gibbed					GIBBED
+
+$RANDOM BulletWhistle { w1 w2 w3 w4 }
+w1					DSWHIZ1
+w2					DSWHIZ2
+w3					DSWHIZ3
+w4					DSWHIZ4
+$ROLLOFF w1 64 320
+$ROLLOFF w2 64 320
+$ROLLOFF w3 64 320
+$ROLLOFF w4 64 320
+
+menu/activate		SHOTFIR2		// Activate a new menu
+menu/backup			SAAPULL			// Backup to previous menu
+menu/prompt			SHOTFIRE		// Activate a prompt "menu"
+menu/cursor			PUNT			// Move cursor up/down
+menu/change			THUD			// Select new value for option
+menu/invalid		VOOLAUGH		// Menu not available
+menu/dismiss		LLPICK			// Dismiss a prompt message
+menu/choose			SHOTFIRE		// Choose a menu item
+menu/clear			SHOTCOCK		// Close top menu
+
+intermission/tick			TOMFIRE
+intermission/nextstage		EXPLODCL
+intermission/paststats		SHOTCOCK

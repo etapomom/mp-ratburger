@@ -1,0 +1,23 @@
+Model "BloodyBullet"
+{
+	Path "models"
+	Model 0 "MiniTrace_d.3d"
+	Skin 0 "JUT_Tracer_01.png"
+	Scale 0.8 0.33 0.5
+	Offset 60 0 0
+	USEACTORPITCH
+	USEACTORROLL
+	DONTCULLBACKFACES
+	PITCHFROMMOMENTUM
+
+	FrameIndex TRAC E 0 0
+}
+
+Model "RadiusDebugSphere"
+{
+	Path "models"
+	Model 0 "UnitSphere.obj"
+	Scale 1.0 1.0 1.0
+
+	FrameIndex XZW1 A 0 0
+}

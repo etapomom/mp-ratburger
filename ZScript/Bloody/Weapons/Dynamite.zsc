@@ -1,0 +1,90 @@
+Class BloodyDynamite : BloodyThrowable
+{	
+	Default
+	{
+		Tag "TNT Bundle";
+		Inventory.PickupMessage "Picked up a TNT Bundle.";
+		Obituary "%o caught %k's TNT Bundle.";
+		Weapon.SlotNumber 6;
+		Weapon.SelectionOrder 3;
+		Weapon.AmmoType "RocketAmmo";
+		Weapon.AmmoType2 "RocketAmmo";
+		Weapon.AmmoUse 1;
+		Weapon.AmmoGive 1;
+		Weapon.AmmoUse2 1;
+		-WEAPON.CHEATNOTWEAPON
+	}
+	
+	Override void DoEffect()
+	{
+		Super.DoEffect();
+		If(!Owner || !Owner.Player || !(Owner.Player.ReadyWeapon == Self)) Return;
+		
+		If(CheckWater())
+		{
+			
+		}
+	}
+	
+	States
+	{
+	Spawn: TNT1 A 1; Stop;
+	Select: TNTB A 0 Overlay(Left, "Lighter_Raise"); Goto SelectLoop;
+	Deselect: TNTB A 0 Overlay(Left, "Lighter_Lower"); Goto DeselectLoop;
+	Ready:
+		TNTB A 1 A_WeaponReady2();
+		Loop;
+	Fire:
+		TNTB A 0 Overlay(Left, "Lighter_Move_Up");
+		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -2, -1);
+		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -4, -2);
+		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -8, -4);
+		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -12, -6);
+		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -14, -7);
+		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -16, -8);
+		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -17, -8.5);
+		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -18, -9);
+		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -19, -9.5);
+		TNTB AAAA 1 A_WeaponReady2(WRF_DISABLE, -20, -10);
+	LightTheFuse:
+		TNTB A 0 { Overlay(RightFX1, "FuseSparks"); A_StartSound("TNTFuse", CHAN_WEAPON, CHANF_OVERLAP, 1.0, 1.25); }
+		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -19, -9.5);
+		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -18, -9);
+		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -17, -8.5);
+		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -16, -8);
+		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -14, -7);
+		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -12, -6);
+		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -8, -4);
+		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -4, -2);
+		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -2, -1);
+		Wait;
+	
+	FuseSparks:
+		TNTB BBB 1 BRIGHT { If(Random[Blood](0, 255) > 224)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .1)); }
+		TNTB CCC 1 BRIGHT { If(Random[Blood](0, 255) > 220)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .15)); }
+		TNTB DDD 1 BRIGHT { If(Random[Blood](0, 255) > 216)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .2)); }
+		TNTB EEE 1 BRIGHT { If(Random[Blood](0, 255) > 212)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .25)); }
+		TNTB FFF 1 BRIGHT { If(Random[Blood](0, 255) > 208)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .3)); }
+		TNTB GGG 1 BRIGHT { If(Random[Blood](0, 255) > 204)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .35)); }
+		TNTB HHH 1 BRIGHT { If(Random[Blood](0, 255) > 200)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .4)); }
+		TNTB III 1 BRIGHT { If(Random[Blood](0, 255) > 196)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .45)); }
+		TNTB JJJ 1 BRIGHT { If(Random[Blood](0, 255) > 192)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .5)); }
+		TNTB KKK 1 BRIGHT { If(Random[Blood](0, 255) > 188)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .55)); }
+		TNTB LLL 1 BRIGHT { If(Random[Blood](0, 255) > 184)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .6)); }
+		TNTB MMM 1 BRIGHT { If(Random[Blood](0, 255) > 180)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .65)); }
+		TNTB NNN 1 BRIGHT { If(Random[Blood](0, 255) > 176)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .7)); }
+		TNTB OOO 1 BRIGHT { If(Random[Blood](0, 255) > 172)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .75)); }
+		TNTB PPP 1 BRIGHT { If(Random[Blood](0, 255) > 168)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .8)); }
+		TNTB QQQ 1 BRIGHT { If(Random[Blood](0, 255) > 164)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .85)); }
+		TNTB RRR 1 BRIGHT { If(Random[Blood](0, 255) > 160)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .9)); }
+		TNTB SSS 1 BRIGHT { If(Random[Blood](0, 255) > 156)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .95)); }
+		TNTB TTT 1 BRIGHT { If(Random[Blood](0, 255) > 156)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .95)); }
+		TNTB UUU 1 BRIGHT { If(Random[Blood](0, 255) > 156)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .95)); }
+		TNTB VVV 1 BRIGHT { If(Random[Blood](0, 255) > 156)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .95)); }
+		TNTB WWW 1 BRIGHT { If(Random[Blood](0, 255) > 156)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .95)); }
+		Stop;
+	FuseGlow:
+		TNTB A 1 BRIGHT;
+		Stop;
+	}
+}

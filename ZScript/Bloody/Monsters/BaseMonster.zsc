@@ -1,0 +1,202 @@
+Class BloodyMonster : Actor
+{
+	Default
+	{
+		MONSTER;
+		PainChance "Falling", 256;
+		PainChance "Explosive", 256;
+		PainChance "Fire", 128;
+		PainChance "Shock", 224;
+		PainChance "Spirit", 96;
+		PainChance "Melee", 256;
+		GibHealth 50;
+		MinMissileChance 254;
+		+FLOORCLIP
+		+QUICKTORETALIATE
+		+SLIDESONWALLS
+		+ALLOWPAIN
+		+CAUSEPAIN
+		+NODROPOFF
+	} 
+	
+	int ProneCycle, Run, DodgeDir, KiteTimer, DodgeTimer, canfly;
+	
+	Override Void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		bSPRITEFLIP = random(0,1); 
+		If(bFLOAT && bNOGRAVITY) { bNODROPOFF = False; CanFly = True; }
+		DodgeDir = RandomPick(-1, 1);
+		DodgeTimer = 35 * fRandom(0.5, 2);
+	}
+	
+	Override Void Tick()
+	{
+		Super.Tick(); 
+		If(IsFrozen()) Return;
+		
+		If(	InStateSequence(CurState, ResolveState("See")) ||
+			InStateSequence(CurState, ResolveState("Idle"))) 
+			Run++;
+		Else Run = 1;
+	}
+	
+	Override void Die(Actor source, actor inflictor, int dmgflags, Name MeansOfDeath)
+	{
+		Super.Die(source, inflictor, dmgflags, meansofdeath);
+		bNODROPOFF = False;
+	}
+	
+	States
+	{
+	Shocked:
+		"####" "#" 0 { bNOPAIN = 1; }
+		"####" "#" 1;
+		"####" "#" 1 BRIGHT; //A_MonsterShocked();
+		"####" "#" 1;
+		"####" "#" 1 BRIGHT; //A_MonsterShocked();
+		"####" "#" 1;
+		"####" "#" 1 BRIGHT { /*A_MonsterShocked();*/ A_Pain(); A_GiveInventory("ShockedCycle",1); }
+		"####" "#" 0 A_JumpIfInventory("ShockedCycle",10,2);
+		"####" "#" 0 A_Jump(PainChance + 64,"Shocked");
+		"####" "#" 0 A_TakeInventory("ShockedCycle",10);
+		"####" "#" 0 { bNOPAIN = 0; }
+		"####" "#" 0 A_Jump(256,"See");
+		Stop;
+	}
+}
+
+Class ShockedCycle : Inventory { Default { Inventory.MaxAmount 10; } }
+Class QueuedFall : Inventory { Default { Inventory.MaxAmount 65536; } }
+
+/*Class FlameGuy : Actor
+{
+	Default
+	{
+		MONSTER;
+		-COUNTKILL
+		+NOPAIN
+		Health 1;
+	}
+	
+	int timer;
+	Override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		Timer = 35 * Random(3, 5);
+		If(Master)
+		{
+			Mass = Master.Mass;
+			Vel = Master.Vel;
+		}
+	}
+	
+	/*Override int DamageMObj(Actor Inflictor, Actor Source, int Damage, Name MOD, int Flags, double Angle)
+	{
+		If(Source && Source == Self && DamageTypeReceived == "Fire") Damage = 0;
+		Return Super.DamageMObj(inflictor, source, damage, mod, flags, angle);
+	}*/
+	
+	/*Override void Die(Actor source, Actor inflictor, int DmgFlags, Name MeansOfDeath)
+	{
+		Super.Die(Source, Inflictor, DmgFlags, MeansOfDeath);
+		
+		Timer = 35 * Random(3, 5);
+		
+		A_PlaySound("NapalmHit4", CHAN_WEAPON);
+		
+		A_QuakeEx(9,9,9,12,0,Radius*8,"Blank",QF_RELATIVE|QF_SCALEDOWN|QF_WAVE,0,0,0,Radius*4,0,5*randompick(-1,1),frandom(5.5,8.5));
+		For(int p = 0; p != 5; p++) A_SpawnItemEx("FlameGuyShockwave",0,0,Height*2.75,0,0,0,0,SXF_NOCHECKPOSITION,0);
+		
+		For(int a = 0; a != 101; a++)
+		{ A_SpawnItemEx("NapalmFireFX",frandom(-radius,radius),0,frandom(0,height),frandom(-4,4),frandom(-4,4),frandom(-4,4),frandom(0,359),SXF_NOCHECKPOSITION,0); }
+		For(int i = 0; i != 200; i++)
+		{
+			If(Random(0,1) == 1) { A_SpawnParticle("Yellow",SPF_FULLBRIGHT|SPF_RELATIVE,70,frandom(3,6),frandom(0,359),0,0,0,frandom(-4,4),frandom(-4,4),frandom(-1,8),0,0,-0.4,1.0,-1,0); }
+			Else { A_SpawnParticle("Orange",SPF_FULLBRIGHT|SPF_RELATIVE,70,frandom(3,6),frandom(0,359),0,0,0,frandom(-4,4),frandom(-4,4),frandom(-1,8),0,0,-0.4,1.0,-1,0); }
+		}
+	}
+	
+	Override void Tick()
+	{
+		Super.Tick();
+		If(!IsFrozen())
+		{
+			If(Timer > 0)
+			{
+				int maxp = Max(4, (Radius * 0.33)) * (1 + (2*bBOSS));
+				For(int i = 0; i < maxp; i++)
+				{	
+					A_SpawnItemEx("FireFX",frandom(-radius,radius),frandom(-radius,radius),frandom(0,height),0,0,frandom(0.03,3),frandom(0,359),SXF_NOCHECKPOSITION,192);
+					A_SpawnParticle("Yellow",SPF_RELATIVE|SPF_FULLBRIGHT,frandom(35,105),frandom(3,6),frandom(0,359),frandom(-radius,radius),0,frandom(0,height),0,0,frandom(0.015,1.5),0,0,frandom(0,0.01),frandom(0.8,1),frandom(-0.1,0.25),frandom(-0.01,0.05));
+				}
+			}
+			
+			If(Timer <= 0 && InStateSequence(CurState, ResolveState("Spawn"))) 
+			{
+				A_Die();
+			}
+			If(InStateSequence(CurState, ResolveState("Spawn"))) 
+				A_RadiusGive("BurnDOT",36+Radius*2,RGF_PLAYERS|RGF_MONSTERS|RGF_OBJECTS,(random(4,6)));
+			
+			Timer--;
+		}
+	}
+	
+	States
+	{
+	Spawn:
+		E22W AABBCCDDEEFF 2 BRIGHT A_Chase(Null, Null, CHF_NOPLAYACTIVE);
+		Loop;
+	Death:
+		E22D A 2 BRIGHT;
+		E22D A 6 BRIGHT A_Scream();
+		E22D BC 8 BRIGHT A_Fall();
+	BurnLoop:
+		E22D DEFGHI 6 BRIGHT;
+		E22D I 0 A_JumpIf(Invoker.Timer > 0, "BurnLoop");
+		TNT1 A 0 A_Jump(256,"BurnStop");
+		Stop;
+	BurnStop:
+		E22D JKLM 5 BRIGHT;
+		E22D N -1;
+		Stop;
+	}
+}
+
+Class FlameGuyShockwave : ShockwaveBase
+{
+	Default { Scale 0.25; }
+	States
+	{
+	Spawn:
+		E22D O 0;
+		Goto Super::Spawn;
+	}
+}*/
+
+Class ShockedLight : DynamicLight
+{
+	int cnt;
+	Default
+	{
+		DynamicLight.Type "Point";
+		args 96,128,255,64;
+	}
+	
+	Override void PostBeginPlay() 
+	{ 
+		Super.PostBeginPlay(); 
+		If(Master && Master.Radius > 0) { args[LIGHT_INTENSITY] = 1 + Master.Radius * frandom(1,1.5); }
+		Else { args[LIGHT_INTENSITY] = 16; }
+	}
+	
+	Override void Tick()
+	{
+		Super.Tick();
+		If(!Master) { Destroy(); Return; }
+		SetOrigin(Master.Pos,true);
+		If(IsFrozen()) Return;
+		If(cnt++ > 0) { Destroy(); }
+	}
+}

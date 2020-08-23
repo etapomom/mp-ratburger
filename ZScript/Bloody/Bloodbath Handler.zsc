@@ -1,0 +1,98 @@
+Class BloodbathHandler : EventHandler
+{
+	Static Void SpawnGibs(Actor Source, Bool Chunk = 0)
+	{
+		If(!Source) { Return; }
+		
+		int maxp;
+		Double vx = Source.Vel.X * 0.5;
+		Double vy = Source.Vel.Y * 0.5;
+		Double vz = Source.Vel.Z * 0.5;
+		
+		Source.A_PlaySound("Gibbed", CHAN_7);
+		
+		MaxP = Max(16, Source.Radius) * (1 + (3 * Source.bBOSS));
+		For(int i = 0; i != MaxP; i++)
+		{
+			CVar TrailChance = CVar.FindCVar("BB_TrailChance");
+			
+			Actor b = Source.Spawn("BloodbathTrailer", Source.Pos + (0, 0, Source.Height * 0.5));
+			If(b)
+			{
+				If(Random[Blood](0, 255) < TrailChance.GetInt() * 32)
+					b.Destroy();
+				
+				If(Chunk)
+					b.SetOrigin(Source.Pos + (	FRandom[Blood](-Source.Radius, Source.Radius), 
+												FRandom[Blood](-Source.Radius, Source.Radius), 
+												FRandom[Blood](8, Source.DeathHeight * 2)), 0);
+				
+				b.Master = Source;
+				b.Vel.X += VX + FRandom[Blood](-3, 3);
+				b.Vel.Y += VY + FRandom[Blood](-3, 3);
+				b.Vel.Z += VZ + FRandom[Blood](4, 12);
+				BloodbathHandler.TranslateBlood(Source, b);
+			}
+			
+			For(int a = 0; a != 2; a++)
+			{
+				Actor a = Source.Spawn("BloodbathChunk1", Source.Pos + (0, 0, Source.Height * 0.5));
+				If(a)
+				{
+					If(Random[Blood](0, 255) < TrailChance.GetInt() * 32)
+						a.Destroy();
+						
+					If(Chunk)
+						a.SetOrigin(Source.Pos + (	FRandom[Blood](-Source.Radius, Source.Radius), 
+													FRandom[Blood](-Source.Radius, Source.Radius),
+													FRandom[Blood](8, Source.DeathHeight * 2)), 0);
+					
+					a.Master = Source;
+					a.Vel.X += VX + FRandom[Blood](-3, 3);
+					a.Vel.Y += VY + FRandom[Blood](-3, 3);
+					a.Vel.Z += VZ + FRandom[Blood](4, 12);
+					BloodbathHandler.TranslateBlood(Source, a);
+				}
+			}
+		}
+	}
+	
+	Static void TranslateBlood(Actor Source, Actor Bleed)
+	{
+		Return;
+		/*If(!Source || !Bleed)	
+			Return;
+		
+		If(Source.BloodTranslation != GameInfo.DefaultBloodColor) Bleed.Translation = Source.BloodTranslation;
+		Else Bleed.Translation = Source.Translation;
+		If(Source.BloodColor) Bleed.SetShade(Source.BloodColor);
+		Else Bleed.SetShade(GameInfo.DefaultBloodColor);*/
+	}
+	
+	override void WorldThingDamaged(WorldEvent e)
+	{
+		If(!e.Thing)
+			Return;
+		
+		If(e.Thing.bISMONSTER && e.Thing.Health <= 0 && !(e.Thing is 'BloodbathCorpseHitbox'))
+		{
+			If(!e.Thing.bNOBLOOD && (e.Inflictor ? !e.Inflictor.bNOEXTREMEDEATH : true) && e.DamageType != "Ice" && e.DamageType != "Massacre" && e.Damage <= 1000000 && e.Thing.Health <= e.Thing.GetGibHealth())
+				BloodbathHandler.SpawnGibs(e.Thing);
+			
+			Actor a = e.Thing.Spawn("BloodbathCorpseHitbox", e.Thing.Pos);
+			If(a)
+			{
+				a.Master = e.Thing;
+				a.Vel = e.Thing.Vel;
+				a.CopyBloodColor(e.Thing);
+			}
+		}
+	}
+	
+	Override void CheckReplacement(ReplaceEvent e)
+	{
+		CVar Toggled = CVar.FindCVar("BB_Toggle");
+		If(e.Replacee == "Blood" && Toggled.GetBool())
+			e.Replacement = "BloodbathBlood";
+	}
+}

@@ -1,0 +1,4 @@
+SWOFA = "Voxels/SHOTGUN.KVX"	{ Scale = 0.9 	}
+TOMMA = "Voxels/TOMMYGUN.KVX" 	{ Scale = 0.9 	}
+SAAPA = "Voxels/REVOLVER.KVX"	{ Scale = 1.5	}
+NAPLH = "Voxels/NAPALM.KVX"		{ Scale = 1.0	}

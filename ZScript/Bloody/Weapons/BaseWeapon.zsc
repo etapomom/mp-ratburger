@@ -1,0 +1,558 @@
+Class BloodWeapon : DoomWeapon
+{
+	enum BFlag { WRF_DISABLE = WRF_NOFIRE|WRF_NOSWITCH, }
+	bool rotdir;
+	
+	Default
+	{
+		Weapon.BobStyle "InverseSmooth";
+		Weapon.BobRangeX 0.2;
+		Weapon.BobRangeY 0.25;
+		Weapon.BobSpeed 2.0;
+		Weapon.AmmoGive 0;
+		Weapon.AmmoUse 1;
+		Weapon.AmmoGive2 0;
+		Weapon.AmmoUse2 0;
+		Decal "BulletHit";
+		Radius 16;
+		Height 20;
+		Inventory.PickupSound "GotWeapon";
+		+WEAPON.NOALERT
+		//+WEAPON.NOAUTOFIRE
+		+WEAPON.NODEATHDESELECT
+		+WEAPON.NODEATHINPUT
+		+INTERPOLATEANGLES
+	}
+	
+	Override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		If(Owner) Return;
+		Angle = frandom[Blood](0, 359);
+		RotDir = random[Blood](0, 1);
+	}
+	
+	States
+	{
+	Spawn: TNT1 A 1; Stop;
+	SpawnLoop:
+		"####" "#" 1 A_Turn(invoker.rotdir ? -4. : 4.);
+		Loop;
+	Select: "####" "#" 0;
+	SelectLoop:
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 39, 48);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 27, 36);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 21, 28);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 15, 20);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 9, 12);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 3, 3);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 2, 2);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 1.5, 1.5);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 1, 1);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 0.5, 0.5);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 0.25, 0.25);
+		"####" "###########################" 0 A_Raise();
+		"####" "#" 0 A_Jump(256, "Ready");
+		Stop;
+	Deselect:
+	DeselectLoop:
+		"####" "#" 0 { BloodyHandler.DoSwing(Self, (0, -0.025), 0, -2, 6, SWING_Spring, 1, 2); }
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 3, 3);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 9, 12);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 15, 20);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 21, 28);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 27, 36);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 39, 48);
+		"####" "#" 0
+		{
+			For(int i = 100; i != 150; i++)
+			{
+				A_Overlay(i,"StopOverlay");
+				A_Overlay(i + 500,"StopOverlay");
+				A_TakeInventory("PitchforkBloodTimer",350);
+				A_TakeInventory("PitchforkBloodAlpha",200);
+			}
+		}
+		"####" "####################" 0 A_Lower();
+	    "####" "#" 1 A_Lower();
+		Goto DeselectLoop+8;
+	DeselectAkimbo:
+		"####" "#" 0 { BloodyHandler.DoSwing(Self, (0, -0.025), 0, -2, 6, SWING_Spring, 1, 2); }
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 3, 3);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 9, 12);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 15, 20);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 21, 28);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 27, 36);
+		Goto DeselectLoop+8;
+	Ready: "####" "#" 1 A_WeaponReady(); "####" "#" 0 ResolveState("Ready"); Stop;
+	Fire: "####" "#" 1 A_FireBullets(0,0,-1,666,"BulletPuff"); "####" "#" 0 ResolveState("Ready"); Stop;
+	StopOverlay: TNT1 A 1; Stop;
+	
+	DeathStuff:
+		TNT1 A 1 A_JumpIf(Invoker.InStateSequence(CurState, ResolveState("Ready")), "Deselect");
+		Loop;
+	
+	/*Reselect:
+		"####" "#" 0
+		{
+			If(CountInv("TeslaCannon") && CountInv("Charges")) { A_SelectWeapon("TeslaCannon"); }
+			If(CountInv("SawnOffShotgun") && CountInv("Shells")) { A_SelectWeapon("SawnOffShotgun"); }
+			If(CountInv("TommyGun") && CountInv("Bullets")) { A_SelectWeapon("TommyGun"); }
+			//If(CountInv("VoodooDoll") && CountInv("VoodooMagic")) { A_SelectWeapon("VoodooDoll"); }
+			If(CountInv("LifeLeech") && CountInv("TrappedSoul")) { A_SelectWeapon("LifeLeech"); }
+			//If(CountInv("Dynamite") && CountInv("TNTBundle")) { A_SelectWeapon("Dynamite"); }
+			If(CountInv("Incinerator") && CountInv("Napalm")) { A_SelectWeapon("Incinerator"); }
+			//If(CountInv("SprayCan") && CountInv("Aerosol")) { A_SelectWeapon("SprayCan"); }
+			//If(CountInv("FlareGun") && CountInv("Flares")) { A_SelectWeapon("FlareGun"); }
+			//If(CountInv("DynamiteR") && CountInv("TNTBundleR")) { A_SelectWeapon("DynamiteR"); }
+			//If(CountInv("DynamiteP") && CountInv("TNTBundleP")) { A_SelectWeapon("DynamiteP"); }
+			A_SelectWeapon("Pitchfork");
+		}
+		"####" "#" 0 A_Jump(256,"Ready");
+		Stop;*/
+	}	
+	
+	Action State A_WeaponReady2(int flags = 0, double x = 0, double y = 0, bool add = 0, bool interpolate = 1)
+	{
+		int fff;
+		If(add) fff = WOF_ADD;
+		If(interpolate) fff = WOF_INTERPOLATE;
+		If(add && interpolate) fff = WOF_INTERPOLATE|WOF_ADD;
+		
+		A_WeaponReady(Flags);
+		A_WeaponOffset(x,y+24, fff);
+		
+		If(Invoker.Owner.Health <= 0 && (Flags & WRF_DISABLE) != WRF_DISABLE) Return A_Jump(256, "Deselect");
+		Return ResolveState(Null);
+	}
+	
+	Action void FireBullets(int damage, int numbullets, double spread, name type, double spawnheight = 10, double explicitspread = 0, bool akimbo = 0, int range = 16384)
+	{
+		Weapon weap = Weapon(invoker);
+		if ( !weap ) return;
+		Vector3 x, y, z, x2, y2, z2;
+		[x, y, z] = dt_CoordUtil.GetAxes(pitch,angle-explicitspread,roll);
+		Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0,0,player.viewz),10*x+y*3-z*3);
+		[x2, y2, z2] = dt_CoordUtil.GetAxes(BulletSlope(),angle-explicitspread,roll);
+		Vector3 dir;
+		
+		For(int i = 0; i < numbullets; i++)
+		{
+			double a = FRandom[Minigun](0,360), s = FRandom[Minigun](0,spread);
+			dir = (x2+y2*cos(a)*s+z2*sin(a)*s).unit();
+		FLineTraceData d;
+		LineTrace(atan2(dir.y,dir.x),range,asin(-dir.z),TRF_ABSPOSITION,origin.z,origin.x,origin.y,d);
+		UTBulletTrail.DoTrail(self,origin,dir,range,3);
+		if ( d.HitType == TRACE_HitActor )
+		{
+			int dmg = damage;
+			dmg = d.HitActor.DamageMobj(invoker,self,damage,type,DMG_USEANGLE|DMG_THRUSTLESS,atan2(d.HitDir.y,d.HitDir.x));
+			double mm = 2048;
+			BloodyHandler.DoKnockback(d.HitActor,d.HitDir-(0,0,pitch/mm),dmg*mm);
+			if ( d.HitActor.bNOBLOOD )
+			{
+				let p = Spawn("BulletHit",d.HitLocation);
+				p.angle = atan2(d.HitDir.y,d.HitDir.x)+180;
+				p.pitch = asin(d.HitDir.z);
+			}
+			else
+			{
+				d.HitActor.TraceBleed(dmg,self);
+				d.HitActor.SpawnBlood(d.HitLocation,atan2(d.HitDir.y,d.HitDir.x)+180,dmg);
+			}
+		}
+		else if ( d.HitType != TRACE_HitNone )
+		{
+			Vector3 hitnormal = -d.HitDir;
+			if ( d.HitType == TRACE_HitFloor )
+			{
+				if ( d.Hit3DFloor ) hitnormal = -d.Hit3DFloor.top.Normal;
+				else hitnormal = d.HitSector.floorplane.Normal;
+			}
+			else if ( d.HitType == TRACE_HitCeiling )
+			{
+				if ( d.Hit3DFloor ) hitnormal = -d.Hit3DFloor.bottom.Normal;
+				else hitnormal = d.HitSector.ceilingplane.Normal;
+			}
+			else if ( d.HitType == TRACE_HitWall )
+			{
+				hitnormal = (-d.HitLine.delta.y,d.HitLine.delta.x,0).unit();
+				if ( !d.LineSide ) hitnormal *= -1;
+			}
+			let p = Spawn("BulletHit",d.HitLocation+hitnormal*0.01);
+			p.angle = atan2(hitnormal.y,hitnormal.x);
+			p.pitch = asin(-hitnormal.z);
+			if ( d.HitLine ) d.HitLine.RemoteActivate(self,d.LineSide,SPAC_Impact,d.HitLocation);
+		}
+		}
+	}
+	
+	Action Void A_FireWeapon(int damage, int numbullets, double spread, name type, double spawnheight = 10, double explicitspread = 0, bool akimbo = 0, int Range = 16384)
+	{
+		FireBullets(damage, numbullets, spread, type, spawnheight, explicitspread, akimbo, range);
+		return;
+		
+		Weapon weap = Weapon(invoker);
+		If(!weap) Return;
+		
+		vector3 asdf = (0, explicitspread, 0);
+		Vector3 x, y, z, x2, y2, z2;
+		[x, y, z] = dt_CoordUtil.GetAxes(Pitch, Angle-explicitspread, Roll);
+		Vector3 origin = level.Vec3Offset(Vec2OffsetZ(0, 0, Player.ViewZ), spawnheight*x+y*2-z*2);
+		[x2, y2, z2] = dt_CoordUtil.GetAxes(BulletSlope(), Angle-explicitspread, Roll);
+		double a, s;
+		Vector3 dir;
+		If(akimbo) origin *= -1;
+		
+		For(int i=0; i<numbullets; i++ )
+		{
+			a = FRandom[Blood](0, 360);
+			s = FRandom[Blood](0, Spread);
+			dir = (x2+y2*cos(a)*s+z2*sin(a)*s).unit();
+			If(!invoker.t) invoker.t = new("BloodyTracer");
+			invoker.t.ignoreme = self;
+			invoker.t.hitlist.Clear();
+			invoker.t.ShootThroughList.Clear();
+			invoker.t.Trace(Origin, CurSector, Dir, Range, 0);
+			ProcessTraceHit(invoker.t, origin, Dir, Damage, Type);
+		}
+	}
+	
+	Action void ProcessTraceHit(BloodyTracer t, Vector3 origin, Vector3 dir, int Damage, name Type)
+	{
+		for ( int i=0; i<invoker.t.ShootThroughList.Size(); i++ )
+			invoker.t.ShootThroughList[i].Activate(self,0,SPAC_PCross);
+		/*for ( int i=5; i<invoker.t.Results.Distance; i+=10 )
+		{
+			if ( !Random[Boolet](0,4*bc) ) continue;
+			let b = Actor.Spawn("UTBubble",level.Vec3Offset(origin,dir*i));
+			b.Scale *= FRandom[Boolet](0.4,0.6);
+		}*/
+		
+		for ( int i=0; i<t.HitList.Size(); i++ )
+		{
+			int dmg = Damage;
+			FlakAccumulator.Accumulate(t.HitList[i].HitActor,dmg,invoker,self,type);
+			double mm = Damage * 1500;
+			BloodyHandler.DoKnockback(t.HitList[i].HitActor, t.HitList[i].x+(0,0,0.25), mm);
+			if ( t.HitList[i].HitActor.bNOBLOOD )
+			{
+				let p = Spawn("BulletHit",t.HitList[i].HitLocation);
+				//p.scale *= FRandom[Blood](0.2,0.4);
+				p.angle = atan2(t.HitList[i].x.y,t.HitList[i].x.x)+180;
+				p.pitch = asin(t.HitList[i].x.z);
+			}
+			else
+			{
+				t.HitList[i].HitActor.TraceBleed(dmg,self);
+				t.HitList[i].HitActor.SpawnBlood(t.HitList[i].HitLocation,atan2(t.HitList[i].x.y,t.HitList[i].x.x)+180,dmg);
+			}
+		}
+		if ( t.Results.HitType != TRACE_HitNone )
+		{
+			Vector3 hitnormal = -t.Results.HitVector;
+			if ( t.Results.HitType == TRACE_HitFloor )
+			{
+				if ( t.Results.FFloor ) hitnormal = -t.Results.FFloor.top.Normal;
+				else hitnormal = t.Results.HitSector.floorplane.Normal;
+			}
+			else if ( t.Results.HitType == TRACE_HitCeiling )
+			{
+				if ( t.Results.FFloor ) hitnormal = -t.Results.FFloor.bottom.Normal;
+				else hitnormal = t.Results.HitSector.ceilingplane.Normal;
+			}
+			else if ( t.Results.HitType == TRACE_HitWall )
+			{
+				hitnormal = (-t.Results.HitLine.delta.y,t.Results.HitLine.delta.x,0).unit();
+				if ( !t.Results.Side ) hitnormal *= -1;
+			}
+			let p = Spawn("BulletHit",t.Results.HitPos+hitnormal*0.01);
+			p.scale *= FRandom[Blood](0.2,0.4);
+			p.angle = atan2(hitnormal.y,hitnormal.x);
+			p.pitch = asin(-hitnormal.z);
+			if ( t.Results.HitLine ) t.Results.HitLine.RemoteActivate(self,t.Results.Side,SPAC_Impact,t.Results.HitPos);
+			
+			Vector3 x, y, z;
+			[x, y, z] = dt_CoordUtil.GetAxes(Pitch, Angle, Roll);
+			Let o = Spawn("BloodyBullet",level.Vec3Offset(origin,x*20));
+			o.angle = atan2(dir.y,dir.x);
+			o.pitch = asin(-dir.z);
+			BloodyBullet(o).dest = t.Results.HitPos;
+		}
+	}
+	
+	action bool PressingFire() { return player.cmd.buttons&BT_ATTACK; }
+	action bool PressingAltfire() { return player.cmd.buttons&BT_ALTATTACK; }
+	
+	Override void Tick()
+	{
+		Super.Tick();
+		if ( !Owner || !Owner.player || (Owner.player.ReadyWeapon != self) ) return;
+		Owner.player.WeaponState |= WF_WEAPONBOBBING;
+	}
+	
+	BloodyTracer t;
+}
+
+Class FlakAccumulator : Thinker
+{
+	Actor victim, inflictor, source;
+	Array<Int> amounts;
+	int total;
+	Name type;
+
+	override void Tick()
+	{
+		Super.Tick();
+		// so many damn safeguards in this
+		if ( !victim )
+		{
+			Destroy();
+			return;
+		}
+		int gibhealth = victim.GetGibHealth();
+		// おまえはもう死んでいる
+		if ( victim.health-total <= gibhealth )
+		{
+			// safeguard for inflictors that have somehow ceased to exist, which apparently STILL CAN HAPPEN
+			if ( inflictor ) inflictor.bEXTREMEDEATH = true;
+			else type = 'Extreme';
+		}
+		// make sure accumulation isn't reentrant
+		if ( inflictor /*&& (inflictor is 'FlakChunk')*/ ) inflictor.bAMBUSH = true;
+		// 何？
+		for ( int i=0; i<amounts.Size(); i++ )
+		{
+			if ( !victim ) break;
+			victim.DamageMobj(inflictor,source,amounts[i],type,DMG_THRUSTLESS);
+		}
+		// clean up
+		if ( inflictor )
+		{
+			/*if ( inflictor is 'FlakChunk' ) inflictor.bAMBUSH = false;*/
+			inflictor.bEXTREMEDEATH = false;
+		}
+		Destroy();
+	}
+
+	static void Accumulate( Actor victim, int amount, Actor inflictor, Actor source, Name type )
+	{
+		if ( !victim ) return;
+		let ti = ThinkerIterator.Create("FlakAccumulator",STAT_USER);
+		FlakAccumulator a, match = null;
+		while ( a = FlakAccumulator(ti.Next()) )
+		{
+			if ( a.victim != victim ) continue;
+			match = a;
+			break;
+		}
+		if ( !match )
+		{
+			match = new("FlakAccumulator");
+			match.ChangeStatNum(STAT_USER);
+			match.victim = victim;
+			match.amounts.Clear();
+		}
+		match.amounts.Push(amount);
+		match.total += amount;
+		match.inflictor = inflictor;
+		match.source = source;
+		match.type = type;
+	}
+
+	static clearscope int GetAmount( Actor victim )
+	{
+		let ti = ThinkerIterator.Create("FlakAccumulator",STAT_USER);
+		FlakAccumulator a, match = null;
+		while ( a = FlakAccumulator(ti.Next()) )
+		{
+			if ( a.victim != victim ) continue;
+			return a.total;
+		}
+		return 0;
+	}
+}
+
+Class HitListEntry
+{
+	Actor hitactor;
+	Vector3 hitlocation, x;
+	int hitdamage;
+}
+
+Class BloodyTracer : LineTracer
+{
+	Actor ignoreme;
+	Array<Line> ShootThroughList;
+	Array<HitListEntry> hitlist;
+
+	override ETraceStatus TraceCallback()
+	{
+		if ( Results.HitType == TRACE_HitActor )
+		{
+			if ( Results.HitActor == ignoreme ) return TRACE_Skip;
+			if ( Results.HitActor.bSHOOTABLE )
+			{
+				int amt = FlakAccumulator.GetAmount(Results.HitActor);
+				// getgibhealth isn't clearscope, fuck
+				int gibhealth = -int(Results.HitActor.GetSpawnHealth()*gameinfo.gibfactor);
+				if ( Results.HitActor.GibHealth != int.min ) gibhealth = -abs(Results.HitActor.GibHealth);
+				// if gibbed, go through without dealing more damage
+				if ( Results.HitActor.health-amt <= gibhealth ) return TRACE_Skip;
+				let ent = new("HitListEntry");
+				ent.hitactor = Results.HitActor;
+				ent.hitlocation = Results.HitPos;
+				ent.x = Results.HitVector;
+				hitlist.Push(ent);
+				// go right on through if dead
+				if ( Results.HitActor.health-amt <= 0 ) return TRACE_Skip;
+				// stap
+				return TRACE_Abort;
+			}
+			return TRACE_Skip;
+		}
+		else if ( (Results.HitType == TRACE_HitWall) && (Results.Tier == TIER_Middle) )
+		{
+			if ( !Results.HitLine.sidedef[1] || (Results.HitLine.Flags&(Line.ML_BlockHitscan|Line.ML_BlockEverything)) )
+				return TRACE_Stop;
+			ShootThroughList.Push(Results.HitLine);
+			return TRACE_Skip;
+		}
+		return TRACE_Stop;
+	}
+}
+
+Class TempWeapon : BloodWeapon
+{
+	Default { Tag "Unarmed"; }
+	States
+	{
+	Select: TNT1 A 0 A_Raise(); Loop;
+	Deselect: TNT1 A 0 A_Lower(); Loop;
+	Ready: TNT1 A 1 A_WeaponReady(WRF_DISABLESWITCH|WRF_NOFIRE); Loop;
+	Fire: TNT1 A 0; Goto Ready;
+	}
+}
+
+Class WeaponLight : DynamicLight
+{
+	int Timer;
+	int HoldTics, FadeTics, SizeStep;
+	double AlphaStep;
+	
+	Property Setup : HoldTics, FadeTics, AlphaStep, SizeStep;
+	
+	Default
+	{
+		DynamicLight.Type "Point";
+		WeaponLight.Setup 2, 24, 0.75, 8;
+		Args 255, 224, 128, 192;
+	}
+	
+	override void Tick()
+	{
+		Super.Tick();
+		
+		If(!Master || Timer > FadeTics) { Destroy(); Return; }
+		
+		If(Master.Player) SetOrigin(Master.Vec2OffsetZ(0, 0, Master.Player.ViewZ), True);
+		Else SetOrigin(Master.Pos, True);
+		
+		If(IsFrozen() && !bNOTIMEFREEZE) Return;
+		
+		Args[LIGHT_INTENSITY] -= SizeStep;
+		
+		If(Timer > HoldTics)
+		{
+			Args[LIGHT_RED] *= AlphaStep;
+			Args[LIGHT_GREEN] *= AlphaStep;
+			Args[LIGHT_BLUE] *= AlphaStep;
+		}
+		
+		Timer++;
+	}
+}
+
+/*
+Class GlowHandler : Inventory
+{
+	Default
+	{
+		+INVENTORY.UNTOSSABLE
+		+INVENTORY.UNDROPPABLE
+		Inventory.MaxAmount 1;
+		Inventory.Amount 1;
+		Inventory.InterHubAmount 1;
+		Args 50, 100, 0, 10; //OverlayID, BaseAlpha, HoldTime, FadeOutTime;
+		RenderStyle "Translucent";
+	} 
+	
+	bool init;
+	int cnt;
+	double astep, acurr;
+	
+	Override void DoEffect()
+	{
+		Super.DoEffect();
+		
+		If(!Owner || (Owner && !Owner.Player)) 
+		{ 
+			Destroy(); 
+			Return; 
+		}
+		
+		If(!Init)
+		{
+			Init = True;
+			Owner.A_OverlayFlags(Args[0], PSPF_ALPHA|PSPF_RENDERSTYLE, 1);
+			Owner.A_OverlayRenderstyle(Args[0], GetRenderstyle());
+			Owner.A_OverlayAlpha(Args[0], Args[1] / 100);
+			AStep = Args[1] / Args[3];
+		}
+		
+		If(Cnt++ > Args[2])
+		{
+			ACurr = (Args[1] / 100) - (AStep * (Cnt - Args[2]));
+			
+			If(ACurr <= 0 || Cnt > (Args[3] - Args[2]))
+			{
+				Destroy();
+				Return;
+			}
+			
+			Owner.A_OverlayAlpha(Args[0], ACurr);
+		}
+	}
+}
+
+Class GlowHandler0 : GlowHandler {}
+Class GlowHandler1 : GlowHandler {}
+Class GlowHandler2 : GlowHandler {}
+Class GlowHandler3 : GlowHandler {}
+Class GlowHandler4 : GlowHandler {}
+Class GlowHandler5 : GlowHandler {}
+Class GlowHandler6 : GlowHandler {}
+Class GlowHandler7 : GlowHandler {}
+Class GlowHandler8 : GlowHandler {}
+Class GlowHandler9 : GlowHandler {}
+Class GlowHandler10 : GlowHandler {}
+Class GlowHandler11 : GlowHandler {}
+Class GlowHandler12 : GlowHandler {}
+Class GlowHandler13 : GlowHandler {}
+Class GlowHandler14 : GlowHandler {}
+Class GlowHandler15 : GlowHandler {}
+Class GlowHandler16 : GlowHandler {}
+Class GlowHandler17 : GlowHandler {}
+Class GlowHandler18 : GlowHandler {}
+Class GlowHandler19 : GlowHandler {}
+Class GlowHandler20 : GlowHandler {}
+Class GlowHandler21 : GlowHandler {}
+Class GlowHandler22 : GlowHandler {}
+Class GlowHandler23 : GlowHandler {}
+Class GlowHandler24 : GlowHandler {}
+Class GlowHandler25 : GlowHandler {}
+Class GlowHandler26 : GlowHandler {}
+Class GlowHandler27 : GlowHandler {}
+Class GlowHandler28 : GlowHandler {}
+Class GlowHandler29 : GlowHandler {}
+Class GlowHandler30 : GlowHandler {}

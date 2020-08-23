@@ -1,0 +1,110 @@
+Class BloodyThrowable : BloodWeapon
+{
+	Default { +WEAPON.CHEATNOTWEAPON }
+	
+	bool water, intozippo;
+	double force;
+	
+	void KeepLighter()
+	{
+		// Is there even a way to get the pending weapon
+		// when performing a switch?
+	}
+	
+	action bool CheckWater() { Return (Invoker.Owner.WaterLevel > 2); }
+	action double GetForce() { Return Invoker.Owner.CountInv("ThrowableForce"); }
+	
+	// Speed, Pitch, Angle (momentum carry), Time left
+	Action double, double, double, int GetThrowInfo()
+	{
+		double a, b, c;
+		int d;
+		Let p = Invoker.Owner;
+		
+		a = ((GetForce() / 2) * 48.) / 100.;
+		b = ((GetForce() / 4) * 25.) / 100.;
+		c = ((p.Vel.X * 0.5) * (sin(p.Angle))) + ((p.Vel.Y * 0.5) * (cos(p.Angle)));
+		d = 1;
+		Return a, b, c, d;
+	}
+	
+	Action void Overlay(int id, statelabel start = null, double alpha = 1.)
+	{
+		If(id < 100 || (id > 112 && id < 200) || id > 212 || start == null) Return;
+		
+		ClearOverlay(id);
+		
+		A_Overlay(id, start);
+		A_OverlayFlags(id, PSPF_ADDWEAPON, false);
+		
+		If(id != 100 && id != 200)
+		{
+			A_OverlayFlags(id, PSPF_RENDERSTYLE|PSPF_ALPHA, true);
+			A_OverlayRenderstyle(id, STYLE_Translucent);
+			A_OverlayAlpha(id, alpha);
+			Let psp = Player.GetPSprite((id > 200) ? PSP_WEAPON : 100);
+			A_OverlayOffset(id, psp.x, psp.y);
+		}
+	}
+	
+	Action void ClearOverlay(int id)
+	{
+		A_Overlay(id, "ClearLayer");
+		A_OverlayOffset(id, 0, 32);
+	}
+	
+	Action void OverlayOffset(int id, vector2 offs, bool interpolate = true) 
+	{
+		If(id != 100 && id != 200) 
+		{
+			Let psp = Player.GetPSprite((id > 200) ? PSP_WEAPON : 100);
+			A_OverlayOffset(id, psp.x + offs.x, psp.y + offs.y, interpolate?WOF_INTERPOLATE:0);
+			Return;
+		}
+		
+		//A_OverlayOffset(id, offs.x, offs.y, WOF_INTERPOLATE);
+		// Sync FX and glow layers
+		For(int i = 0; i < 13; i++) 
+			A_OverlayOffset(id+i, offs.x, offs.y + 32., interpolate?WOF_INTERPOLATE:0); 
+	}
+	
+	Action void ThrowableReady(int flags = 0, double x = 0, double y = 0)
+	{
+		A_WeaponReady2(flags, x, y);
+		If(CheckWater()) A_SelectWeapon("ThrowableHolstered");
+	}
+	
+	Action void ThrowableCharge(double x, double y)
+	{
+		If(PressingFire()) A_GiveInventory("ThrowableForce", 1);
+		
+	}
+}
+
+Class ThrowableForce : Inventory
+{
+	Default
+	{
+		+INVENTORY.UNDROPPABLE
+		+INVENTORY.UNTOSSABLE
+		+INVENTORY.UNCLEARABLE
+		Inventory.Amount 1;
+		Inventory.MaxAmount 100;
+		Inventory.InterHubAmount 0;
+	}
+	
+	Override void DoEffect()
+	{
+		Super.DoEffect();
+		If(!Owner || !Owner.Player) Return;
+		
+		If(	Owner.Player.ReadyWeapon.GetClassName() != 'BloodyThrowable' ||
+			Owner.Player.ReadyWeapon.GetClassName() != 'BloodyDynamite' ||
+			Owner.Player.ReadyWeapon.GetClassName() != 'BloodyDynamite_Prox' ||
+			Owner.Player.ReadyWeapon.GetClassName() != 'BloodyDynamite_Remote' ||
+			Owner.Player.ReadyWeapon.GetClassName() != 'BloodySprayCan')
+				Owner.A_SetInventory("ThrowableForce", 0);
+	}
+}
+
+Class ThrowableHolstered : TempWeapon {}

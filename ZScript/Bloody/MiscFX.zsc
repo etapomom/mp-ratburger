@@ -1,0 +1,996 @@
+Class ZapFXBase : Actor
+{
+	Default
+	{
+		+NOINTERACTION
+		+FORCEXYBILLBOARD
+		+ROLLSPRITE
+		Scale 0.2;
+		RenderStyle "Add";
+	}
+	
+	Override Void PostBeginPlay()
+	{
+		A_SetRoll(random(0,359));
+		Scale.X *= frandom(0.95,1.05); Scale.Y *= frandom(0.95,1.05);
+		bSPRITEFLIP = random(0,1);
+		
+		Super.PostBeginPlay();
+	}
+	
+	States
+	{
+	Spawn:
+		TNT1 A 0 NoDelay A_Jump(128,1,2,3);
+		ZAPR ABC 1 Bright;
+		TNT1 A 0 A_Jump(128,1);
+		Goto Spawn+1;
+		ZAPR ABC 1 Bright;
+		ZAPR DE 1 Bright A_FadeOut(0.1,1);
+		Wait;
+	Death:
+		TNT1 A 1;
+		Stop;
+	}
+}
+
+Class ShockwaveBase : Actor
+{
+	Default
+	{
+		+NOCLIP
+		+NOINTERACTION
+		+FLATSPRITE
+		+NOGRAVITY
+		+NOBLOCKMAP
+		+DONTBLAST
+		Renderstyle "Add";
+		Scale 0.1;
+	}
+	
+	Override Void PostBeginPlay()
+	{
+		A_SetRoll(frandom(0,359));
+		A_SetAngle(frandom(0,359));
+		A_SetPitch(frandom(-90,90));
+		bSPRITEFLIP = random(0,1);
+		
+		Super.PostBeginPlay();
+	}
+	
+	states
+	{
+	Spawn:
+		"####" "#" 1 BRIGHT
+		{
+			A_FadeOut(0.08,1);
+			Scale.X *= 1.15; Scale.Y = Scale.X;
+		}
+		Wait;
+	}
+}
+
+Class ExplosionBase : Actor
+{
+	Default
+	{ 
+		+NOINTERACTION
+		+NOGRAVITY
+		+FORCEXYBILLBOARD;
+		RenderStyle "Translucent";
+		Alpha 0.95;
+		Scale 0.95;
+		VSpeed -0.5;
+	}
+	
+	Override Void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		bSPRITEFLIP = random(0,1);
+	}
+	
+	States
+	{
+	Spawn:
+		NAPX ABCDEFGHIJKLMNOPQRSTU 1 BRIGHT;
+		Stop;
+	}
+}
+
+Class ExplosionBase2 : ExplosionBase
+{
+	Default { RenderStyle "Add"; +ROLLSPRITE VSpeed 0; }
+	
+	Override Void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		A_SetRoll(frandom(0,359));
+	}
+	
+	States
+	{
+	Spawn:
+		NAPZ ABCDEFGHIJK 2 BRIGHT;
+		Stop;
+	}
+}
+
+Class ExplosionSmoke : Actor
+{
+	Default
+	{
+		Scale 0.5;
+		Alpha 0.4;
+		RenderStyle "Translucent";
+		+NOTELEPORT
+		+FORCEXYBILLBOARD
+		+NOINTERACTION
+		+ROLLSPRITE
+		+ROLLCENTER
+		Translation "0:255=%[0.00,0.00,0.00]:[0.21,0.21,0.21]";
+	}
+	
+	Override Void PostBeginPlay() { Super.PostBeginPlay(); A_SetRoll(frandom(0,359)); Scale.X += frandom(-0.1,0.1); Scale.Y = Scale.X; }
+	
+	States
+	{
+	Spawn:
+		SMOK A 0 A_SetScale(Scale.X * 1.015, Scale.Y * 1.015);
+		SMOK A 1 A_Fadeout(0.005,1);
+		loop;
+	}
+}
+
+Class ExplosionSmokeAlt : Actor
+{
+	Default
+	{
+		+NOINTERACTION
+		+NOGRAVITY
+		+FORCEXYBILLBOARD
+		+ROLLSPRITE
+		RenderStyle "Subtract";
+		Scale 1.5;
+		Alpha 0.5;
+	}
+	States
+	{
+	Spawn:
+		SMOK B 0;
+	DoTheThing:
+		"####" "#" 0 { A_SetRoll(frandom(0,359)); Scale.X *= frandom(0.95,1.05); Scale.Y = Scale.X; A_FadeOut(frandom(0,0.05)); }
+		"####" "#" 1;
+		"####" "#" 1
+		{
+			A_FadeOut(0.005,1);
+			Scale.X *= 1.015; Scale.Y = Scale.X;
+		}
+		Goto DoTheThing+1;
+	}
+}
+
+Class ExplosionSmokeAlt2 : ExplosionSmokeAlt
+{
+	Default
+	{
+		RenderStyle "Translucent";
+	}
+}
+
+Class ExplosionSmokeAlt3 : ExplosionSmokeAlt
+{
+	Default
+	{
+		Scale 1.0;
+		Renderstyle "Translucent";
+		Translation "0:255=%[0.00,0.00,0.00]:[0.21,0.21,0.21]";
+	}
+	States
+	{
+	Spawn:
+		SMOK C 0;
+		Goto DoThething;
+	}
+}
+	
+
+Class SmokeFXBase : Actor
+{
+	Default
+	{
+		+FORCEXYBILLBOARD
+		+NOINTERACTION
+		+ROLLSPRITE
+		Scale 0.33;
+		RenderStyle "Add";
+		Alpha 0.7;
+		Translation "0:255=%[0.00,0.00,0.00]:[2.00,2.00,2.00]";
+	}
+	
+	Override Void PostBeginPlay() 
+	{ Super.PostBeginPlay(); A_SetRoll(frandom(0,359)); bSPRITEFLIP = Random(0,1); }
+	
+	States
+	{
+	Spawn:
+		SMEK AAABBBCCCDDDEEEFFFGGGHHHIII 1 NoDelay { Scale.X *= 1.025; Scale.Y = Scale.X; A_FadeOut(0.05,1); }
+		Wait;
+	}
+}
+
+Class ExplosionAddBase : Actor
+{
+	Default
+	{
+		+NOINTERACTION
+		+NOGRAVITY
+		+FORCEXYBILLBOARD
+		+ROLLSPRITE
+		+ROLLCENTER
+		RenderStyle "Add";
+		Scale 1.25;
+	}
+	
+	Override Void PostBeginPlay() 
+	{ 
+		Super.PostBeginPlay(); 
+		A_SetRoll(frandom(0,359)); 
+		Scale.X *= frandom(0.975,1.025); 
+		Scale.Y = Scale.X; 
+	}
+	
+	States
+	{
+	Spawn:
+		/*TNT1 A 0 NoDelay A_Jump(255,1,2,3,4);
+		E1_A A 0 A_Jump(256,"DoTheThing");
+		E2_A A 0 A_Jump(256,"DoTheThing");
+		E3_A A 0 A_Jump(256,"DoTheThing");
+		E4_A A 0 A_Jump(256,"DoTheThing");
+		Loop;
+	DoTheThing:*/
+		E1_A AABBCCDDEEFFGGHHIIJJ 1 BRIGHT NoDelay { Scale.X *= 1.0075; Scale.Y = Scale.X; }
+		Stop;
+	}
+}
+
+Class ExplosionAddBase2 : ExplosionAddBase
+{
+	States
+	{
+	Spawn:
+		E3_A AABBCCDDEEFFGGHHIIJJKKLLMM 1 BRIGHT NoDelay { Scale.X *= 1.0075; Scale.Y = Scale.X; }
+		Stop;
+	}
+}
+
+Class ExplosionAddBase3 : ExplosionAddBase
+{
+	States
+	{
+	Spawn:
+		E2_A AABBCCDDEEFFGGHHIIJJKKLLMMNNOOPPQQRR 1 BRIGHT NoDelay { Scale.X *= 1.0075; Scale.Y = Scale.X; }
+		Stop;
+	}
+}
+
+Class GroundedFire : Actor
+{
+	Default
+	{
+		+NOINTERACTION
+		+MOVEWITHSECTOR
+		+FLOORHUGGER
+		+FLOORCLIP
+		+RANDOMIZE
+		Scale 0;
+		RenderStyle "Add";
+		Radius 16;
+		Height 24;
+	} double toscale; int ticker;
+	
+	Override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		ToScale = frandom(0.75, 0.95);
+		Ticker = 35 * random(5, 10);
+		bSPRITEFLIP = random(0,1);
+		If(WaterLevel > 0) { Destroy(); Return; }
+		A_SpawnItemEx("GroundedFireSub",frandom(-0.5,0.5),frandom(-0.5,0.5),0,0,0,0,0,SXF_NOCHECKPOSITION|SXF_SETMASTER,32);
+		//A_SpawnItemEx("GroundedFireSub",frandom(-0.5,0.5),frandom(-0.5,0.5),0,0,0,0,0,SXF_NOCHECKPOSITION|SXF_SETMASTER,64);
+	}
+	
+	Override void Tick()
+	{
+		Super.Tick();
+		If(IsFrozen()) Return;
+		
+		If(Scale.X < ToScale && Scale.Y < ToScale) { Scale.X += frandom(0.025, 0.05); Scale.Y = Scale.X; }
+		If(Ticker-- <= 0) { Scale.X *= 0.9; Scale.Y = Scale.X; A_FadeOut(0.05, 1); }
+		//If(Level.Time % 5 == 0) { A_RadiusGive("BurnDOT", 48, RGF_PLAYERS|RGF_MONSTERS, random(5, 15)); }
+		
+		A_SpawnParticle("Yellow",SPF_FULLBRIGHT|SPF_RELATIVE,frandom(25,35),frandom(2,3),frandom(0,359),frandom(-4,4),frandom(-4,4),frandom(0,24),0,0,frandom(0.5,1.5),0,0,-0.05,1.0,-0.05,0);
+		//A_SpawnItemEx("FireFX",frandom(-4,4),frandom(-4,4),frandom(0,24),0,0,frandom(0.5,4),0,SXF_NOCHECKPOSITION,192);
+		//A_SpawnItemEX("FireSmoke",frandom(-4,4),frandom(-4,4),24,frandom(-0.3,0.3),frandom(-0.3,0.3),frandom(0.5,1),frandom(0,359),SXF_NOCHECKPOSITION,224);
+	}
+	
+	States
+	{
+	Spawn:
+		FLMF ABCDEFGHIJKLMN random(1,2) BRIGHT;
+		Loop;
+	}
+}
+
+Class GroundedFireSub : Actor
+{
+	Default
+	{
+		+NOINTERACTION
+		+MOVEWITHSECTOR
+		+FLOORHUGGER
+		+FLOORCLIP
+		+RANDOMIZE
+		Scale 0;
+		RenderStyle "Add";
+	} double AlphaC;
+	
+	Override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		If(!Master || WaterLevel > 0) { Destroy(); Return; }
+		bSPRITEFLIP = random(0,1);
+		AlphaC = frandom(0.45,0.55);
+	}
+	
+	Override void Tick()
+	{
+		Super.Tick();
+		If(!Master) { Destroy(); Return; }
+		Scale.X = Master.Scale.X;
+		Scale.Y = Master.Scale.Y;
+		Alpha = Master.Alpha - AlphaC;
+	}
+	
+	States
+	{
+	Spawn:
+		FLMF ABCDEFGHIJKLMN random(1,2) BRIGHT;
+		Loop;
+	}
+}
+/*
+Class SplashFunc : Actor
+{
+	int edam, erad, etime, edam2, escale2;
+	bool hurtuser, noexplosion, nothrust;
+	Property Setup : edam, erad, etime, escale, hurtuser;
+	Property Extra : NoExplosion, NoThrust;
+	
+	Default 
+	{
+		+NOINTERACTION
+		+BLOODLESSIMPACT
+		+EXTREMEDEATH
+		SplashFunc.Setup 17, 128, 8, 1, True; 
+		SplashFunc.Extra False, False;
+	}
+	
+	bool doomexp, edone;
+	int escale, ebase, ticker;
+	
+	Override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		If(GetCVar("Blood_DoomSplash") || bDONTSPLASH) doomexp = True;
+		If(etime > 0) ebase = int(erad / etime);
+		If(etime > 0) escale = int(edam / etime);
+	}
+	
+	Override void Tick()
+	{
+		Super.Tick();
+		If(IsFrozen()) Return;
+		
+		If(!EDone)
+		{
+			If(DoomExp)
+			{
+				If(!NoExplosion) A_Explode(((EDam * ETime) - (EScale * ETime) + Random(EDam-1, EDam+1)), ERad, HurtUser ? 1 : 0);
+				If(!NoThrust) BloodyHandler.DoBlast(Self, ERad, EDam * 56);
+				EDone = True;
+			}
+			
+			Else
+			{
+				If(!NoExplosion) A_Explode((Random(EDam2-1, EDam2+1) - (EScale2 * Ticker)), EBase + (EBase * Ticker), HurtUser ? 1 : 0);
+				If(!NoThrust) BloodyHandler.DoBlast(Self, EBase + (EBase * Ticker), (EDam + (EScale * Ticker)) * 28);
+				If((EDam - (EScale * Ticker)) <= 0) EDone = True;
+			}
+			
+			Ticker++;
+		}
+		
+		Else { Destroy(); Return; }
+	}
+	
+	States
+	{
+	Spawn:
+		TNT1 A 1;
+		Loop;
+	}
+}
+*/
+
+Class SplashFunc : Actor
+{
+	int edam, erad, etime, edam2, escale2;
+	bool hurtuser, noexplosion, nothrust;
+	Property Setup : edam, erad, etime, hurtuser;
+	Property Extra : NoExplosion, NoThrust;
+	
+	Default
+	{
+		+NOINTERACTION
+		+EXTREMEDEATH
+		SplashFunc.Setup 128, 128, 8, True; 
+		SplashFunc.Extra False, False;
+	}
+	
+	bool doomexp;
+	int curdam, cursize, finaldam;
+	Double SizeDelta, DamageDelta;
+	Override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		If(!Target) { Destroy(); Return; }
+		
+		DoomExp = (GetCVar("Blood_DoomSplash") || ETime <= 1);
+		CurSize = ERad / ETime;
+		CurDam  = EDam / ETime;
+		FinalDam = EDam / ETime;
+		
+		/*SizeDelta 	= (ERad - CurSize) / ETime;
+		DamageDelta = (FinalDam + CurDam) / ETime;*/
+		
+		A_QuakeEx(EDam / 64, EDam / 64, EDam / 64, ETime * ETime, 0, ERad * ETime, "", QF_RELATIVE|QF_SCALEDOWN, rollIntensity:EDam / 192);
+	}
+	
+	int ticker;
+	bool done;
+	Override void Tick()
+	{
+		Super.Tick();
+		If(IsFrozen()) Return;
+		
+		CurDam = Max(CurDam, 1);
+		
+		If(!Done)
+		{
+			If(DoomExp)
+			{
+				If(!NoExplosion) BloodyHandler.DoExplosion(Self, EDam, EDam * 960, ERad, ERad, DE_NOBLEED|DE_EXTRAZTHRUST, Default.DamageType, !HurtUser? Target : Null);
+				If(!NoThrust) BloodyHandler.DoExplosion(Self, EDam, 0, ERad, ERad, DE_NOBLEED, Default.DamageType, HurtUser? Target : Null);
+				Done = True;
+			}
+			
+			Else
+			{
+				If(!NoExplosion) BloodyHandler.DoExplosion(Self, CurDam, (EDam / ETime) * 980, CurSize, CurSize, DE_NOBLEED|DE_EXTRAZTHRUST, Default.DamageType, !HurtUser? Target : Null);
+				If(!NoThrust) BloodyHandler.DoExplosion(Self, CurDam, 0, CurSize, CurSize, DE_NOBLEED, Default.DamageType, HurtUser? Target : Null);
+				
+				CurSize += ERad / ETime;
+				//CurDam  -= EDam / ETime;
+				
+				Done = (Ticker > ETime);
+				
+				/*SizeDelta 	= (ERad - CurSize) / ETime;
+				DamageDelta = (FinalDam + CurDam) / ETime;
+				CurSize += SizeDelta;
+				CurDam  -= DamageDelta; 
+				
+				Done = (SizeDelta < 1.5);*/
+			}
+			
+			Ticker++;
+		}
+		
+		Else { Destroy(); Return; }
+	}
+	
+	States
+	{
+	Spawn:
+		TNT1 A 1;
+		Loop;
+	}
+}
+
+Class RicochetFX : Actor
+{
+	Default
+	{
+		PROJECTILE;
+		Speed 0;
+		Radius 1;
+		Height 1;
+		DamageFunction 0;
+		+RIPPER
+		+BLOODLESSIMPACT
+		+PAINLESS
+		+NODECAL
+		-NOGRAVITY
+		Gravity 0.75;
+	}
+	States
+	{
+	Spawn:
+		TNT1 AAAAAAAA 1 NoDelay
+		{
+			If(Random(0, 256) >= 244) A_Die();
+			A_SpawnParticle("Yellow",SPF_FULLBRIGHT|SPF_RELATIVE,10,8,0,0,0,0,0,0,0,0,0,0,1,-0.75,-1);
+		}
+		Stop;
+	Death:
+		TNT1 A 1;
+		Stop;
+	}
+}
+
+Class Nothing : Actor 
+{ 
+	Override Void PostBeginPlay() 
+	{ 
+		Super.PostBeginPlay(); 
+		Destroy(); 
+	} 
+	
+	Default 
+	{ 
+		Decal "None"; 
+		+FORCEDECAL
+		+NODECAL
+		+PAINLESS
+		+BLOODLESSIMPACT
+		+ALWAYSPUFF
+		+PUFFONACTORS
+		+PUFFGETSOWNER
+		+HITTRACER
+	} 
+}
+
+Class HealAura : Actor
+{
+	Default 
+	{ 
+		+NOINTERACTION 
+		Renderstyle "Add"; 
+		Translation "0:255=%[0.00,0.00,0.00]:[0.00,1.01,0.50]";
+		Radius 16;
+		Height 16;
+	} int Mul;
+	
+	Override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		//If(!Master || (Master && Master.Health <= 0)) { Destroy(); Return; }
+		If(Master)
+		{
+			A_SetSize(Master.Radius, Master.Height, 0);
+			If(Master.bBOSS)  Mul = 2;
+			Else Mul = 1;
+		}
+	}
+	
+	Override void Tick() { Super.Tick(); If(Master) SetOrigin(Master.Pos, 1); }
+	
+	States
+	{
+	Spawn:
+		TNT1 AAAAA 1 NoDelay
+		{
+			For(int a = 0; a <= (20 * mul); a++)
+			{
+				A_SpawnItemEx(	"HealAuraTrail", 
+								frandom(Radius, Radius), 0, frandom(0, Height),
+								0, 0, frandom(Height * 0.005, Height * 0.045), 
+								frandom(0, 359), 
+								SXF_NOCHECKPOSITION|SXF_TRANSFERTRANSLATION|SXF_TRANSFERRENDERSTYLE, 
+								int(128 / mul));
+								
+				A_SpawnItemEx(	"HealAuraParticle", 
+								frandom(Radius, Radius), 0, frandom(0, Height),
+								0, 0, frandom(Height * 0.005, Height * 0.045), 
+								frandom(0, 359), 
+								SXF_NOCHECKPOSITION|SXF_TRANSFERTRANSLATION|SXF_TRANSFERRENDERSTYLE, 
+								int(192 / mul));
+			}
+		}
+		Stop;
+	}
+}
+
+Class HealAuraTrail : Actor
+{
+	Default
+	{
+		+NOINTERACTION
+		Alpha 0.01;
+		Scale 0.35;
+	}
+	
+	Override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		bSPRITEFLIP = Random(0,1);
+		Scale.Y *= frandom(0.75, 1.25);
+	}
+	
+	States
+	{
+	Spawn:
+		SPFX AAAA 1 BRIGHT NoDelay A_FadeIn(0.1, 0);
+		SPFX AA 1 BRIGHT A_FadeIn(0.05, 0);
+		SPFX AAAAAAA 1 BRIGHT;
+		SPFX A 1 BRIGHT A_FadeOut(0.05, 1);
+		Wait;
+	}
+}
+
+Class HealAuraParticle : Actor
+{
+	Default
+	{
+		+NOINTERACTION
+		+FORCEXYBILLBOARD
+		+ROLLSPRITE
+		+INTERPOLATEANGLES
+		Scale 0.125;
+		Alpha 0.01;
+	} bool minus;
+	
+	Override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		bSPRITEFLIP = Random(0,1);
+		Scale.X *= frandom(0.75, 1.25);
+		Scale.Y = Scale.X;
+		Roll += frandom(0, 359);
+		Minus = Random(0, 1);
+	}
+	
+	Override void Tick()
+	{
+		Super.Tick();
+		If(IsFrozen()) Return;
+		Roll += Minus ? -1.8 : 1.8;
+	}
+	
+	States
+	{
+	Spawn:
+		SPFX BBBB 1 BRIGHT NoDelay A_FadeIn(0.1, 0);
+		SPFX BB 1 BRIGHT A_FadeIn(0.05, 0);
+		SPFX BBBBBBB 1 BRIGHT;
+		SPFX B 1 BRIGHT A_FadeOut(0.05, 1);
+		Wait;
+	}
+}
+
+Class BulletHit : BulletPuff replaces BulletPuff
+{
+	Default
+	{
+		Scale 0.5;
+		RenderStyle "Normal";
+		Alpha 1.0;
+		VSpeed 0.0;
+		Decal "BulletHit";
+		+NOBLOCKMAP
+		+NOGRAVITY
+		+RANDOMIZE
+		+PUFFONACTORS
+		+FLOORCLIP
+		+NOTELEPORT
+		+FORCEXYBILLBOARD
+		+NOINTERACTION
+		+PUFFGETSOWNER
+		+HITTRACER
+	}
+	States
+	{
+	Spawn:
+		TNT1 A 0 NoDelay
+		{
+			A_SprayDecal("BulletHit", -16., (0, 0, -2));
+			
+			If(Random(0,9) >= 6) 
+			{ A_PlaySound("Ricochet",CHAN_BODY,1.0); }
+			
+			For(int i = 0; i != 60; i++)
+			{
+				A_SpawnParticle("Yellow",SPF_FULLBRIGHT|SPF_RELATIVE,random(70,105),random(4,8),frandom(0,359),0,0,0,frandom(-6,6),frandom(-6,6),frandom(-6,6),0,0,-0.5,frandom(0.75,1),-0.75,-0.5);
+			}
+			/*For(int i = 0; i != 20; i++)
+			{
+				A_SpawnItemEx("RicochetFX",0,0,0,frandom(-8,8),frandom(-8,8),frandom(-2,8),frandom(0,359),SXF_NOCHECKPOSITION,224);
+			}*/
+		}
+		TNT1 AAAAAA 0 A_SpawnItemEx("BulletSmoke",0,0,0,frandom(-0.3,0.3),frandom(-0.3,0.3),frandom(-0.3,0.3),frandom(0,359),SXF_NOCHECKPOSITION,128);
+		TNT1 A 35 A_SpawnItemEx("LightRicochet",0,0,0,0,0,0,0,SXF_NOCHECKPOSITION|SXF_SETMASTER|SXF_ORIGINATOR,0);
+		stop;
+	XDeath:
+		TNT1 A 0;
+		TNT1 A 0
+		{
+			If(Random(0,9) >= 3) 
+			{ A_PlaySound("Flesh",CHAN_BODY,1.0); }
+		}
+		Stop;
+	}
+}
+
+Class BulletSmoke : SmokeFXBase 
+{ 
+	Default { VSpeed 1; } 
+	States
+	{
+	Spawn:
+		SMEK AAABBBCCCDDDEEEFFFGGGHHHIII 1 NoDelay { Scale.X *= 1.025; Scale.Y = Scale.X; A_FadeOut(0.015,1); }
+		Wait;
+	}
+}
+
+Class LightRicochet : DynamicLight
+{
+	int cnt;
+	Default
+	{
+		DynamicLight.Type "Point";
+		args 255,224,128,9;
+	}
+	override void Tick()
+	{
+		Super.Tick();
+		If(IsFrozen()) Return;
+		args[LIGHT_INTENSITY] += 1 - (cnt * 0.05);
+		args[LIGHT_RED] *= 0.8;
+		args[LIGHT_GREEN] *= 0.8;
+		args[LIGHT_BLUE] *= 0.8;
+		If(cnt++ > 18) Destroy();
+	}
+}
+
+Class BloodyBullet : Actor
+{
+	Vector3 dest;
+	Default
+	{
+		RenderStyle "Add";
+		Radius 0.1;
+		Height 0;
+		+NOCLIP;
+		+NOGRAVITY;
+		+DONTSPLASH;
+		+INTERPOLATEANGLES;
+		+NOTELEPORT;
+	}
+	override void Tick()
+	{
+		Super.Tick();
+		if ( isFrozen() ) return;
+		Vector3 dir = level.Vec3Diff(pos,dest);
+		if ( dir.length() < 160 )
+		{
+			Destroy();
+			return;
+		}
+		dir = dir.unit();
+		SetOrigin(level.Vec3Offset(pos,dir*160),true);
+		angle = atan2(dir.y,dir.x);
+		pitch = asin(-dir.z);
+		roll += 60;
+	}
+	States
+	{
+	Spawn:
+		TRAC E -1 Bright;
+		Stop;
+	}
+}
+
+Class WaterHit
+{
+	Sector sect;
+	Vector3 hitpos;
+}
+
+Class UTInvisibleSplasher : Actor
+{
+	States
+	{
+	Spawn:
+		TNT1 A 2;
+		Stop;
+	}
+}
+
+// Follows a single line trail, spawns bubbles if underwater
+// In addition, also activates shoot-through lines, since LineTrace can't do it
+// Also spawns splashes when crossing water sectors
+Class UTBulletTrail : LineTracer
+{
+	Array<WaterHit> WaterHitList;
+	Array<Line> ShootThroughList;
+	Actor ignoreme;
+
+	static play void DoTrail( Actor target, Vector3 pos, Vector3 dir, int dist, int bubblechance )
+	{
+		let t = new("UTBulletTrail");
+		t.ignoreme = target;
+		t.WaterHitList.Clear();
+		t.ShootThroughList.Clear();
+		t.Trace(pos,level.PointInSector(pos.xy),dir,dist,0);
+		for ( int i=0; i<t.ShootThroughList.Size(); i++ )
+			t.ShootThroughList[i].Activate(target,0,SPAC_PCross);
+		for ( int i=0; i<t.WaterHitList.Size(); i++ )
+		{
+			let b = Actor.Spawn("UTInvisibleSplasher",t.WaterHitList[0].hitpos);
+			b.A_CheckTerrain();
+		}
+		for ( int i=5; i<t.Results.Distance; i+=10 )
+		{
+			if ( !Random[Boolet](0,bubblechance) ) continue;
+			let b = Actor.Spawn("Nothing",level.Vec3Offset(pos,dir*i));
+			b.Scale *= FRandom[Boolet](0.4,0.6);
+		}
+		t.Destroy();
+	}
+
+	override ETraceStatus TraceCallback()
+	{
+		// liquid splashes
+		if ( Results.CrossedWater )
+		{
+			let hl = new("WaterHit");
+			hl.sect = Results.CrossedWater;
+			hl.hitpos = Results.CrossedWaterPos;
+			WaterHitList.Push(hl);
+		}
+		else if ( Results.Crossed3DWater )
+		{
+			let hl = new("WaterHit");
+			hl.sect = Results.Crossed3DWater;
+			hl.hitpos = Results.Crossed3DWaterPos;
+			WaterHitList.Push(hl);
+		}
+		if ( Results.HitType == TRACE_HitActor )
+		{
+			if ( Results.HitActor == ignoreme ) return TRACE_Skip;
+			if ( Results.HitActor.bSHOOTABLE ) return TRACE_Stop;
+			return TRACE_Skip;
+		}
+		else if ( (Results.HitType == TRACE_HitWall) && (Results.Tier == TIER_Middle) )
+		{
+			if ( !Results.HitLine.sidedef[1] || (Results.HitLine.Flags&(Line.ML_BlockHitscan|Line.ML_BlockEverything)) )
+				return TRACE_Stop;
+			ShootThroughList.Push(Results.HitLine);
+			return TRACE_Skip;
+		}
+		return TRACE_Stop;
+	}
+}
+
+/*
+Class ProjectileLight : DynamicLight
+{
+	int cnt, tail;
+	double tailspace;
+	Property TailLength : Tail, TailSpace;
+	
+	Default
+	{
+		DynamicLight.Type "Point";
+		ProjectileLight.TailLength 4, 1.0;
+		Args 255, 192, 16, 64;
+	}
+	
+	Override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		If(!Master) { Destroy(); Return; }
+		
+		If(Tail <= 4) Tail = 4;
+		If(Tail >= 16) Tail = 16;
+		
+		If(TailSpace <= 0) TailSpace = 0.001;
+		If(TailSpace >= 4) TailSpace = 4;
+		
+		Mass = args[LIGHT_INTENSITY];
+		
+		For(int t = Tail; t > 0; t--)
+		{
+			Actor l = Spawn("ProjectileTailLight", Self.Pos);
+			If(l)
+			{
+				l.Master = Self;
+				l.Mass = args[LIGHT_INTENSITY] * (t / Tail);
+				l.args[LIGHT_RED] = args[LIGHT_RED] * (t / Tail);
+				l.args[LIGHT_GREEN] = args[LIGHT_GREEN] * (t / Tail);
+				l.args[LIGHT_BLUE] = args[LIGHT_BLUE] * (t / Tail);
+				l.Scale.X = Scale.X;
+				l.Scale.Y = Scale.Y;
+				l.Speed = (args[LIGHT_INTENSITY] * 1.25) / (Tail - (t - 1));
+				l.args[LIGHT_INTENSITY] *= TailSpace;
+			}
+		}
+	}
+	
+	Override void Tick()
+	{
+		Super.Tick();
+		
+		If(Master)
+		{
+			SetOrigin(Master.Pos,true);
+			If(!IsFrozen()) args[LIGHT_INTENSITY] = Mass * FRandom(Scale.X, Scale.Y);
+		}
+		
+		Else
+		{
+			If(cnt > 18) { Destroy(); Return; }
+			If(IsFrozen()) Return;
+			args[LIGHT_RED] *= 0.875;
+			args[LIGHT_GREEN] *= 0.875;
+			args[LIGHT_BLUE] *= 0.875;
+			args[LIGHT_INTENSITY] *= 0.9975;
+			cnt++;
+		}
+	}
+}
+
+Class ProjectileTailLight : DynamicLight
+{
+	Default
+	{
+		DynamicLight.Type "Point";
+		Args 1, 1, 1, 1;
+	} int cnt, ipos;
+	
+	Override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		If(!Master) { Destroy(); Return; }
+		ipos = args[LIGHT_INTENSITY];
+	}
+	
+	Override void Tick()
+	{
+		Super.Tick();
+		
+		If(Master)
+		{
+			args[LIGHT_INTENSITY] = ipos;
+			A_Warp(Master, args[LIGHT_INTENSITY] * -1, 0, 0, 0, WARPF_INTERPOLATE);
+			args[LIGHT_INTENSITY] = Mass;
+			
+			If(Master.Master && !IsFrozen())
+				args[LIGHT_INTENSITY] = Mass * FRandom(Scale.X, Scale.Y);
+			
+			Else
+			{
+				If(cnt > 18) { Destroy(); Return; }
+				If(IsFrozen()) Return;
+				args[LIGHT_RED] *= 0.875;
+				args[LIGHT_GREEN] *= 0.875;
+				args[LIGHT_BLUE] *= 0.875;
+				args[LIGHT_INTENSITY] *= 0.9975;
+				Mass *= 0.9975;
+				cnt++;
+			}
+		}
+		
+		Else { Destroy(); Return; } 
+	}
+}

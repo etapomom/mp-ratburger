@@ -1,0 +1,83 @@
+Extend Class BloodyStatusbar
+{
+	double wiggle;
+	Private void DrawBeastHUD()
+	{	
+		/*If(BeastTic < 55) 		DrawImage("BBBARA", (0, -CurY - 16), DI_BOTTOMCENTER);
+		Else If(BeastTic >= 55) DrawImage("BBBARB", (0, -CurY - 16), DI_BOTTOMCENTER);
+		Else If(!Bloodbath())	DrawImage("BBBAR3", (0, -CurY - 16), DI_BOTTOMCENTER);*/
+		
+		DrawSawBlade(-25, (-CurY - 16));
+		DrawGem("HUDCHAIN", "SKULLGEM", BeastTimer.GetValue(), 1050, (11, (-CurY - 12) + wiggle), 14, 28, 16, DI_BOTTOMCENTER);
+		DrawImage("GEMMASKL", (-75, -CurY - 17), DI_BOTTOMCENTER);
+		DrawImage("GEMMASKR", (115, -CurY - 14), DI_BOTTOMCENTER);
+		
+		DrawString(BigFont, FormatNumber((GetAmountOnly("BloodbathTimer") * 100) / 1050, 1, 2), (48, -CurY - 32), DI_BOTTOMCENTER, Font.CR_GOLD, Scale: (0.25, 0.25));
+	}
+	
+	int beasttic, sawcycles;
+	Private void BeastTicker()
+	{
+		If(Bloodbath())
+		{
+			BeastTic++;
+			If(BeastTic >= 25) BeastTic = 16;
+		}
+		Else If(!Bloodbath() || !GetAmountOnly("BloodbathTimer")) { BeastTic--; If(BeastTic <= 0) BeastTic = 0; }
+	}
+	
+	Private void DrawSawblade(double x, double y)
+	{
+		String Saw, Spark;
+		Spark = "TNT1A0";
+		
+		If		(BeastTic >= 0 && BeastTic < 3) 	  Saw = "BBBAR1";
+		Else If	(BeastTic >= 3 && BeastTic < 6) 	  Saw = "BBBAR2";
+		Else If	(BeastTic >= 9 && BeastTic < 11) 	  Saw = "BBBAR3";
+		Else If	(BeastTic >= 11 && BeastTic < 13) 	  Saw = "BBBAR1";
+		Else If	(BeastTic >= 13 && BeastTic < 15) 	  Saw = "BBBAR2";
+		Else If	(BeastTic >= 15 && BeastTic < 16) 	  Saw = "BBBAR3";
+		Else If	(BeastTic >= 16 && BeastTic < 17) 	{ Saw = "BBBAR1"; Spark = "SPARKS1"; }
+		Else If	(BeastTic >= 17 && BeastTic < 18) 	{ Saw = "BBBAR2"; Spark = "SPARKS1"; }
+		Else If	(BeastTic >= 18 && BeastTic < 19) 	{ Saw = "BBBAR3"; Spark = "SPARKS1"; }
+		Else If	(BeastTic >= 19 && BeastTic < 20) 	{ Saw = "BBBAR1"; Spark = "SPARKS2"; }
+		Else If	(BeastTic >= 20 && BeastTic < 21) 	{ Saw = "BBBAR2"; Spark = "SPARKS2"; }
+		Else If	(BeastTic >= 21 && BeastTic < 22) 	{ Saw = "BBBAR3"; Spark = "SPARKS2"; }
+		Else If	(BeastTic >= 22 && BeastTic < 23) 	{ Saw = "BBBAR1"; Spark = "SPARKS3"; }
+		Else If	(BeastTic >= 23 && BeastTic < 24) 	{ Saw = "BBBAR2"; Spark = "SPARKS3"; }
+		Else If	(BeastTic >= 24 && BeastTic < 25) 	{ Saw = "BBBAR3"; Spark = "SPARKS3"; }
+		
+		DrawImage(Saw, (x, y), DI_BOTTOMCENTER);
+		DrawImage(Spark, (x - 44, y - 8), DI_BOTTOMCENTER);
+	}
+	
+	/*TextureID Saw[3], Sparks[3];
+	Private void DrawSawBlade(double x, double y)
+	{
+		For(int i = 0; i < 3; i++) Saw[i] 		= TexMan.CheckForTexture(String.Format("%s%d", "BBBAR",  i+1), Texman.Type_Any);
+		For(int i = 0; i < 3; i++) Sparks[i] 	= TexMan.CheckForTexture(String.Format("%s%d", "SPARKS", i+1), Texman.Type_Any);
+		
+		int a, b;
+		If(SawCycles == 0) { If(BeastTic >= 3) a++; If(a >= 2) SawCycles++; }
+		If(SawCycles == 1) { If(BeastTic >= 2) a++; If(a >= 2) SawCycles++; }
+		If(SawCycles == 2) { If(BeastTic >= 1) a++; If(a >= 2) SawCycles++; }
+		
+		If(SawCycles >= 3) 
+		{ 
+			If(BeastTic == 1) a++; 
+			If(BeastTic >= 3) b++;
+		}
+		
+		If(a > 3) a = 0;
+		If(b > 4) b = 1;
+		
+		String q, w;
+		q = Saw[a].."";
+		w = Sparks[b+1].."";
+		
+		DrawImage(q, (x, y), DI_BOTTOMCENTER);
+		If(b > 0) DrawImage(w, (x - 50, y - 20), DI_BOTTOMCENTER);
+	}*/
+	
+	Private bool Bloodbath() { Return CPlayer.mo.FindInventory("IsBloodbath"); }
+}

@@ -1,0 +1,76 @@
+#Include "ZScript/Bloody/HUD/Mover.zsc"
+#Include "ZScript/Bloody/HUD/HUD.zsc"
+#Include "ZScript/Bloody/HUD/BeastHUD.zsc"
+
+Class BloodyStatusBar : BaseStatusBar
+{
+	HUDFont BigFont;
+	Vector2 BaseSize;
+	BloodyHandler Event;
+	
+	DynamicValueInterpolator HealthNumber, BeastBar, BeastTimer;
+	
+	ENum HudConst
+	{
+		DI_TOPRIGHT = DI_SCREEN_RIGHT_TOP|DI_ITEM_RIGHT_TOP,
+		DI_TOPLEFT = DI_SCREEN_LEFT_TOP|DI_ITEM_LEFT_TOP,
+		DI_BOTTOMLEFT = DI_SCREEN_LEFT_BOTTOM|DI_ITEM_LEFT_BOTTOM,
+		DI_BOTTOMRIGHT = DI_SCREEN_RIGHT_BOTTOM|DI_ITEM_RIGHT_BOTTOM,
+		DI_CENTERED = DI_SCREEN_CENTER|DI_ITEM_HCENTER,
+		DI_BOTTOMCENTER = DI_SCREEN_CENTER_BOTTOM|DI_ITEM_CENTER_BOTTOM,
+	}
+	
+	Override Void Init()
+	{
+		Super.Init();
+		BaseSize = (320, 240);
+		
+		Font fnt = "BLUDFONT";
+		BigFont = HUDFont.Create(fnt, fnt.GetCharWidth("0") + 1, true, 0, 0);
+		
+		HealthNumber = DynamicValueInterpolator.Create(100, 0.2, 1, 20);
+		BeastBar = DynamicValueInterpolator.Create(0, 0.25, 1, 50);
+		BeastTimer = DynamicValueInterpolator.Create(0, 0.25, 1, 50);
+		
+		CurX = -160;
+		CurY = -120;
+	}
+	
+	bool firsttic;
+	override void Draw(int state, double TicFrac)
+	{
+		Super.Draw(state, TicFrac);
+		SetSize(0, BaseSize.X, BaseSize.Y);
+		BeginHUD(ForceScaled: True);
+		
+		If(State != HUD_None) 	DrawHUDStuff(TicFrac);
+	}
+	
+	Override void Tick()
+	{	
+		Super.Tick();
+		
+		HealthNumber.Update(CPlayer.mo.Health > 0 ? CPlayer.mo.Health : 0);
+		BeastBar.Update(GetAmountOnly("BeastMeter"));
+		BeastTimer.Update(GetAmountOnly("BloodbathTimer"));
+		
+		Wiggle = (BeastTimer.GetValue() < GetAmountOnly("BloodbathTimer")) && Random[ChainWiggle](0, 1);
+		
+		FirstTic = Level.Time < 2;
+		HUDMover();
+		BeastTicker();
+	}
+	
+	Override void NewGame()
+	{
+		Super.NewGame();
+		CurX = -160.;
+		CurY = -120.;
+	}
+	
+	int GetAmountOnly(class<Inventory> item)
+	{
+		let it = CPlayer.mo.FindInventory(item);
+		return (it ? it.Amount : 0);
+	}
+}
