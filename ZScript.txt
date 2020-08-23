@@ -7,7 +7,6 @@ Version "4.4"
 #Include "ZScript/Bloody/Libraries/dt_quaternion.zsc"
 #Include "ZScript/Bloody/Libraries/dt_coordutil.zsc"
 
-#Include "ZScript/Bloody/MenuStuff.zsc"
 #Include "ZScript/Bloody/PlayerPawn.zsc"
 #Include "ZScript/Bloody/Handler.zsc"
 #Include "ZScript/Bloody/HUD/StatusBar.zsc"

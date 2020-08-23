@@ -23,7 +23,7 @@ Class BloodyDynamite_Prox : BloodyThrowable
 		TNTD A 1 A_WeaponReady2();
 		Loop;
 	Fire:
-		TNTD A 1 A_WeaponReady2(WRF_DISABLE;
+		TNTD A 1 A_WeaponReady2(WRF_DISABLE);
 		Goto Ready;
 	
 	Radar:

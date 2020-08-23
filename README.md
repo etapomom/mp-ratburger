@@ -5,6 +5,7 @@ This mod aims to recreate Blood's gameplay in GZDoom using the voodoo arts of ZS
 ### Currently Implemented
 - Pitchfork
 - Bloodhound (New weapon)
+	- Optional pistol start weapon that's just a slow shooting revolver.
 - Shotgun
 - Tommygun
 - Napalm Launcher
@@ -21,4 +22,6 @@ This mod aims to recreate Blood's gameplay in GZDoom using the voodoo arts of ZS
 - Powerups
 - Bloodbath (Beast transformation)
 ### Stuff that will most likely not be included
-- Monsters
+- Blood's monsters
+- Also its armor system
+	- It's way too complex and it would be impossible to make it compatible with every custom damagetype out there.

@@ -10,57 +10,6 @@ enum EDoExplosionFlags
 
 Class BloodyHandler : EventHandler
 {
-	/*static void DoBlast( Actor Source, double ExplosionRadius, double MomentumTransfer )
-	{
-		BlockThingsIterator bi = BlockThingsIterator.Create(Source,ExplosionRadius);
-		while ( bi.Next() )
-		{
-			Actor a = bi.Thing;
-			If( !a || 
-				!Source.CheckSight(a,0xf) || 
-				(a == Source) || (Source.Distance3D(a) > ExplosionRadius))
-					Continue;
-					
-			If(/*(a is 'CorpseHitbox' && Blood_PushableCorpses) ||*/ /*a.bSHOOTABLE)
-			{
-				Vector3 midpoint = a.Vec3Offset(0,0,a.height*0.5);
-				Vector3 dir = Level.Vec3Diff(Source.pos,midpoint);
-				double dist = max(1,dir.length());
-				double damagescale = 1-max(0,(dist-a.radius)/ExplosionRadius);
-				dir = dir/dist;
-				//If(a is 'CorpseHitbox') a.A_ChangeVelocity(0,0,dir.z*damagescale*(MomentumTransfer/(Thinker.TICRATE*a.mass)),CVF_RELATIVE);
-				a.vel += dir*damagescale*(MomentumTransfer/(Thinker.TICRATE*a.mass));
-			}
-		}
-	}*/
-	
-	// Doom's explosions aren't fully 3D
-	Static void DoBlast(Actor Source, double ExplosionRadius, double MomentumTransfer)
-	{
-		BlockThingsIterator bi = BlockThingsIterator.Create(Source,ExplosionRadius);
-		While(bi.Next())
-		{
-			Actor a = bi.Thing;
-			If( !a || 
-				!a.bSHOOTABLE || 
-				!Source.CheckSight(a,0xf) || 
-				(a == Source) || 
-				(Source.Distance3D(a) > ExplosionRadius) || 
-				a.bCANNOTPUSH || 
-				(a.Mass >= 10000000))
-					Continue;
-			
-			Vector3 midpoint = a.Vec3Offset(0,0,a.height*0.5);
-			Vector3 dir = Level.Vec3Diff(Source.pos,midpoint);
-			double dist = max(1,dir.length());
-			double damagescale = 1-max(0,(dist-a.radius)/ExplosionRadius);
-			dir = dir/dist;
-			/*if ( (a is 'ShredCorpseHitbox') && a.target )
-				a.target.vel += dir*damagescale*(MomentumTransfer/(Thinker.TICRATE*a.target.mass));
-			else*/ a.vel += dir*damagescale*(MomentumTransfer/(Thinker.TICRATE*a.mass));
-		}
-	}
-	
 	static bool SphereIntersect( Actor a, Vector3 p, double radius )
 	{
 		Vector3 ap = p+level.Vec3Diff(p,a.pos);	// portal-relative actor position
