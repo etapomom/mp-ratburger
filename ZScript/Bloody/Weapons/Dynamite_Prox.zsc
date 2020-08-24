@@ -23,8 +23,51 @@ Class BloodyDynamite_Prox : BloodyThrowable
 		TNTD A 1 A_WeaponReady2();
 		Loop;
 	Fire:
-		TNTD A 1 A_WeaponReady2(WRF_DISABLE);
-		Goto Ready;
+		TNTD A 1 { A_WeaponReady2(WRF_DISABLE, 2, 2);		ThrowableCharge(); }
+		TNTD A 1 { A_WeaponReady2(WRF_DISABLE, 8, 10);		ThrowableCharge(); }
+		TNTD A 1 { A_WeaponReady2(WRF_DISABLE, 10, 14);		ThrowableCharge(); }
+		TNTD A 1 { A_WeaponReady2(WRF_DISABLE, 12, 18); 	ThrowableCharge(); }
+		TNTD A 1 { A_WeaponReady2(WRF_DISABLE, 14, 26); 	ThrowableCharge(); }
+		TNTD A 1 { A_WeaponReady2(WRF_DISABLE, 16, 32); 	ThrowableCharge(); }
+		TNTD A 1 { A_WeaponReady2(WRF_DISABLE, 17, 36); 	ThrowableCharge(); }
+		TNTD A 1 { A_WeaponReady2(WRF_DISABLE, 18, 38); 	ThrowableCharge(); }
+		TNTD A 1 { A_WeaponReady2(WRF_DISABLE, 19, 39); 	ThrowableCharge(); }
+		TNTD A 1 { A_WeaponReady2(WRF_DISABLE, 19.5, 39.5); ThrowableCharge(); }
+	Hold:
+		TNTD A 1 
+		{ 
+			A_WeaponReady2(WRF_DISABLE, 20, 40); 	
+			ThrowableCharge();
+		}
+		TNTD A 0 A_ReFire("Hold");
+		Goto Release;
+	Release:
+		TNTD A 1 A_WeaponReady2(WRF_DISABLE, 22, 48);
+		TNTD A 1 A_WeaponReady2(WRF_DISABLE, 24, 56);
+		TNTD A 1 A_WeaponReady2(WRF_DISABLE, 26, 64);
+		TNTD A 1 A_WeaponReady2(WRF_DISABLE, 28, 72);
+		TNTD A 0
+		{
+			ClearOverlay(RightFX1);
+			ClearOverlay(RightGlow1);
+			
+			Double a, b, c, d;
+			[a, b, c, d] = GetThrowInfo();
+			Actor p;
+			p = A_FireProjectile("ProximityBombProj", 0, 0, 4, 0, 0, 0);
+			If(p) 
+			{
+				p.A_ChangeVelocity(Cos(Pitch) * (a * 0.8), 0, b * 0.125, CVF_RELATIVE);
+				p.Vel.Z += Sin(Pitch) * (-a); // Blessed
+			}
+			A_SetInventory("ThrowableForce", 0);
+			
+			//A_ChangeVelocity(Cos(Pitch) * 20, 0, Sin(Pitch) * -20, CVF_Relative)
+		}
+		Goto Throw;
+	BringBack:
+		TNTD A 0 Overlay(RightFX1, "Radar");
+		Goto BringBack_Raise;
 	
 	Radar:
 		TNT1 A 0 Overlay(RightGlow1, "RadarGlow", 0.75);
@@ -33,5 +76,110 @@ Class BloodyDynamite_Prox : BloodyThrowable
 	RadarGlow:
 		TNTD BBBCCCDDDEEEFFFBBBBBB 1 BRIGHT OverlayOffset(RightGlow1, (0, 0));
 		Loop;
+	}
+}
+
+Class ProximityBombProj : Actor
+{
+	Default
+	{
+		Radius 8;
+		Height 16;
+		Speed 4;
+		Scale 0.35;
+		Gravity 0.5;
+		DamageFunction (0);
+		Seesound "ThrowTNT";
+		PROJECTILE;
+		+BOUNCEONWALLS
+		+BOUNCEONCEILINGS
+		+CANBOUNCEWATER
+		+FORCEXYBILLBOARD
+		+ALLOWBOUNCEONACTORS
+		+BOUNCEONACTORS
+		+RANDOMIZE
+		+DONTSPLASH
+		+DONTGIB
+		+USEBOUNCESTATE
+		-NOGRAVITY
+		BounceCount 1337;
+		BounceFactor 0.9;
+		DamageType "Explosive";
+		Obituary "%o caught a Dynamite stick.";
+	}
+	
+	int timer;
+	bool armed, done;
+	Action void ProximityRadar()
+	{
+		If(Invoker.Armed && !Invoker.Done)
+		{
+			BlockThingsIterator bi = BlockThingsIterator.Create(Self, 128);
+			While(bi.Next())
+			{
+				Actor a = bi.Thing;
+				If( !a ||														// Nothing
+					!self.CheckSight(a, 0xf) || 								// Not through walls
+					(a == self) || 												// Not on self
+					//(Target && (a == Target) && Blood_ProximitySelf) ||			// Not on owner, if enabled
+					(self.Distance3D(a) > 128) )								// Too far
+						Continue;
+				
+				If(a.bSHOOTABLE)
+				{
+					A_StartSound("ProximityAlarm", CHAN_WEAPON, CHANF_OVERLAP, 1.0, 0.9);
+					Invoker.Timer = 10;
+					Invoker.Done = True;
+					Break;
+				}
+			}
+		}
+	}
+	
+	Action void ProximityArm() 
+	{ 
+		A_StartSound("ProximityArmed", CHAN_WEAPON, CHANF_OVERLAP, 1.0, 1.0); 
+		Invoker.Armed = True; 
+	}
+	
+	Vector2 prevspeed;
+	Override void Tick()
+	{
+		Super.Tick();
+		prevspeed = (vel.x, vel.y);
+		
+		If(WaterLevel)
+		{
+			Vel.X *= 0.99; Vel.Y *= 0.99;
+			If(Self.Pos.Z > Self.FloorZ) Vel.Z -= 0.5;
+		}
+	}
+	
+	States
+	{
+	Bounce.Actor:
+		TNT1 A 0 ProximityArm();
+	Bounce:
+		TNT1 A 0 A_StartSound("TNTBounce", CHAN_BODY, CHANF_OVERLAP, 1.0);
+	Spawn:
+		TNT1 A 0 NoDelay A_Jump(8, 1, 2, 3, 4, 5, 6, 7, 8);
+		Loop;
+	See:
+		TNTY FGHIJKLM 4 { If(Invoker.Armed && !Invoker.Done) ProximityRadar(); }
+		Loop;
+	Death:
+		TNTY A 0 { Scale = (.8, .8); A_ChangeVelocity(invoker.prevspeed.x, invoker.prevspeed.y, 0, 0); A_StartSound("TNTBounce", CHAN_BODY, CHANF_OVERLAP, 1.0); }
+		TNTY AAAABBBBCCCCDDDDEEEE 1
+		{
+			If(Self.Pos.Z <= FloorZ) Vel *= 0.975;
+			If(Vel == (0, 0, 0) && !Invoker.Armed && !Invoker.Done) ProximityArm();
+			If(Invoker.Armed && !Invoker.Done) ProximityRadar();
+			If(Invoker.Done && Invoker.Timer-- <= 0) Return ResolveState("Explode");
+			Return ResolveState(Null);
+		}
+		Goto Death+1;
+	Explode:
+		TNT1 A 35 A_SpawnItemEx("NapalmExplosionDamage", flags: SXF_TRANSFERPOINTERS);
+		Stop;
 	}
 }

@@ -118,6 +118,13 @@ $RollOff NapalmHit4 1024 2048
 
 ZippoOpen				ZIPOPEN
 ZippoStrike				ZIPLIGHT
+Throw					TNTTOSS
+Fuse					TNTFUSE
+$RANDOM TNTBounce { TNTBounce1 TNTBounce2 }
+TNTBounce1				FFDIRT1
+TNTBounce2				FFDIRT2
+ProximityArmed			PROXARM
+ProximityAlarm			LSRBMBWN
 SprayFire				SPRAYFIR
 Spray/Throw				TNTTOSS
 Spray/Open				ZIPOPEN

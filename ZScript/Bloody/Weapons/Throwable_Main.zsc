@@ -21,9 +21,9 @@ Class BloodyThrowable : BloodWeapon
 		int d;
 		Let p = Invoker.Owner;
 		
-		a = ((GetForce() / 2) * 48.) / 100.;
-		b = ((GetForce() / 4) * 25.) / 100.;
-		c = ((p.Vel.X * 0.5) * (sin(p.Angle))) + ((p.Vel.Y * 0.5) * (cos(p.Angle)));
+		a = .20 * (GetForce() * 100.) / 70.;
+		b = .85 * (GetForce() * 100.) / 70.;
+		c = (p.Vel.X * (sin(p.Angle))) + (p.Vel.Y * (cos(p.Angle)));
 		d = 1;
 		Return a, b, c, d;
 	}
@@ -74,10 +74,10 @@ Class BloodyThrowable : BloodWeapon
 		If(CheckWater()) A_SelectWeapon("ThrowableHolstered");
 	}
 	
-	Action void ThrowableCharge(double x, double y)
+	Action void ThrowableCharge()
 	{
 		If(PressingFire()) A_GiveInventory("ThrowableForce", 1);
-		
+		Else A_TakeInventory("ThrowableForce", 1);
 	}
 }
 
@@ -89,11 +89,11 @@ Class ThrowableForce : Inventory
 		+INVENTORY.UNTOSSABLE
 		+INVENTORY.UNCLEARABLE
 		Inventory.Amount 1;
-		Inventory.MaxAmount 100;
+		Inventory.MaxAmount 70;
 		Inventory.InterHubAmount 0;
 	}
 	
-	Override void DoEffect()
+	/*Override void DoEffect()
 	{
 		Super.DoEffect();
 		If(!Owner || !Owner.Player) Return;
@@ -104,7 +104,7 @@ Class ThrowableForce : Inventory
 			Owner.Player.ReadyWeapon.GetClassName() != 'BloodyDynamite_Remote' ||
 			Owner.Player.ReadyWeapon.GetClassName() != 'BloodySprayCan')
 				Owner.A_SetInventory("ThrowableForce", 0);
-	}
+	}*/
 }
 
 Class ThrowableHolstered : TempWeapon {}
