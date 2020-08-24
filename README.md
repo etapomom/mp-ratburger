@@ -9,10 +9,11 @@ This mod aims to recreate Blood's gameplay in GZDoom using the voodoo arts of ZS
 - Shotgun
 - Tommygun
 - Napalm Launcher
+- Proximity Dynamite (kinda?)
+- Blood's gore
 ### In progress
 - Flaregun
 - Dynamite
-- Proximity Dynamite
 - Remote Dynamite
 - Spray Can
 - Tesla Cannon
