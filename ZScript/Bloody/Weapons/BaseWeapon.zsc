@@ -65,7 +65,7 @@ Class BloodWeapon : DoomWeapon
 		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 39, 48);
 		"####" "#" 0
 		{
-			For(int i = 100; i != 150; i++)
+			For(int i = 100; i < 300; i++)
 			{
 				A_Overlay(i,"StopOverlay");
 				A_Overlay(i + 500,"StopOverlay");

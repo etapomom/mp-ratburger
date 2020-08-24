@@ -1,0 +1,248 @@
+Class RatburgerBloodChunkBase : Actor
+{
+	Default
+	{
+		PROJECTILE;
+		+ROLLSPRITE
+		+ROLLCENTER
+		+BOUNCEONFLOORS
+		+BOUNCEONCEILINGS
+		+BOUNCEONWALLS
+		+CANBOUNCEWATER
+		+USEBOUNCESTATE
+		+MOVEWITHSECTOR
+		+INTERPOLATEANGLES
+		+RIPPER
+		+BLOODLESSIMPACT
+		+PAINLESS
+		-NOGRAVITY
+		Gravity 1.0;
+		BounceFactor 0.67;
+		WallBounceFactor 0.67;
+		BounceCount 2;
+		Scale 0.4;
+		Radius 4;
+		Height 8;
+		BloodType "ChunkBlood";
+		Tag "Giblet";
+		Health 20;
+	}
+	
+	const BLOODY = SXF_NOCHECKPOSITION|SXF_TRANSFERTRANSLATION;
+	
+	Override int SpecialMissileHit(Actor victim) { Return 1; }
+	
+	Override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		A_SetRoll(frandom(0,359));
+	}
+	
+	bool boom; vector2 prevvel;
+	Override void Tick()
+	{
+		Super.Tick();
+		If(Abs(Vel.Length()) > 32) { boom = 1; }
+		
+		If(bCORPSE == 1)
+		{
+			A_StartSound("Gibbed", CHAN_BODY, CHANF_OVERLAP, 0.25, 2.0);
+			SetStateLabel("Null");
+		}
+		
+		prevvel.x = vel.x;
+		prevvel.y = vel.y;
+		
+		If(Self.Pos.Z <= FloorZ) Vel *= 0.99;
+	}
+	
+	Action Void A_ChunkFly()
+	{
+		If(bSPRITEFLIP)
+		{
+			A_SetRoll(Roll - Max(10,Max(Abs(Vel.X),Abs(Vel.Y))), SPF_INTERPOLATE);
+		}
+		
+		If(!bSPRITEFLIP)
+		{	
+			A_SetRoll(Roll + Max(10,Max(Abs(Vel.X),Abs(Vel.Y))), SPF_INTERPOLATE);
+		}
+	}
+	
+	States
+	{
+	Flight:
+		"####" "#" 1 A_ChunkFly();
+		Loop;
+	Bounce:
+		"####" "#" 0
+		{
+			A_SprayDecal("BloodSplat",32);
+			A_SetRoll(frandom(0,359));
+			If(Invoker.Boom)
+			{
+				A_StartSound("Gibbed", CHAN_BODY, CHANF_OVERLAP, 0.25, 2.0);
+				CVar PoolChance = Cvar.FindCVar("BB_PoolChance");
+				A_SpawnItemEx("RatburgerBloodPool",0,0,0,0,0,0,0,BLOODY|SXF_TRANSFERPOINTERS, Ratburg_Gore_PoolChance * 32);
+				For(int i = 0; i != 8; i++)
+				{
+					Double VX = Vel.X * 0.5;
+					Double VY = Vel.Y * 0.5;
+					A_SpawnItemEx("RatburgerBloodChunk1b",0,0,Invoker.Height * 0.5,vx+frandom(-6,6),vy+frandom(-6,6),invoker.vel.z+frandom(4,12),frandom(0,359),BLOODY|SXF_TRANSFERPOINTERS,0);
+				}
+				Return ResolveState("Null");
+			}
+			A_StartSound("GibletSplat", CHAN_BODY, CHANF_OVERLAP, 0.5, 2.0);
+			Return ResolveState(Null);
+		}
+		"####" "#" 0 A_Jump(256,"Spawn");
+		Stop;
+	Death:
+		"####" E 0 { Vel = (prevvel.x, prevvel.y, 0); }
+		"####" E 700 
+		{ 
+			A_SetTics(140 * Ratburg_Gore_GibDuration);
+			
+			A_SpawnItemEx("RatburgerCorpseHitbox",0,0,0,0,0,0,0,BLOODY|SXF_TRANSFERTRANSLATION|SXF_ORIGINATOR|SXF_SETMASTER,0);
+			A_SpawnItemEx("RatburgerBloodPool",0,0,0,0,0,0,0,BLOODY|SXF_TRANSFERPOINTERS, Ratburg_Gore_PoolChance * 32);
+			bROLLSPRITE = 0; 
+			bNOTIMEFREEZE = 1; 
+		}
+		"####" E 1 A_FadeOut(0.01,1);
+		Wait;
+	}
+}
+
+Class RatburgerBloodChunkBaseFlippable : RatburgerBloodChunkBase
+{
+	Override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		bSPRITEFLIP = random(0,1);
+	}
+}
+
+Class RatburgerBloodChunk1 : RatburgerBloodChunkBaseFlippable
+{
+	Default { Scale 0.5; }
+	
+	Override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		Scale.X *= frandom(0.95,1.05);
+		Scale.Y = Scale.X;
+	}
+	
+	States
+	{
+	Spawn:
+		C5_A A 0 NoDelay A_Jump(255,1,2,3,4);
+		C5_A ABCD 0;
+		Goto Super::Flight;
+	}
+}
+
+Class RatburgerBloodChunk1b : RatburgerBloodChunk1
+{
+	Default
+	{
+		-BOUNCEONFLOORS
+		-BOUNCEONCEILINGS
+		-BOUNCEONWALLS
+		-CANBOUNCEWATER
+		-USEBOUNCESTATE
+		Scale 0.25;
+	}
+	States
+	{
+	Death:
+		TNT1 A 0;
+		TNT1 A 0 A_SpawnItemEx("RatburgerBloodChunk1bImpact",0,0,0,0,0,0,0,BLOODY|SXF_TRANSFERPOINTERS,0);
+		Stop;
+	}
+}
+
+Class RatburgerBloodChunk1bImpact : RatburgerBloodTrailer
+{
+	States
+	{
+	Spawn:
+	Death:
+		B3_A ABCDE 5;
+		Stop;
+	}
+}
+
+Class RatburgerGibber : Actor
+{
+	Default { +NOINTERACTION }
+	
+	Override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		If(!Master) { Destroy(); Return; }
+	}
+	
+	States
+	{
+	Spawn:
+		TNT1 A 5 NoDelay
+		{
+			bool chunk;
+			Chunk = (self is 'RatburgerBloodChunk1');
+			
+			int maxp;
+			Double vx = Master.Vel.X * 0.5;
+			Double vy = Master.Vel.Y * 0.5;
+			Double vz = Master.Vel.Z * 0.5;
+			
+			Master.A_StartSound("Gibbed", CHAN_BODY, CHANF_OVERLAP, 1.0, 0.85);
+			
+			MaxP = Max(16, Master.Radius) * (Master.bBOSS?4:1);
+			For(int i = 0; i != MaxP; i++)
+			{		
+				Actor b = Master.Spawn("RatburgerBloodTrailer", Master.Pos + (0, 0, Master.Height * 0.5));
+				If(b)
+				{
+					If(Random[Blood](0, 255) < Ratburg_Gore_TrailChance * 32)
+						b.Destroy();
+					
+					If(Chunk)
+						b.SetOrigin(Master.Pos + (	FRandom[Blood](-Master.Radius, Master.Radius), 
+													FRandom[Blood](-Master.Radius, Master.Radius), 
+													FRandom[Blood](8, Master.DeathHeight * 2)), 0);
+					
+					b.Master = Master;
+					b.Vel.X += VX + FRandom[Blood](-3, 3);
+					b.Vel.Y += VY + FRandom[Blood](-3, 3);
+					b.Vel.Z += VZ + FRandom[Blood](4, 12);
+					b.Translation = Master.Translation;
+				}
+				
+				For(int a = 0; a != 2; a++)
+				{
+					Actor a;
+					If(Chunk) 	a = Master.Spawn("RatburgerBloodChunk1b", Master.Pos + (0, 0, Master.Height * 0.5));
+					Else 		a = Master.Spawn("RatburgerBloodChunk1", Master.Pos + (0, 0, Master.Height * 0.5));
+					If(a)
+					{
+						If(Random[Blood](0, 255) < Ratburg_Gore_TrailChance * 32)
+							a.Destroy();
+						
+						If(Chunk)
+							a.SetOrigin(Master.Pos + (	FRandom[Blood](-Master.Radius, Master.Radius), 
+														FRandom[Blood](-Master.Radius, Master.Radius),
+														FRandom[Blood](8, Master.DeathHeight * 2)), 0);
+						
+						a.Master = Master;
+						a.Vel.X += VX + FRandom[Blood](-3, 3);
+						a.Vel.Y += VY + FRandom[Blood](-3, 3);
+						a.Vel.Z += VZ + FRandom[Blood](4, 12);
+						b.Translation = Master.Translation;
+					}
+				}
+			}
+		}
+		Stop;
+	}
+}

@@ -16,6 +16,11 @@ Version "4.4"
 #Include "ZScript/Bloody/CorpseHitbox.zsc"
 #Include "ZScript/Bloody/FireDOT.zsc"
 
+#Include "ZScript/Bloody/Gore/Handler.zsc"
+#Include "ZScript/Bloody/Gore/Blood.zsc"
+#Include "ZScript/Bloody/Gore/Gibs.zsc"
+#Include "ZScript/Bloody/Gore/Hitbox.zsc"
+
 #Include "ZScript/Bloody/Weapons/BaseWeapon.zsc"
 #Include "ZScript/Bloody/Weapons/Casings.zsc"
 #Include "ZScript/Bloody/Weapons/Pitchfork.zsc"

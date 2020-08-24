@@ -1,0 +1,35 @@
+Class RatburgerBloodHandler : EventHandler
+{
+	Override void CheckReplacement(ReplaceEvent e)
+	{
+		Super.CheckReplacement(e);
+		If(	Ratburg_Gore_Toggle && 
+			((e.Replacee == 'Blood') || 
+			(e.Replacee == 'BloodSplatter') || 
+			(e.Replacee == 'AxeBlood'))) 
+				e.Replacement = 'RatburgerBlood';
+	}
+	
+	Override void WorldThingDied(WorldEvent e)
+	{
+		If(!e.Thing) Return;
+		
+		If(	e.Thing && !e.Thing.bNOBLOOD && 
+			!(e.Thing is 'RatburgerBloodChunk1') && !(e.Thing is 'RatburgerBloodChunk1b') && !(e.Thing is 'RatburgerCorpseHitbox') &&
+			((e.Inflictor && e.Inflictor.bEXTREMEDEATH) || (e.Thing.Health < e.Thing.GetGibHealth())) && (!e.Inflictor || !e.Inflictor.bNOEXTREMEDEATH))
+			{
+				Let b = e.Thing.Spawn("RatburgerGibber", e.Thing.pos);
+				b.Master = e.Thing;
+				b.Translation = e.Thing.BloodColor;
+				b.Vel = e.Thing.Vel;
+			}
+		
+		If(e.Thing && !e.Thing.Player)
+		{
+			Let a = e.Thing.Spawn("RatburgerCorpseHitbox", e.Thing.pos);
+			a.Master = e.Thing;
+			a.Translation = e.Thing.BloodColor;
+			a.Vel = e.Thing.Vel;
+		}
+	}
+}

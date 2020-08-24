@@ -101,6 +101,7 @@ Class ProximityBombProj : Actor
 		+DONTSPLASH
 		+DONTGIB
 		+USEBOUNCESTATE
+		+EXTREMEDEATH
 		-NOGRAVITY
 		BounceCount 1337;
 		BounceFactor 0.9;

@@ -1,0 +1,173 @@
+Class RatburgerCorpseHitbox : Actor
+{
+	Default
+	{
+		+SHOOTABLE
+		+SOLID
+		+CANPASS
+		+THRUSPECIES
+		+SLIDESONWALLS
+		Radius 1;
+		Height 1;
+		Health 1;
+		Gravity 0.5;
+		Species "RatburgerCorpseHitbox";
+		Tag "Carcass";
+	}
+	
+	Bool Chunk, Ready; Int cnt;
+	
+	Override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		
+		If(!Master) { Destroy(); Return; }
+		
+		If(Master is 'RatburgerBloodChunk1') Chunk = True;
+		
+		A_SetSize(Master.Radius, Master.Height); 
+		
+		Health = Master.GetSpawnHealth() * Ratburg_Gore_CarcassHP;
+		Mass = Master.Mass * 0.5;
+		bNOBLOOD = Master.Default.bNOBLOOD;
+	}
+	
+	Override void Tick()
+	{
+		Super.Tick();
+		
+		If(!Master) { Destroy(); Return; }
+		
+		If(Master && Master.bISMONSTER && Master.Health > 0) 
+		{ 
+			Destroy(); 
+			Return; 
+		}
+		
+		If(IsFrozen()) Return;
+		
+		If(Ready == False || (Master.bBOSS && !Ratburg_Gore_GibBosses) || bNOBLOOD || !Ratburg_Gore_GibCorpses)
+			Health = Master.GetSpawnHealth() * Ratburg_Gore_CarcassHP;
+		
+		If(!Ready && (Master.Tics <= -1 || (cnt++ >= 18 && !Master.bBOSS)))
+		{
+			Ready = True;
+			If(!Chunk)
+				A_SetSize(Master.Radius, Master.DeathHeight);
+		}
+		
+		If(!Ratburg_Gore_GibCorpses)
+			bSHOOTABLE = 0;
+		
+		Else
+			bSHOOTABLE = 1;
+		
+		If(Health > 0) Master.SetOrigin(Self.Pos,1); 
+	}
+	
+	Override void Die(Actor source, Actor inflictor, int DmgFlags, Name MeansOfDeath)
+	{
+		Super.Die(Source, Inflictor, DmgFlags, MeansOfDeath);
+		
+		If(Chunk == True)
+		{		
+			For(int i = 0; i != 4; i++)
+			{
+				Actor a = Master.Spawn("RatburgerBloodChunk1b", Master.Pos);
+				If(a)
+				{
+					If(Random[Blood](0, 255) < Ratburg_Gore_TrailChance * 32)
+						a.Destroy();
+					
+					a.Vel.X = (Self.Vel.X * 0.5) + FRandom[Blood](-6, 6);
+					a.Vel.Y = (Self.Vel.Y * 0.5) + FRandom[Blood](-6, 6);
+					a.Vel.Z = (Self.Vel.Z * 0.5) + FRandom[Blood](4, 12);
+				}
+			}
+			
+			Master.bCORPSE = 1;
+		}
+		
+		Else
+		{
+			Actor g = Master.Spawn("RatburgerGibber", Master.Pos);
+			g.Master = Master;
+			g.Translation = Translation;
+		}
+	}
+	
+	Override int DamageMObj(Actor inflictor, Actor source, int Damage, Name mod, int Flags, double Angle)
+	{
+		If((Master && Master.bBOSS && !Ratburg_Gore_GibBosses) || bNOBLOOD || (!Chunk && !Ratburg_Gore_GibCorpses) || !Ready)
+			Return Super.DamageMObj(Inflictor, Source, 0, Mod, Flags, Angle);
+		
+		Return Super.DamageMObj(Inflictor, Source, Damage, MOD, Flags, Angle);
+	}
+	
+	Override bool CanCollideWith(Actor Other, Bool Passive)
+	{
+		If(!Ratburg_Gore_GibCorpses || Chunk)
+			Return False;
+		
+		If(Passive)
+		{
+			If(!Other)
+				Return False;
+				
+			If(Other && Other == Master)
+				Return False;
+			
+			If(Other && Other.Player)
+				Return False;
+			
+			If(Other && Other.bISMONSTER)
+				Return False;
+			
+			If(Other && !Other.bMISSILE)
+				Return False;
+			
+			If(Other && Other is 'RatburgerCorpseHitbox')
+				Return False;
+				
+			If(Other && Other.GetSpecies() == 'RatburgerCorpseHitbox')
+				Return False;
+			
+			If(Other && Other != Master && Other.bMISSILE)
+				Return True;
+		}
+		
+		If(!Passive)
+		{
+			If(!Other)
+				Return False;
+				
+			If(Other && Other == Master)
+				Return False;
+			
+			If(Other && Other.Player)
+				Return False;
+			
+			If(Other && Other.bISMONSTER)
+				Return False;
+			
+			If(Other && Other is 'RatburgerCorpseHitbox')
+				Return False;
+				
+			If(Other && Other.GetSpecies() == 'RatburgerCorpseHitbox')
+				Return False;
+		}
+		
+		Return True;
+	}
+	
+	States
+	{
+	Spawn:
+		TNT1 A 1;
+		Loop;
+	Death:
+		TNT1 A 1;
+		TNT1 A 1 { Master.SetStateLabel("Null"); }
+		Stop;
+	}
+}

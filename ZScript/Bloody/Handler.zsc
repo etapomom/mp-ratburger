@@ -144,8 +144,9 @@ Class BloodyHandler : EventHandler
 	
 	Override Void WorldThingDamaged(WorldEvent e)
 	{
-		If(e.Thing && e.DamageSource && e.DamageSource.Player && e.DamageSource != e.Thing)
-			e.DamageSource.A_GiveInventory("BeastMeter", e.Damage);
+		If(	e.Thing && e.DamageSource && e.DamageSource.Player && e.DamageSource != e.Thing &&
+			!(e.Thing is 'RatburgerBloodChunk1') && !(e.Thing is 'RatburgerBloodChunk1b') && !(e.Thing is 'RatburgerCorpseHitbox'))
+				e.DamageSource.A_GiveInventory("BeastMeter", e.Damage);
 	}
 }
 

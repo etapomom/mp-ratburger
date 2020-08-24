@@ -69,6 +69,6 @@ gameinfo
 	dimamount = 0.9
 	playerclasses = "ChosenPlayer"
 	quitsound = "TchernobogDeath"
-	addeventhandlers = "BloodyHandler"
+	addeventhandlers = "BloodyHandler", "RatburgerBloodHandler"
 	statusbarclass = "bloodystatusbar"
 }

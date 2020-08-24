@@ -93,18 +93,18 @@ Class ThrowableForce : Inventory
 		Inventory.InterHubAmount 0;
 	}
 	
-	/*Override void DoEffect()
+	Override void DoEffect()
 	{
 		Super.DoEffect();
 		If(!Owner || !Owner.Player) Return;
 		
-		If(	Owner.Player.ReadyWeapon.GetClassName() != 'BloodyThrowable' ||
-			Owner.Player.ReadyWeapon.GetClassName() != 'BloodyDynamite' ||
-			Owner.Player.ReadyWeapon.GetClassName() != 'BloodyDynamite_Prox' ||
-			Owner.Player.ReadyWeapon.GetClassName() != 'BloodyDynamite_Remote' ||
+		If(	Owner.Player.ReadyWeapon.GetClassName() != 'BloodyThrowable' &&
+			Owner.Player.ReadyWeapon.GetClassName() != 'BloodyDynamite' &&
+			Owner.Player.ReadyWeapon.GetClassName() != 'BloodyDynamite_Prox' &&
+			Owner.Player.ReadyWeapon.GetClassName() != 'BloodyDynamite_Remote' &&
 			Owner.Player.ReadyWeapon.GetClassName() != 'BloodySprayCan')
 				Owner.A_SetInventory("ThrowableForce", 0);
-	}*/
+	}
 }
 
 Class ThrowableHolstered : TempWeapon {}

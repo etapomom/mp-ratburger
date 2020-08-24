@@ -24,6 +24,7 @@ $Limit Ricochet 0
 $Limit Flesh 0
 
 BloodGround				BLUDSPLT
+GibletSplat				BDYPTIM2
 $Limit Gibbed 0
 $Limit BloodGround 0
 
