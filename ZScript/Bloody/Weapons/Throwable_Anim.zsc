@@ -80,20 +80,36 @@ Extend Class BloodyThrowable
 		TNTA D 1 OverlayOffset(Left, (17, -8.5));
 		TNTA D 1 OverlayOffset(Left, (18, -9));
 		TNTA D 1 OverlayOffset(Left, (19, -9.5));
-		TNTA DDDD 1 OverlayOffset(Left, (20, -10));
+		TNTA D 1 OverlayOffset(Left, (20, -10));
 	Lighter_Move_Down:
-		TNTA DDDD 1 OverlayOffset(Left, (20, -10));
-		TNTA D 1 OverlayOffset(Left, (19, -9.5));
-		TNTA D 1 OverlayOffset(Left, (18, -9));
-		TNTA D 1 OverlayOffset(Left, (17, -8.5));
-		TNTA D 1 OverlayOffset(Left, (16, -8));
-		TNTA D 1 OverlayOffset(Left, (14, -7));
-		TNTA D 1 OverlayOffset(Left, (12, -6));
-		TNTA D 1 OverlayOffset(Left, (8, -4));
-		TNTA D 1 OverlayOffset(Left, (4, -2));
-		TNTA D 1 OverlayOffset(Left, (2, -1));
-		TNTA D 0 OverlayOffset(Left, (0, 0));
+		TNTA D 1 OverlayOffset(Left, (20, -10));
+		TNTA D 1 OverlayOffset(Left, (18, -8));
+		TNTA D 1 OverlayOffset(Left, (12, -2));
+		TNTA D 1 OverlayOffset(Left, (4, 6));
+		TNTA D 1 OverlayOffset(Left, (-2, 16));
+		TNTA D 1 OverlayOffset(Left, (-8, 24));
+		TNTA D 1 OverlayOffset(Left, (-10, 30));
+		TNTA D 1 OverlayOffset(Left, (-12, 34));
+		TNTA D 1 OverlayOffset(Left, (-13, 36));
+		TNTA D 1 OverlayOffset(Left, (-13.5, 38));
+	Lighter_Hold_Down:
+		TNTA D 1 OverlayOffset(Left, (-14, 40));
+		Loop;
+	Lighter_Move_Reset:
+		TNTA D 1 OverlayOffset(Left, (-14, 40)); //OverlayOffset(Left, (-39, 48));
+		TNTA D 1 OverlayOffset(Left, (-11, 36));
+		TNTA D 1 OverlayOffset(Left, (-9, 28));
+		TNTA D 1 OverlayOffset(Left, (-7, 20));
+		TNTA D 1 OverlayOffset(Left, (-5, 12));
+		TNTA D 1 OverlayOffset(Left, (-3, 3));
 		Goto Lighter_Idle;
+		/*TNTA D 1 OverlayOffset(Left, (20, -10));
+		TNTA D 1 OverlayOffset(Left, (18, -9));
+		TNTA D 1 OverlayOffset(Left, (16, -8));
+		TNTA D 1 OverlayOffset(Left, (12, -6));
+		TNTA D 1 OverlayOffset(Left, (4, -2));
+		TNTA D 0 OverlayOffset(Left, (0, 0));
+		Goto Lighter_Idle;*/
 		
 	Lighter_Spark:
 		TNTA E 0 Overlay(LeftFX2, "Lighter_Fire");
@@ -118,20 +134,63 @@ Extend Class BloodyThrowable
 		TNTA D 1 BRIGHT;
 		Stop;
 	
+	ReleaseTheButton:
+		TNTC C 0 
+		{ 
+			A_StopSound(CHAN_WEAPON);
+			Actor x = Invoker.Owner.Spawn("DynamiteExplosion", Invoker.Owner.Pos + (0, 0, Invoker.Owner.Player.ViewHeight));
+			If(x) x.Target = Invoker.Owner;
+			Invoker.Owner.DamageMObj(Invoker.Owner, Invoker.Owner, 42069, 'Explosive', DMG_FORCED|DMG_THRUSTLESS, 0); 
+		}
+		TNTC C 0 
+		{
+			For(int i = 100; i < 300; i++) ClearOverlay(i);
+			Overlay(Left, "ReleaseTheButtonLeft");
+			Invoker.Timer = 0;
+			A_SetInventory("ThrowableForce", 0);
+		}
+		TNTC C 1 A_WeaponReady2(WRF_DISABLE);
+		TNTC C 1 A_WeaponReady2(WRF_DISABLE, 56, -16);
+		TNTC C 1 A_WeaponReady2(WRF_DISABLE, 112, -32);
+		TNTC C 1 A_WeaponReady2(WRF_DISABLE, 168, -64);
+		TNTC C 0 
+		{
+			A_GiveInventory("BloodyThrowable_Holstered", 1);
+			A_SelectWeapon("BloodyThrowable_Holstered");
+		}
+		Stop;
+	ReleaseTheButtonLeft:
+		TNTC D 1 OverlayOffset(Left, (0, 0));
+		TNTC D 1 OverlayOffset(Left, (-56, -16));
+		TNTC D 1 OverlayOffset(Left, (-112, -32));
+		TNTC D 1 OverlayOffset(Left, (-168, -64));
+		Stop;
+	
 	Throw:
 		TNTC A 0;
-		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 39, 48);
-		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 27, 36);
-		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 21, 28);
-		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 15, 20);
-		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 9, 12);
-		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 3, 3);
-		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 3, 3);
-		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 9, 12);
-		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 15, 20);
-		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 21, 28);
-		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 27, 36);
-		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 39, 48);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 56, 60);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 44, 52);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 32, 40);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 26, 32);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 20, 24);
+		TNTC B 0;
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 14, 16);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 8, 10);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 4, 6);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 2, 4);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 1, 3);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 0, 2);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 1, 3);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 2, 4);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 4, 6);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 8, 10);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 14, 16);
+		TNTC A 0;
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 20, 24);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 26, 32);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 32, 40);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 44, 52);
+		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 56, 60);
 		"####" "#" 0 A_Jump(256, "BringBack");
 		Stop;
 	
@@ -149,5 +208,133 @@ Extend Class BloodyThrowable
 		Loop;
 	
 	ClearLayer: TNT1 A 1; Stop;
+	}
+}
+
+Class DynamiteExplosion : Actor
+{
+	Default { +NOINTERACTION }
+	States
+	{
+	Spawn:
+		TNT1 A 5 NoDelay
+		{
+			A_RemoveMaster(RMVF_EVERYTHING);
+			
+			Let l = Spawn("DynamiteHitLight", Self.Pos);
+			l.Master = Self;
+			
+			A_SpawnItemEx("DynamiteExplosionFX", flags: SXF_NOCHECKPOSITION);
+			A_SpawnItemEx("DynamiteExplosionFX", flags: SXF_NOCHECKPOSITION);
+			
+			For(int i = 0; i < 6; i++)
+			{
+				A_SpawnItemEx("DynamiteExplosionAdd", 0, 0, 0, frandom(-2, 2), 0, frandom(-2, 2), frandom(0, 359), SXF_NOCHECKPOSITION);
+				For(int a = 0; a < 2; a++) 
+					A_SpawnItemEx("DynamiteShockwave", flags: SXF_NOCHECKPOSITION);
+			}
+			
+			A_StartSound("DynamiteHit", CHAN_WEAPON, CHANF_OVERLAP, 1.0, 0.5);
+			A_AlertMonsters();
+			A_Stop();
+			
+			For(int i = 0; i < 24; i++)
+			{
+				A_SpawnItemEx("DynamiteSmoke", 0,0,0, frandom[Rocket](-0.33, 0.33), 0, frandom[Rocket](-0.33, 0.33), frandom[Rocket](0, 359), SXF_NOCHECKPOSITION, 8);
+			}
+			
+			/*For(int a = 0; a < 100; a++)
+			{ 
+				A_SpawnParticle(DukeHandler.ColorPicker(0xffff73, 0xffde00, random[Rocket](1, 255), 1, 4),
+								SPF_FULLBRIGHT|SPF_RELATIVE,50,frandom(4,10),frandom(0,359),0,0,0,frandom(-4,4),frandom(-4,4),frandom(-1,8),0,0,-0.275,1.0,0.02,0.05); 
+			}*/
+			
+			Actor x = Spawn("DynamiteExplosionDamage", Self.Pos);
+			If(x) x.Target = Target;
+		}
+		Stop;
+	}
+}
+
+Class DynamiteExplosionDamage : SplashFunc
+{
+	Default
+	{
+		DamageType "Explosive";
+		SplashFunc.Setup 156, 128, 10, True;
+		SplashFunc.Multipliers .85, True;
+	}
+}
+
+Class DynamiteSmoke : SmokeFX
+{
+	Default
+	{
+		Alpha 0.25;
+		Scale 0.3;
+		SmokeFX.Changer 0.018, 0.005, 70;
+		Renderstyle "Translucent";
+		Translation "0:255=%[0.00,0.00,0.00]:[0.5,0.5,0.5]";
+	}
+}
+
+Class DynamiteShockwave : ShockwaveBase
+{
+	Default { Scale 0.7; Args 67, 1500, 0, 0; }
+	States
+	{
+	Spawn:
+		E5_A A 1 BRIGHT
+		{
+			A_FadeOut(0.067, 1);
+			Scale.X *= 1.15; Scale.Y = Scale.X;
+		}
+		Wait;
+	}
+}
+
+Class DynamiteExplosionFX : ExplosionFX5 { Default { Scale 1.33; } }
+Class DynamiteExplosionAdd : ExplosionFX1 { Default { Scale 1.5; } }
+
+Class DynamiteLight : DynamicLight
+{
+	int cnt;
+	Default
+	{
+		DynamicLight.Type "Point";
+		args 255,192,128,48;
+	}
+	
+	Override void Tick()
+	{
+		Super.Tick();
+		If(!Master) { Destroy(); Return; }
+		SetOrigin(Master.Pos,true);
+		If(IsFrozen()) Return;
+		args[LIGHT_INTENSITY] = 56 * frandom(0.95,1.05);
+	}
+}
+
+Class DynamiteHitLight : DynamicLight
+{
+	int cnt;
+	Default
+	{
+		DynamicLight.Type "Point";
+		args 255,192,128,64;
+	}
+	override void Tick()
+	{
+		Super.Tick();
+		If(master) SetOrigin(master.pos,true);
+		If(IsFrozen()) Return;
+		args[LIGHT_INTENSITY] += (12 - cnt);
+		If(cnt > 8)
+		{
+			args[LIGHT_RED] *= 0.8;
+			args[LIGHT_GREEN] *= 0.8;
+			args[LIGHT_BLUE] *= 0.8;
+		}
+		If(cnt++ > 35) Destroy();
 	}
 }

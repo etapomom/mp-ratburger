@@ -426,9 +426,11 @@ Class SplashFunc : Actor
 Class SplashFunc : Actor
 {
 	int edam, erad, etime, edam2, escale2;
-	bool hurtuser, noexplosion, nothrust;
+	bool hurtuser, noexplosion, nothrust, addz;
+	double thrustmul;
 	Property Setup : edam, erad, etime, hurtuser;
 	Property Extra : NoExplosion, NoThrust;
+	Property Multipliers : ThrustMul, AddZ;
 	
 	Default
 	{
@@ -436,6 +438,7 @@ Class SplashFunc : Actor
 		+EXTREMEDEATH
 		SplashFunc.Setup 128, 128, 8, True; 
 		SplashFunc.Extra False, False;
+		SplashFunc.Multipliers 1., True;
 	}
 	
 	bool doomexp;
@@ -446,7 +449,7 @@ Class SplashFunc : Actor
 		Super.PostBeginPlay();
 		If(!Target) { Destroy(); Return; }
 		
-		DoomExp = (GetCVar("Blood_DoomSplash") || ETime <= 1);
+		DoomExp = (GetCVar("Ratburg_DoomSplash") || ETime <= 1);
 		CurSize = ERad / ETime;
 		CurDam  = EDam / ETime;
 		FinalDam = EDam / ETime;
@@ -470,14 +473,14 @@ Class SplashFunc : Actor
 		{
 			If(DoomExp)
 			{
-				If(!NoExplosion) BloodyHandler.DoExplosion(Self, EDam, EDam * 960, ERad, ERad, DE_NOBLEED|DE_EXTRAZTHRUST, Default.DamageType, !HurtUser? Target : Null);
+				If(!NoExplosion) BloodyHandler.DoExplosion(Self, EDam, EDam * (960 * ThrustMul), ERad, ERad, DE_NOBLEED|AddZ?DE_EXTRAZTHRUST:0, Default.DamageType, !HurtUser? Target : Null);
 				If(!NoThrust) BloodyHandler.DoExplosion(Self, EDam, 0, ERad, ERad, DE_NOBLEED, Default.DamageType, HurtUser? Target : Null);
 				Done = True;
 			}
 			
 			Else
 			{
-				If(!NoExplosion) BloodyHandler.DoExplosion(Self, CurDam, (EDam / ETime) * 980, CurSize, CurSize, DE_NOBLEED|DE_EXTRAZTHRUST, Default.DamageType, !HurtUser? Target : Null);
+				If(!NoExplosion) BloodyHandler.DoExplosion(Self, CurDam, (EDam / ETime) * (960 * ThrustMul), CurSize, CurSize, DE_NOBLEED|AddZ?DE_EXTRAZTHRUST:0, Default.DamageType, !HurtUser? Target : Null);
 				If(!NoThrust) BloodyHandler.DoExplosion(Self, CurDam, 0, CurSize, CurSize, DE_NOBLEED, Default.DamageType, HurtUser? Target : Null);
 				
 				CurSize += ERad / ETime;

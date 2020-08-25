@@ -13,6 +13,7 @@ Version "4.4"
 
 #Include "ZScript/Bloody/Armor.zsc"
 #Include "ZScript/Bloody/MiscFX.zsc"
+#Include "ZScript/Bloody/ExplosionFX.zsc"
 #Include "ZScript/Bloody/CorpseHitbox.zsc"
 #Include "ZScript/Bloody/FireDOT.zsc"
 

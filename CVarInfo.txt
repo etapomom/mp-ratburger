@@ -11,6 +11,8 @@ server	bool	Ratburg_DoomSplash			= False;		// Explosions work like in Doom
 server	bool	Ratburg_Recoil				= False;		// Camera sway when doing stuff
 server	bool	Ratburg_MonsterFallDamage 	= True;			// Monsters take fall damage
 server	bool	Ratburg_PushableCorpses		= True;			// Corpses can be blasted by explosions
+server	int		Ratburg_DynamiteTrail		= 0;			// Dynamite trail - 0: disabled, 1: afterimage, 2: colored particles
+server	bool	Ratburg_ProximitySelf		= True;			// Proximity bombs detonating when their owner is near toggle
 
 server	bool	Ratburg_Gore_Toggle			= True;			// Blood's blood (heh) toggle
 server	int		Ratburg_Gore_TrailChance	= 6;			// Chance of spilling blood trails

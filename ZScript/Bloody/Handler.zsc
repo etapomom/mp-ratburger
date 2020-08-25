@@ -30,7 +30,7 @@ Class BloodyHandler : EventHandler
 	static void DoExplosion( Actor Source, double Damage, double MomentumTransfer, double ExplosionRadius, double FullDamageRadius = 0., int flags = 0, Name DamageType = '', Actor ignoreme = null )
 	{
 		// debug, display radius sphere
-		if ( blood_doomsplash )
+		if ( damage == 420 )
 		{
 			let s = Actor.Spawn("RadiusDebugSphere",Source.pos);
 			s.Scale *= ExplosionRadius;

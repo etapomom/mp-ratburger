@@ -20,10 +20,17 @@ Class BloodyDynamite : BloodyThrowable
 		Super.DoEffect();
 		If(!Owner || !Owner.Player || !(Owner.Player.ReadyWeapon == Self)) Return;
 		
-		If(CheckWater())
+		/*If(CheckWater())
 		{
-			
-		}
+			A_SetInventory("ThrowableForce", 0);
+			If(Timer)
+			{
+				double a, b, c, d;
+				[a, b, c, d] = GetThrowInfo();
+				
+				Timer = 0;
+			}
+		}*/
 	}
 	
 	States
@@ -45,46 +52,123 @@ Class BloodyDynamite : BloodyThrowable
 		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -17, -8.5);
 		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -18, -9);
 		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -19, -9.5);
-		TNTB AAAA 1 A_WeaponReady2(WRF_DISABLE, -20, -10);
 	LightTheFuse:
-		TNTB A 0 { Overlay(RightFX1, "FuseSparks"); A_StartSound("TNTFuse", CHAN_WEAPON, CHANF_OVERLAP, 1.0, 1.25); }
-		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -19, -9.5);
-		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -18, -9);
-		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -17, -8.5);
-		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -16, -8);
-		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -14, -7);
-		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -12, -6);
-		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -8, -4);
-		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -4, -2);
-		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -2, -1);
-		Wait;
+		TNTB A 0 { Overlay(RightFX1, "FuseSparks"); Invoker.SparkCycles = 0; Invoker.SparkY = 0; A_StartSound("TNTFuse", CHAN_WEAPON, CHANF_OVERLAP|CHANF_LOOP, 1.0, 1.25); }
+		TNTB AA 1 {A_WeaponReady2(WRF_DISABLE, -20, -10);	ThrowableCharge(); }
+		TNTB A 1 { A_WeaponReady2(WRF_DISABLE, -18, -8);	ThrowableCharge(); }
+		TNTB A 1 { A_WeaponReady2(WRF_DISABLE, -12, -2);	ThrowableCharge(); }
+		TNTB A 1 { A_WeaponReady2(WRF_DISABLE, -4, 6);		ThrowableCharge(); }
+		TNTB A 1 { A_WeaponReady2(WRF_DISABLE, 2, 16);		ThrowableCharge(); }
+		TNTB A 1 { A_WeaponReady2(WRF_DISABLE, 8, 24);		ThrowableCharge(); }
+		TNTB A 1 { A_WeaponReady2(WRF_DISABLE, 10, 30); 	ThrowableCharge(); }
+		TNTB A 1 { A_WeaponReady2(WRF_DISABLE, 12, 34); 	ThrowableCharge(); }
+		TNTB A 1 { A_WeaponReady2(WRF_DISABLE, 13, 36); 	ThrowableCharge(); }
+		TNTB A 1 { A_WeaponReady2(WRF_DISABLE, 13.5, 38); 	ThrowableCharge(); }
+	Hold:
+		TNTB A 0 A_JumpIf(Invoker.Timer >= 175, "ReleaseTheButton");
+		TNTB A 1 
+		{ 
+			A_WeaponReady2(WRF_DISABLE, 14, 40); 	
+			ThrowableCharge();
+		}
+		TNTB A 0 
+		{
+			If(Invoker.Owner.Health > 0) A_ReFire("Hold");
+			Else Return ResolveState("Hold");
+			Return ResolveState(Null);
+		}
+		Goto Release;
+	Release:
+		TNTB A 1 A_WeaponReady2(WRF_DISABLE, 14.25, 56);
+		TNTB A 1 A_WeaponReady2(WRF_DISABLE, 14.5, 72);
+		TNTD A 0 A_GunFlash();
+		Goto Throw;
+	Flash:
+		TNT1 A 4 { ClearOverlay(RightFX1); ClearOverlay(RightGlow1); }
+		TNTD A 0 { ThrowDynamite("DynamiteProj"); A_StopSound(CHAN_WEAPON); }
+		Stop;
+	BringBack:
+		TNTB A 0 Overlay(Left, "Lighter_Move_Reset");
+		Goto BringBack_Raise;
 	
 	FuseSparks:
-		TNTB BBB 1 BRIGHT { If(Random[Blood](0, 255) > 224)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .1)); }
-		TNTB CCC 1 BRIGHT { If(Random[Blood](0, 255) > 220)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .15)); }
-		TNTB DDD 1 BRIGHT { If(Random[Blood](0, 255) > 216)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .2)); }
-		TNTB EEE 1 BRIGHT { If(Random[Blood](0, 255) > 212)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .25)); }
-		TNTB FFF 1 BRIGHT { If(Random[Blood](0, 255) > 208)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .3)); }
-		TNTB GGG 1 BRIGHT { If(Random[Blood](0, 255) > 204)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .35)); }
-		TNTB HHH 1 BRIGHT { If(Random[Blood](0, 255) > 200)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .4)); }
-		TNTB III 1 BRIGHT { If(Random[Blood](0, 255) > 196)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .45)); }
-		TNTB JJJ 1 BRIGHT { If(Random[Blood](0, 255) > 192)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .5)); }
-		TNTB KKK 1 BRIGHT { If(Random[Blood](0, 255) > 188)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .55)); }
-		TNTB LLL 1 BRIGHT { If(Random[Blood](0, 255) > 184)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .6)); }
-		TNTB MMM 1 BRIGHT { If(Random[Blood](0, 255) > 180)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .65)); }
-		TNTB NNN 1 BRIGHT { If(Random[Blood](0, 255) > 176)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .7)); }
-		TNTB OOO 1 BRIGHT { If(Random[Blood](0, 255) > 172)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .75)); }
-		TNTB PPP 1 BRIGHT { If(Random[Blood](0, 255) > 168)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .8)); }
-		TNTB QQQ 1 BRIGHT { If(Random[Blood](0, 255) > 164)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .85)); }
-		TNTB RRR 1 BRIGHT { If(Random[Blood](0, 255) > 160)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .9)); }
-		TNTB SSS 1 BRIGHT { If(Random[Blood](0, 255) > 156)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .95)); }
-		TNTB TTT 1 BRIGHT { If(Random[Blood](0, 255) > 156)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .95)); }
-		TNTB UUU 1 BRIGHT { If(Random[Blood](0, 255) > 156)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .95)); }
-		TNTB VVV 1 BRIGHT { If(Random[Blood](0, 255) > 156)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .95)); }
-		TNTB WWW 1 BRIGHT { If(Random[Blood](0, 255) > 156)	Overlay(RightGlow1, "FuseGlow", frandom[Blood](.05, .95)); }
+		TNTB BBB 1 BRIGHT OverlayOffset(RightFX1, (.67*Invoker.SparkCycles, Invoker.SparkY));
+		TNTB CCC 1 BRIGHT OverlayOffset(RightFX1, (.67*Invoker.SparkCycles, Invoker.SparkY));
+		TNT1 A 0
+		{
+			If(Invoker.SparkCycles == 13) Invoker.SparkY += 1;
+			If(Invoker.SparkCycles == 21) Invoker.SparkY += 1;
+			If(Invoker.SparkCycles++ >= 25) Return ResolveState("FuseSparksEnd");
+			Return ResolveState(Null);
+		}
+		Loop;
+	FuseSparksEnd:
+		TNTB DDD 1 BRIGHT OverlayOffset(RightFX1, (0, 0), False); // 54
+		TNTB EEE 1 BRIGHT OverlayOffset(RightFX1, (0, 0)); // 55
+		TNTB FFF 1 BRIGHT OverlayOffset(RightFX1, (0, 0)); // 56
+		TNTB GGG 1 BRIGHT OverlayOffset(RightFX1, (0, 0)); // 57
+		TNTB HHH 1 BRIGHT OverlayOffset(RightFX1, (0, 0)); // 58
+		TNTB III 1 BRIGHT OverlayOffset(RightFX1, (0, 0)); // 58
 		Stop;
 	FuseGlow:
 		TNTB A 1 BRIGHT;
 		Stop;
+	}
+	
+	int SparkCycles;
+	double SparkY;
+}
+
+Class DynamiteProj : DynamiteBase
+{
+	Override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		Timer = Max(0, (175 - Stamina));
+		A_StartSound("TNTFuse", CHAN_WEAPON, CHANF_OVERLAP|CHANF_LOOP, 1.0, 0.95);
+	}
+	
+	Override void Tick()
+	{
+		super.Tick();
+		If(IsFrozen()) Return; 
+		DynamiteTrail("Yellow");
+		If(Timer-- <= 0) 
+		{ 
+			SetStateLabel("Explode"); 
+			Timer = 0x7FFFFFFF;
+			Vel = (0,0,0);
+			bTHRUACTORS = TRUE;
+		}
+	}
+	
+	Action Void DynamiteBounce()
+	{
+		If((Tracer && !(Tracer is 'RatburgerBloodChunk1') && !(Tracer is 'RatburgerBloodChunk1b') && !(Tracer is 'RatburgerCorpseHitbox')) || !bAMBUSH)
+			Invoker.Timer = 0;
+	}
+	
+	States
+	{
+	Bounce.Actor:
+		TNT1 A 0 DynamiteBounce();
+	Bounce:
+		TNT1 A 0 { DynamiteBounce(); A_StartSound("TNTBounce", CHAN_BODY, CHANF_OVERLAP, 1.0); }
+	Spawn:
+		TNT1 A 0 NoDelay A_Jump(8, 1, 2, 3, 4, 5, 6, 7, 8);
+		Loop;
+	See:
+		TNTX DEFGHIJK 4 BRIGHT;
+		Loop;
+	Death:
+		TNTX A 0 DynamiteBounce();
+		TNTY A 0 { A_ChangeVelocity(invoker.prevspeed.x * 1.25, invoker.prevspeed.y * 1.25, 0, 0); A_StartSound("TNTBounce", CHAN_BODY, CHANF_OVERLAP, 1.0); }
+		TNTX ABC 4 BRIGHT
+		{
+			If(Self.Pos.Z <= FloorZ) Vel *= 0.99;
+			If(Invoker.Timer-- <= 0) Return ResolveState("Explode");
+			Return ResolveState(Null);
+		}
+		Goto Death+1;
 	}
 }

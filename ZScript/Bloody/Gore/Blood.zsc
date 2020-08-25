@@ -50,7 +50,7 @@ Class RatburgerBlood : Blood
 				a.Destroy();
 		}
 		
-		For(int i = 0; i != 40; i++)
+		For(int i = 0; i != 8; i++)
 		{
 			Actor b = Spawn("RatburgerBloodParticles", Self.Pos);
 			If(b)
@@ -61,9 +61,9 @@ Class RatburgerBlood : Blood
 				If(Target)
 				{
 					b.Target = Self.Target;
-					b.Vel.X = (Target.Vel.X * 0.5) + FRandom[Blood](-4, 4);
-					b.Vel.Y = (Target.Vel.Y * 0.5) + FRandom[Blood](-4, 4);
-					b.Vel.Z = (Target.Vel.Z * 0.5) + FRandom[Blood](0, 8);
+					b.Vel.X = Target.Vel.X + FRandom[Blood](-4, 4);
+					b.Vel.Y = Target.Vel.Y + FRandom[Blood](-4, 4);
+					b.Vel.Z = Target.Vel.Z + FRandom[Blood](0, 8);
 				}
 				
 				Else
@@ -94,7 +94,7 @@ Class ChunkBlood : RatburgerBlood
 	
 	Override void PostBeginPlay()
 	{
-		Super.PostBeginPlay();
+		Actor.PostBeginPlay();
 		
 		For(int i = 0; i != 8; i++)
 		{
@@ -151,7 +151,7 @@ Class RatburgerBloodTrailer : Actor
 		TNT1 A 0;
 		TNT1 A 0
 		{
-			If(Random[Blood](0, 255) < 128) A_StartSound("BloodGround", CHAN_BODY, CHANF_OVERLAP, 0.5, 2.0);
+			If(Random[Blood](0, 255) < 128) A_StartSound("BloodGround", CHAN_BODY, CHANF_OVERLAP, 0.5, 1.5);
 			A_SpawnItemEx("RatburgerBloodPool",0,0,0,0,0,0,0,BLOODY|SXF_TRANSFERPOINTERS, Ratburg_Gore_PoolChance * 32);
 		}
 		B3_A ABCDE 5;
@@ -205,13 +205,14 @@ Class RatburgerBloodTrail : RatburgerBloodTrailer
 Class RatburgerBloodParticles : RatburgerBloodTrail
 {
 	Default { Scale 0.25; Gravity 0.67; Alpha 0.75; }
-	Override void PostBeginPlay() { Super.PostBeginPlay(); Timer = -17; }
+	Override void PostBeginPlay() { Super.PostBeginPlay(); Timer = -35; }
 	States
 	{
 	Spawn:
 		B5_A B 1;
 		Loop;
 	Death:
+		TNT1 A 0 { If(Random[Blood](0, 3) < 3) A_SpawnItemEx("RatburgerSmallerBloodPool",0,0,0,0,0,0,0,BLOODY|SXF_TRANSFERPOINTERS, Ratburg_Gore_PoolChance * 32); }
 		B3_A ABCDE 5 { Scale = (.33, .33); Invoker.Timer = 0; }
 		Stop;
 	}
@@ -254,7 +255,33 @@ Class RatburgerBloodPool : Actor
 	Spawn:
 		B5_A AAAAAAAAAAAAAAA 1 { Scale.X += frandom(0.035, 0.055); Scale.Y = Scale.X; }
 	Spawned:
-		B5_A A 700 A_SetTics(140 * Ratburg_Gore_GibDuration);
+		B5_A A 700 A_SetTics(105 * Ratburg_Gore_GibDuration);
+		B5_A A 1 A_FadeOut(0.01, 1);
+		Wait;
+	}
+}
+
+Class RatburgerSmallBloodPool : RatburgerBloodPool
+{
+	States
+	{
+	Spawn:
+		B5_A AAAAAAAAAAAAAAA 1 { Scale.X += frandom(0.015, 0.025); Scale.Y = Scale.X; }
+	Spawned:
+		B5_A A 700 A_SetTics(70 * Ratburg_Gore_GibDuration);
+		B5_A A 1 A_FadeOut(0.01, 1);
+		Wait;
+	}
+}
+
+Class RatburgerSmallerBloodPool : RatburgerBloodPool
+{
+	States
+	{
+	Spawn:
+		B5_A AAAAAAAAAAAAAAA 1 { Scale.X += frandom(0.006, 0.0125); Scale.Y = Scale.X; }
+	Spawned:
+		B5_A A 700 A_SetTics(35 * Ratburg_Gore_GibDuration);
 		B5_A A 1 A_FadeOut(0.01, 1);
 		Wait;
 	}

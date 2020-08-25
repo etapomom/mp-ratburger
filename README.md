@@ -28,6 +28,7 @@ This mod aims to recreate Blood's gameplay in GZDoom using the voodoo arts of ZS
 ### Credits
 - Sprites mostly from Monolith.
 - Sounds too.
+- [Dzierzan](https://forum.zdoom.org/viewtopic.php?f=37&t=60457) for some of the weapon sprites.
 - [Marisa Kirisame](https://github.com/OrdinaryMagician) for the DoExplosion and DoKnockback functions.
 - [KeksDose](https://forum.zdoom.org/viewtopic.php?f=105&t=64566) for libeye.
 - If I forgot to credit someone, I'm sorry, just tell me and I'll add you to this list.

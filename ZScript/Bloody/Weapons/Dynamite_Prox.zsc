@@ -23,16 +23,10 @@ Class BloodyDynamite_Prox : BloodyThrowable
 		TNTD A 1 A_WeaponReady2();
 		Loop;
 	Fire:
-		TNTD A 1 { A_WeaponReady2(WRF_DISABLE, 2, 2);		ThrowableCharge(); }
-		TNTD A 1 { A_WeaponReady2(WRF_DISABLE, 8, 10);		ThrowableCharge(); }
-		TNTD A 1 { A_WeaponReady2(WRF_DISABLE, 10, 14);		ThrowableCharge(); }
-		TNTD A 1 { A_WeaponReady2(WRF_DISABLE, 12, 18); 	ThrowableCharge(); }
-		TNTD A 1 { A_WeaponReady2(WRF_DISABLE, 14, 26); 	ThrowableCharge(); }
+		TNTD A 1 { A_WeaponReady2(WRF_DISABLE, 5, 10);		ThrowableCharge(); }
+		TNTD A 1 { A_WeaponReady2(WRF_DISABLE, 9, 18); 		ThrowableCharge(); }
 		TNTD A 1 { A_WeaponReady2(WRF_DISABLE, 16, 32); 	ThrowableCharge(); }
-		TNTD A 1 { A_WeaponReady2(WRF_DISABLE, 17, 36); 	ThrowableCharge(); }
-		TNTD A 1 { A_WeaponReady2(WRF_DISABLE, 18, 38); 	ThrowableCharge(); }
-		TNTD A 1 { A_WeaponReady2(WRF_DISABLE, 19, 39); 	ThrowableCharge(); }
-		TNTD A 1 { A_WeaponReady2(WRF_DISABLE, 19.5, 39.5); ThrowableCharge(); }
+		TNTD A 1 { A_WeaponReady2(WRF_DISABLE, 19, 38); 	ThrowableCharge(); }
 	Hold:
 		TNTD A 1 
 		{ 
@@ -42,29 +36,14 @@ Class BloodyDynamite_Prox : BloodyThrowable
 		TNTD A 0 A_ReFire("Hold");
 		Goto Release;
 	Release:
-		TNTD A 1 A_WeaponReady2(WRF_DISABLE, 22, 48);
-		TNTD A 1 A_WeaponReady2(WRF_DISABLE, 24, 56);
-		TNTD A 1 A_WeaponReady2(WRF_DISABLE, 26, 64);
-		TNTD A 1 A_WeaponReady2(WRF_DISABLE, 28, 72);
-		TNTD A 0
-		{
-			ClearOverlay(RightFX1);
-			ClearOverlay(RightGlow1);
-			
-			Double a, b, c, d;
-			[a, b, c, d] = GetThrowInfo();
-			Actor p;
-			p = A_FireProjectile("ProximityBombProj", 0, 0, 4, 0, 0, 0);
-			If(p) 
-			{
-				p.A_ChangeVelocity(Cos(Pitch) * (a * 0.8), 0, b * 0.125, CVF_RELATIVE);
-				p.Vel.Z += Sin(Pitch) * (-a); // Blessed
-			}
-			A_SetInventory("ThrowableForce", 0);
-			
-			//A_ChangeVelocity(Cos(Pitch) * 20, 0, Sin(Pitch) * -20, CVF_Relative)
-		}
+		TNTD A 1 A_WeaponReady2(WRF_DISABLE, 28, 56);
+		TNTD A 1 A_WeaponReady2(WRF_DISABLE, 36, 72);
+		TNTD A 0 A_GunFlash();
 		Goto Throw;
+	Flash:
+		TNT1 A 4 { ClearOverlay(RightFX1); ClearOverlay(RightGlow1); }
+		TNTD A 0 ThrowDynamite("ProximityBombProj");
+		Stop;
 	BringBack:
 		TNTD A 0 Overlay(RightFX1, "Radar");
 		Goto BringBack_Raise;
@@ -79,87 +58,68 @@ Class BloodyDynamite_Prox : BloodyThrowable
 	}
 }
 
-Class ProximityBombProj : Actor
+Class ProximityBombProj : DynamiteBase 
 {
-	Default
+	Override void PostBeginPlay()
 	{
-		Radius 8;
-		Height 16;
-		Speed 4;
-		Scale 0.35;
-		Gravity 0.5;
-		DamageFunction (0);
-		Seesound "ThrowTNT";
-		PROJECTILE;
-		+BOUNCEONWALLS
-		+BOUNCEONCEILINGS
-		+CANBOUNCEWATER
-		+FORCEXYBILLBOARD
-		+ALLOWBOUNCEONACTORS
-		+BOUNCEONACTORS
-		+RANDOMIZE
-		+DONTSPLASH
-		+DONTGIB
-		+USEBOUNCESTATE
-		+EXTREMEDEATH
-		-NOGRAVITY
-		BounceCount 1337;
-		BounceFactor 0.9;
-		DamageType "Explosive";
-		Obituary "%o caught a Dynamite stick.";
+		Super.PostBeginPlay();
+		If(bAMBUSH) Timer = 35;
 	}
 	
-	int timer;
-	bool armed, done;
+	bool armed, done, hastened;
 	Action void ProximityRadar()
 	{
 		If(Invoker.Armed && !Invoker.Done)
 		{
-			BlockThingsIterator bi = BlockThingsIterator.Create(Self, 128);
+			BlockThingsIterator bi = BlockThingsIterator.Create(Self, 64);
 			While(bi.Next())
 			{
 				Actor a = bi.Thing;
 				If( !a ||														// Nothing
 					!self.CheckSight(a, 0xf) || 								// Not through walls
 					(a == self) || 												// Not on self
-					//(Target && (a == Target) && Blood_ProximitySelf) ||			// Not on owner, if enabled
-					(self.Distance3D(a) > 128) )								// Too far
+					(Target && (a == Target) && !Ratburg_ProximitySelf) ||		// Not on owner, if enabled
+					(a && (a is 'RatburgerBloodChunk1')) ||
+					(a && (a is 'RatburgerBloodChunk1b')) ||
+					(a && (a is 'RatburgerCorpseHitbox')) ||					// Not on gore objects
+					(a && (a.Health <= 0)) ||
+					(self.Distance3D(a) > 64) )									// Too far
 						Continue;
 				
 				If(a.bSHOOTABLE)
 				{
 					A_StartSound("ProximityAlarm", CHAN_WEAPON, CHANF_OVERLAP, 1.0, 0.9);
-					Invoker.Timer = 10;
+					Invoker.Timer = Invoker.Hastened?0:10;
 					Invoker.Done = True;
+					If(Invoker.Hastened) SetStateLabel("Explode");
 					Break;
 				}
 			}
 		}
 	}
 	
-	Action void ProximityArm() 
+	Action void ProximityArm(bool hasten = false) 
 	{ 
 		A_StartSound("ProximityArmed", CHAN_WEAPON, CHANF_OVERLAP, 1.0, 1.0); 
 		Invoker.Armed = True; 
+		If(hasten) Invoker.Hastened = True;
 	}
 	
-	Vector2 prevspeed;
 	Override void Tick()
 	{
-		Super.Tick();
-		prevspeed = (vel.x, vel.y);
-		
-		If(WaterLevel)
-		{
-			Vel.X *= 0.99; Vel.Y *= 0.99;
-			If(Self.Pos.Z > Self.FloorZ) Vel.Z -= 0.5;
-		}
+		super.Tick();
+		If(!IsFrozen()) DynamiteTrail("Green");
 	}
 	
 	States
 	{
 	Bounce.Actor:
-		TNT1 A 0 ProximityArm();
+		TNT1 A 0 
+		{
+			bool hasten;
+			hasten = (Tracer && !(Tracer is 'RatburgerBloodChunk1') && !(Tracer is 'RatburgerBloodChunk1b') && !(Tracer is 'RatburgerCorpseHitbox'));
+			ProximityArm(hasten);
+		}
 	Bounce:
 		TNT1 A 0 A_StartSound("TNTBounce", CHAN_BODY, CHANF_OVERLAP, 1.0);
 	Spawn:
@@ -169,18 +129,15 @@ Class ProximityBombProj : Actor
 		TNTY FGHIJKLM 4 { If(Invoker.Armed && !Invoker.Done) ProximityRadar(); }
 		Loop;
 	Death:
-		TNTY A 0 { Scale = (.8, .8); A_ChangeVelocity(invoker.prevspeed.x, invoker.prevspeed.y, 0, 0); A_StartSound("TNTBounce", CHAN_BODY, CHANF_OVERLAP, 1.0); }
+		TNTY A 0 { Scale = (.8, .8); A_ChangeVelocity(invoker.prevspeed.x * 1.25, invoker.prevspeed.y * 1.25, 0, 0); A_StartSound("TNTBounce", CHAN_BODY, CHANF_OVERLAP, 1.0); }
 		TNTY AAAABBBBCCCCDDDDEEEE 1
 		{
-			If(Self.Pos.Z <= FloorZ) Vel *= 0.975;
-			If(Vel == (0, 0, 0) && !Invoker.Armed && !Invoker.Done) ProximityArm();
+			If(Self.Pos.Z <= FloorZ) Vel *= 0.99;
+			If(Invoker.Timer-- <= -18 && !Invoker.Armed && !Invoker.Done) ProximityArm();
 			If(Invoker.Armed && !Invoker.Done) ProximityRadar();
 			If(Invoker.Done && Invoker.Timer-- <= 0) Return ResolveState("Explode");
 			Return ResolveState(Null);
 		}
 		Goto Death+1;
-	Explode:
-		TNT1 A 35 A_SpawnItemEx("NapalmExplosionDamage", flags: SXF_TRANSFERPOINTERS);
-		Stop;
 	}
 }

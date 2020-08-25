@@ -1,0 +1,138 @@
+Class ExplosionFXBase : Actor
+{
+	Default
+	{
+		+NOINTERACTION
+		+NOGRAVITY
+		+FORCEXYBILLBOARD
+		+ROLLSPRITE
+		//+ROLLCENTER
+		RenderStyle "Add";
+		Scale 1.25;
+	}
+	
+	Override Void PostBeginPlay() 
+	{ 
+		Super.PostBeginPlay(); 
+		A_SetRoll(frandom(0,359)); 
+		Scale.X *= frandom(0.975,1.025); 
+		Scale.Y = Scale.X; 
+		bSPRITEFLIP = random(0, 1);
+	}
+	
+	States
+	{
+	Spawn:
+		TNT1 A 35;
+		Stop;
+	}
+}
+
+Class SmokeFX : Actor
+{
+	Double Changer1, Changer2, Changer3;
+	Property Changer : Changer1, Changer2, Changer3;
+	
+	Default
+	{
+		+FORCEXYBILLBOARD
+		+NOINTERACTION
+		+ROLLSPRITE
+		RenderStyle "Add";
+		SmokeFX.Changer 0.0145, 0.01, 100;
+		Scale 0.001;
+		//Translation "0:255=%[0.00,0.00,0.00]:[0.50,0.50,0.50]";
+	}
+	
+	Override Void PostBeginPlay() 
+	{ 
+		Super.PostBeginPlay(); 
+		Roll = frandom(0,359);
+		Scale.X *= frandom(0.5, 1.5); 
+		Scale.Y = Scale.X;
+		Alpha += frandom(-0.05, 0.05);
+		bSPRITEFLIP = random(0, 1); 
+	}
+	
+	double Scaler;
+	int Cycles;
+	
+	States
+	{
+	Spawn:
+		SMK_ J 0;
+		Goto Go;
+	Go:
+		"####" "#" 1
+		{
+			Invoker.Scaler = Invoker.Changer1 * (Invoker.Changer3 - Invoker.Cycles);
+			Invoker.Scaler = Clamp(Invoker.Scaler, 1.01, Invoker.Changer1 * Invoker.Changer3);
+			A_FadeOut(Invoker.Changer2, 1);
+			Scale.X *= Invoker.Scaler; 
+			Scale.Y = Scale.X;
+			Invoker.Cycles++;
+			//A_SetAngle(Angle+0.45,SPF_INTERPOLATE);
+		}
+		Wait;
+	}
+}
+
+Class ExplosionFX1 : ExplosionFXBase
+{
+	States
+	{
+	Spawn:
+		E1_A AABBCCDDEEFFGGHHIIJJ 1 BRIGHT NoDelay { Scale.X *= 1.0075; Scale.Y = Scale.X; }
+		Stop;
+	}
+}
+
+Class ExplosionFX2 : ExplosionFXBase
+{
+	States
+	{
+	Spawn:
+		E2_A AABBCCDDEEFFGGHHIIJJKKLLMMNOPQR 1 BRIGHT NoDelay { Scale.X *= 1.0075; Scale.Y = Scale.X; }
+		Stop;
+	}
+}
+
+Class ExplosionFX3 : ExplosionFXBase
+{
+	States
+	{
+	Spawn:
+		E3_A AABBCCDDEEFFGGHHIIJJKKLLMM 1 BRIGHT NoDelay { Scale.X *= 1.0075; Scale.Y = Scale.X; }
+		Stop;
+	}
+}
+
+Class ExplosionFX4 : ExplosionFXBase
+{
+	States
+	{
+	Spawn:
+		E4_A AABBCCDDEEFFGGHHIIJJKKLLMMNOPQR 1 BRIGHT NoDelay { Scale.X *= 1.0075; Scale.Y = Scale.X; }
+		Stop;
+	}
+}
+
+Class ExplosionFX5 : ExplosionFXBase
+{
+	States
+	{
+	Spawn:
+		E6_A ABCDEFGHIJKLMNOPQRSTUVWXYZ 1 BRIGHT NoDelay { Scale.X *= 1.0075; Scale.Y = Scale.X; }
+		Stop;
+	}
+}
+
+Class ExplosionFX6 : ExplosionFXBase
+{
+	States
+	{
+	Spawn:
+		E7_A AABBCCDDEEFFGGHHIIJJKKLLMMNOPQ 1 BRIGHT NoDelay { Scale.X *= 1.0075; Scale.Y = Scale.X; }
+		Stop;
+	}
+}

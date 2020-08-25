@@ -4,6 +4,7 @@ Class BloodyThrowable : BloodWeapon
 	
 	bool water, intozippo;
 	double force;
+	int timer;
 	
 	void KeepLighter()
 	{
@@ -21,10 +22,10 @@ Class BloodyThrowable : BloodWeapon
 		int d;
 		Let p = Invoker.Owner;
 		
-		a = .20 * (GetForce() * 100.) / 70.;
+		a = .28 * (GetForce() * 100.) / 70.;
 		b = .85 * (GetForce() * 100.) / 70.;
 		c = (p.Vel.X * (sin(p.Angle))) + (p.Vel.Y * (cos(p.Angle)));
-		d = 1;
+		d = Invoker.Timer;
 		Return a, b, c, d;
 	}
 	
@@ -71,13 +72,34 @@ Class BloodyThrowable : BloodWeapon
 	Action void ThrowableReady(int flags = 0, double x = 0, double y = 0)
 	{
 		A_WeaponReady2(flags, x, y);
-		If(CheckWater()) A_SelectWeapon("ThrowableHolstered");
+		If(CheckWater()) A_SelectWeapon("BloodyThrowable_Holstered");
 	}
 	
 	Action void ThrowableCharge()
 	{
 		If(PressingFire()) A_GiveInventory("ThrowableForce", 1);
 		Else A_TakeInventory("ThrowableForce", 1);
+		If(Invoker.Owner.Player.ReadyWeapon is 'BloodyDynamite') Invoker.Timer++;
+	}
+	
+	Action void ThrowDynamite(Class<Actor> cls, bool alt = false)
+	{	
+		Double a, b, c, d;
+		[a, b, c, d] = GetThrowInfo();
+		Actor p;
+		p = A_FireProjectile(cls, 0, 0, 4, 0, 0, 0);
+		If(p) 
+		{
+			p.Speed = 4;
+			p.A_ChangeVelocity(Cos(Pitch) * (a * 0.85), 0, Max(2, b * 0.155), CVF_RELATIVE);
+			p.Vel.Z += Sin(Pitch) * (-a); // Blessed
+			p.bNOGRAVITY = False;
+			p.Gravity = 0.5;
+			p.bAMBUSH = alt;
+			p.Stamina = d;
+		}
+		A_SetInventory("ThrowableForce", 0);
+		Invoker.Timer = 0;
 	}
 }
 
@@ -107,4 +129,102 @@ Class ThrowableForce : Inventory
 	}
 }
 
-Class ThrowableHolstered : TempWeapon {}
+Class BloodyThrowable_Holstered : TempWeapon {}
+
+Class DynamiteBase : Actor
+{
+	Default
+	{
+		Radius 8;
+		Height 16;
+		Speed 4;
+		Scale 0.35;
+		Gravity 0.5;
+		DamageFunction (0);
+		Seesound "ThrowTNT";
+		PROJECTILE;
+		+BOUNCEONWALLS
+		+BOUNCEONCEILINGS
+		+CANBOUNCEWATER
+		+FORCEXYBILLBOARD
+		+ALLOWBOUNCEONACTORS
+		+BOUNCEONACTORS
+		+RANDOMIZE
+		+DONTSPLASH
+		+DONTGIB
+		+USEBOUNCESTATE
+		+EXTREMEDEATH
+		+HITTRACER
+		-NOGRAVITY
+		BounceCount 1337;
+		BounceFactor 0.9;
+		DamageType "Explosive";
+		Obituary "%o caught a Dynamite stick.";
+	}
+	
+	int timer;
+	bool exploded;
+	
+	Action void DynamiteTrail(Color col)
+	{
+		If(!Ratburg_DynamiteTrail || Invoker.InStateSequence(CurState, ResolveState("Death"))) Return;
+		If(Ratburg_DynamiteTrail == 1)
+		{
+			Let a = Spawn("DynamiteAfterimage", Invoker.Pos);
+			a.Master 	= Invoker;
+			a.Scale 	= Invoker.Scale;
+			a.Sprite 	= Invoker.Sprite;
+			a.Frame 	= Invoker.Frame;
+		}
+		If(Ratburg_DynamiteTrail == 2)
+			A_SpawnParticle(col,SPF_FULLBRIGHT|SPF_RELATIVE,70,16,0,-8,0,0,0,0,0,0,0,0,0.75,0,-0.5);
+	}
+	
+	Vector2 prevspeed;
+	Override void Tick()
+	{
+		Super.Tick();
+		prevspeed = (vel.x, vel.y);
+		If(Exploded) SetStateLabel("Null");
+		
+		If(IsFrozen()) Return;
+		
+		If(WaterLevel)
+		{
+			Vel.X *= 0.99; Vel.Y *= 0.99;
+			If(Self.Pos.Z > Self.FloorZ) Vel.Z -= 0.5;
+		}
+	}
+	
+	States
+	{
+	Explode:
+		TNT1 A 0
+		{ 
+			A_StopSound(CHAN_WEAPON);
+			Invoker.Timer = 0x7FFFFFFF;
+			A_SpawnItemEx("DynamiteExplosion", flags: SXF_TRANSFERPOINTERS|SXF_SETMASTER|SXF_ORIGINATOR);
+			Return ResolveState("Null");
+			Return ResolveState(Null);
+		}
+		TNT1 A 5;
+		Stop;
+	}
+}
+
+Class DynamiteAfterimage : Actor
+{
+	Default
+	{ 
+		+NOINTERACTION 
+		+FORCEXYBILLBOARD
+		Renderstyle "Translucent";
+		Alpha 0.5;
+	}
+	States
+	{
+	Spawn:
+		"####" "#" 1 NoDelay A_FadeOut(0.025, 1);
+		Wait;
+	}
+}

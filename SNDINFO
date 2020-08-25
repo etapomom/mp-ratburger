@@ -25,6 +25,7 @@ $Limit Flesh 0
 
 BloodGround				BLUDSPLT
 GibletSplat				BDYPTIM2
+$Limit GibletSplat 0
 $Limit Gibbed 0
 $Limit BloodGround 0
 
@@ -126,14 +127,8 @@ TNTBounce1				FFDIRT1
 TNTBounce2				FFDIRT2
 ProximityArmed			PROXARM
 ProximityAlarm			LSRBMBWN
-SprayFire				SPRAYFIR
-Spray/Throw				TNTTOSS
-Spray/Open				ZIPOPEN
-Spray/Close				ZIPOPEN
-Spray/Light				ZIPLIGHT
-Doll/Stab				VOOSTAB
-Doll/Chant				VOOCHANT
-Doll/Laugh				VOOLAUGH
+DynamiteHit				TNTBOOM
+$Limit DynamiteHit 0
 
 LifeLeech				LALTFR1
 LeechBall				LLSPIT
