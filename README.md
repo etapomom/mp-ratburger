@@ -9,12 +9,13 @@ This mod aims to recreate Blood's gameplay in GZDoom using the voodoo arts of ZS
 - Shotgun
 - Tommygun
 - Napalm Launcher
-- Proximity Dynamite (kinda?)
+- Dynamite
+- Proximity Dynamite
+- Remote Dynamite
+- Tesla Cannon
 - Blood's gore
 ### In progress
 - Flaregun
-- Dynamite
-- Remote Dynamite
 - Spray Can
 - Tesla Cannon
 - Life Leech
@@ -31,6 +32,7 @@ This mod aims to recreate Blood's gameplay in GZDoom using the voodoo arts of ZS
 	- Also too complex and not that necessary imo, the growing explosion splash is in the mod tho.
 ### Currently known issues
 - Resurrecting after dying with the Akimbo Guns powerup on makes the weapon repeat the deselect animation over and over, manually selecting other weapons solves this.
+- Throwing your last Remote Dynamite will lock you out of detonating it but you will still be able to select it and see the bundle in your hands despite not having any ammo left, I'll improvise something hopefully without spaghettifying the code.
 ### Credits
 - Sprites mostly from Monolith.
 - Sounds too.
