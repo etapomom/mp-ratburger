@@ -1,14 +1,15 @@
 #Include "ZScript/Bloody/HUD/Mover.zsc"
 #Include "ZScript/Bloody/HUD/HUD.zsc"
 #Include "ZScript/Bloody/HUD/BeastHUD.zsc"
+#Include "ZScript/Bloody/HUD/TNTBar.zsc"
 
 Class BloodyStatusBar : BaseStatusBar
 {
-	HUDFont BigFont;
+	HUDFont BigFont, SmallFont;
 	Vector2 BaseSize;
 	BloodyHandler Event;
 	
-	DynamicValueInterpolator HealthNumber, BeastBar, BeastTimer;
+	DynamicValueInterpolator HealthNumber, BeastBar, BeastTimer, ThrowForce, ArmorNumber;
 	
 	ENum HudConst
 	{
@@ -27,10 +28,14 @@ Class BloodyStatusBar : BaseStatusBar
 		
 		Font fnt = "BLUDFONT";
 		BigFont = HUDFont.Create(fnt, fnt.GetCharWidth("0") + 1, true, 0, 0);
+		fnt = "SMALLFONT";
+		SmallFont = HUDFont.Create(fnt, fnt.GetCharWidth("0") + .5, true, 0, 0);
 		
 		HealthNumber = DynamicValueInterpolator.Create(100, 0.2, 1, 20);
+		ArmorNumber = DynamicValueInterpolator.Create(0, 0.2, 1, 20);
 		BeastBar = DynamicValueInterpolator.Create(0, 0.25, 1, 50);
 		BeastTimer = DynamicValueInterpolator.Create(0, 0.25, 1, 50);
+		ThrowForce = DynamicValueInterpolator.Create(0, 0.35, 1, 35);
 		
 		CurX = -160;
 		CurY = -120;
@@ -50,9 +55,13 @@ Class BloodyStatusBar : BaseStatusBar
 	{	
 		Super.Tick();
 		
+		Let Armor = CPlayer.mo.FindInventory("BasicArmor");
+		
 		HealthNumber.Update(CPlayer.mo.Health > 0 ? CPlayer.mo.Health : 0);
 		BeastBar.Update(GetAmountOnly("BeastMeter"));
 		BeastTimer.Update(GetAmountOnly("BloodbathTimer"));
+		ThrowForce.Update(GetAmountOnly("ThrowableForce"));
+		ArmorNumber.Update(Armor.Amount);
 		
 		Wiggle = (BeastTimer.GetValue() < GetAmountOnly("BloodbathTimer")) && Random[ChainWiggle](0, 1);
 		

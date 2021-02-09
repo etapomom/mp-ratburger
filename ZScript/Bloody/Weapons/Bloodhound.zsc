@@ -12,7 +12,7 @@ Class BloodhoundRevolver : BloodWeapon replaces Pistol
 		Weapon.AmmoUse 1;
 		Weapon.AmmoGive 12;
 		Weapon.AmmoUse2 1;
-		//Weapon.SisterWeapon "AkRevolver";
+		Weapon.SisterWeapon "AkBloodhound";
 		+WEAPON.NOAUTOFIRE
 		Scale 0.4;
 	}
@@ -170,7 +170,7 @@ Class BloodhoundRevolver : BloodWeapon replaces Pistol
 		A_QuakeEx(1,1,1,4,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:0.5);
 		A_StartSound("CultistShotgun", CHAN_WEAPON, CHANF_OVERLAP);
 		A_AlertMonsters();
-		A_FireWeapon(random[Blood](19,21), 1, 0.005, 'Normal', -4);
+		A_FireBullets(0.5, 0.5, -1, random[Blood](19,21), "BulletPuff", 0);
 	}
 }
 

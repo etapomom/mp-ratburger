@@ -10,7 +10,7 @@ Class BurnDOT : Inventory
 		+PAINLESS
 		+INVENTORY.UNTOSSABLE 
 		+INVENTORY.UNDROPPABLE 
-		Inventory.MaxAmount 3500; 
+		Inventory.MaxAmount 1400; 
 		DamageType "Fire";
 		BurnDOT.Colors 0xffff73, 0xffde00;
 	}
@@ -29,6 +29,10 @@ Class BurnDOT : Inventory
 			SpawnFireFX();
 			TakeDOT();
 		}
+		
+		/*Class<Inventory> cls = GetClassName();
+		Inventory item = Owner.FindInventory(cls);
+		If(item.Amount > item.MaxAmount) item.Amount = item.MaxAmount;*/
 	}
 	
 	Void Setup(bool Show = True)
@@ -38,7 +42,7 @@ Class BurnDOT : Inventory
 		If(Show) Owner.A_GiveInventory("BurnScreenOverlay", 1);
 	}
 	
-	Virtual Void DealDOT(int dam = 2, int interval = 5, bool LifeTap = False, double LifeTapMul = 1)
+	Virtual Void DealDOT(int dam = 1, int interval = 7, bool LifeTap = False, double LifeTapMul = 1)
 	{
 		If(Owner.CountInv(GetClassName()) % Interval == 0)
 		{
@@ -53,6 +57,8 @@ Class BurnDOT : Inventory
 					Owner.DamageMObj(Self, Master, (dam), Default.DamageType, DMG_THRUSTLESS, 0);
 					If(LifeTap && Master.Health < Master.GetSpawnHealth() && Master.Health > 0 && Owner.Health < OwnHP && Owner != Master)
 					{
+						// Developed this block for Tchernobog's curse thing and funsies.
+						
 						int togive = Min(Dam, Master.GetSpawnHealth() - Master.Health);
 						If(Master.Player) Master.GiveBody(ToGive * LifeTapMul, 100);
 						Else Master.Health += ToGive * LifeTapMul;
@@ -66,7 +72,7 @@ Class BurnDOT : Inventory
 	
 	Virtual Void SpawnFireFX(Class<Actor> cls = "FireFX", Class<Actor> light = "BurnLight", double pmul = 1, int fchance = 96)
 	{
-		int maxp = Max(4, (Owner.Radius * 0.2)) * (1 + (Owner.bBOSS)); maxp *= pmul;
+		int maxp = Max(2, (Owner.Radius * 0.15) * Owner.bBOSS?3:1); maxp *= pmul;
 		For(int i = 0; i < maxp; i++)
 		{
 			If(Random(0, 255) <= fchance && Cls != Null)
@@ -81,7 +87,7 @@ Class BurnDOT : Inventory
 					f.vel.z += frandom[BurnDOT](0.15, 1.);
 				}
 			}
-			If(Random[BurnDOT](0, 255) <= fchance) SpawnFireParticle();
+			If(Random[BurnDOT](0, 255) < fchance) SpawnFireParticle();
 		}
 		
 		/*If(Light != Null) 

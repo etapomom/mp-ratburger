@@ -442,8 +442,8 @@ Class SplashFunc : Actor
 	}
 	
 	bool doomexp;
-	int curdam, cursize, finaldam;
-	Double SizeDelta, DamageDelta;
+	int curdam, cursize, finaldam, mode;
+	Double SizeDelta, DamageDelta, thrust;
 	Override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
@@ -453,11 +453,16 @@ Class SplashFunc : Actor
 		CurSize = ERad / ETime;
 		CurDam  = EDam / ETime;
 		FinalDam = EDam / ETime;
+		Thrust = DoomExp ? (2400 / ETime) : 800;
+		Mode = 0;
+		If(NoExplosion) Mode = 1;
+		If(NoThrust) Mode = 2;
+		If(NoExplosion && NoThrust) Mode = 3;
 		
 		/*SizeDelta 	= (ERad - CurSize) / ETime;
 		DamageDelta = (FinalDam + CurDam) / ETime;*/
 		
-		A_QuakeEx(EDam / 64, EDam / 64, EDam / 64, ETime * ETime, 0, ERad * ETime, "", QF_RELATIVE|QF_SCALEDOWN, rollIntensity:EDam / 192);
+		A_QuakeEx(EDam / 64, EDam / 64, EDam / 64, ETime * ETime, 0, (ERad * ETime) * 2, "", QF_RELATIVE|QF_SCALEDOWN, rollIntensity:EDam / 192);
 	}
 	
 	int ticker;
@@ -473,15 +478,17 @@ Class SplashFunc : Actor
 		{
 			If(DoomExp)
 			{
-				If(!NoExplosion) BloodyHandler.DoExplosion(Self, EDam, EDam * (960 * ThrustMul), ERad, ERad, DE_NOBLEED|AddZ?DE_EXTRAZTHRUST:0, Default.DamageType, !HurtUser? Target : Null);
-				If(!NoThrust) BloodyHandler.DoExplosion(Self, EDam, 0, ERad, ERad, DE_NOBLEED, Default.DamageType, HurtUser? Target : Null);
-				Done = True;
+				If(Mode == 0 && Ticker == 0) BloodyHandler.DoExplosion(Self, EDam, EDam * (Thrust * ThrustMul), ERad, 0, AddZ?(DE_NOBLEED|DE_EXTRAZTHRUST):DE_NOBLEED, Default.DamageType, !HurtUser? Target : Null);
+				If(Mode == 1 && Ticker == 0) BloodyHandler.DoExplosion(Self, 0, EDam * (Thrust * ThrustMul), ERad, 0, AddZ?(DE_NOBLEED|DE_EXTRAZTHRUST):DE_NOBLEED, Default.DamageType, !HurtUser? Target : Null);
+				If(Mode == 2 && Ticker == 0) BloodyHandler.DoExplosion(Self, EDam, 0, ERad, 0, DE_NOBLEED, Default.DamageType, HurtUser? Target : Null);
+				Done = (Ticker > ETime);
 			}
 			
 			Else
 			{
-				If(!NoExplosion) BloodyHandler.DoExplosion(Self, CurDam, (EDam / ETime) * (960 * ThrustMul), CurSize, CurSize, DE_NOBLEED|AddZ?DE_EXTRAZTHRUST:0, Default.DamageType, !HurtUser? Target : Null);
-				If(!NoThrust) BloodyHandler.DoExplosion(Self, CurDam, 0, CurSize, CurSize, DE_NOBLEED, Default.DamageType, HurtUser? Target : Null);
+				If(Mode == 0) BloodyHandler.DoExplosion(Self, CurDam, (EDam / ETime) * (Thrust * ThrustMul), CurSize, CurSize, AddZ?(DE_NOBLEED|DE_EXTRAZTHRUST):DE_NOBLEED, Default.DamageType, !HurtUser? Target : Null);
+				If(Mode == 1) BloodyHandler.DoExplosion(Self, 0, (EDam / ETime) * (Thrust * ThrustMul), CurSize, CurSize, AddZ?(DE_NOBLEED|DE_EXTRAZTHRUST):DE_NOBLEED, Default.DamageType, !HurtUser? Target : Null);
+				If(Mode == 2) BloodyHandler.DoExplosion(Self, CurDam, 0, CurSize, CurSize, DE_NOBLEED, Default.DamageType, HurtUser? Target : Null);
 				
 				CurSize += ERad / ETime;
 				//CurDam  -= EDam / ETime;
@@ -706,7 +713,7 @@ Class BulletHit : BulletPuff replaces BulletPuff
 	Spawn:
 		TNT1 A 0 NoDelay
 		{
-			A_SprayDecal("BulletHit", -16., (0, 0, -2));
+			//A_SprayDecal("BulletHit", -16., (0, 0, -2));
 			
 			If(Random(0,9) >= 6) 
 			{ A_PlaySound("Ricochet",CHAN_BODY,1.0); }

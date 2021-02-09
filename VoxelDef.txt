@@ -1,4 +1,16 @@
 SWOFA = "Voxels/SHOTGUN.KVX"	{ Scale = 0.9 	}
 TOMMA = "Voxels/TOMMYGUN.KVX" 	{ Scale = 0.9 	}
-SAAPA = "Voxels/REVOLVER.KVX"	{ Scale = 1.5	}
+SAAPA = "Voxels/REVOLVER.KVX"	{ Scale = 1.33	}
 NAPLH = "Voxels/NAPALM.KVX"		{ Scale = 1.0	}
+TSLCA = "Voxels/SPEARGUN.KVX"	{ Scale = 1.15	}
+PWUPB = "Voxels/AKIMBO.KVX"		{ Scale = 0.9	}
+BULLA = "Voxels/AMMOTMMY.KVX"	{ Scale = 1.075	}
+SHLLA = "Voxels/AMMOSHOT.KVX"	{ Scale = 1.075	}
+TESAA = "Voxels/AMMOTSLA.KVX"	{ Scale = 1.05	}
+TNTPF = "Voxels/TNTBUNDL.KVX"	{ Scale = 0.75	}
+TNTPB = "Voxels/TNTBOX.KVX"		{ Scale = 1.0	}
+TNTPC = "Voxels/TNTPROX.KVX"	{ Scale = 1.0	}
+TNTPD = "Voxels/REMOTE.KVX"		{ Scale = 1.0	}
+SHLDE = "Voxels/ARMOR0.KVX"		{ Scale = 0.8	}
+SHLDC = "Voxels/ARMOR4.KVX"		{ Scale = 0.8	}
+NAPLI = "Voxels/GASCAN.KVX"		{ Scale = 0.85	}

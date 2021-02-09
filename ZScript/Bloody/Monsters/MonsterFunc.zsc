@@ -34,8 +34,8 @@ Class ThisMonsterIsBloody : Inventory
 		}
 	}
 	
-	Int Ticker, HealthTicker, PrevHP, CurHP, HealCD;
-	Bool Init, bAuraEnchanted;
+	Int Ticker;
+	Bool Init;
 	
 	Override void DoEffect()
 	{
@@ -43,18 +43,16 @@ Class ThisMonsterIsBloody : Inventory
 		
 		If(!Owner || (Owner && !Owner.bISMONSTER) || IsFrozen()) Return;
 		
-		Bool drop, leech, chasinginnocent;
-		Int a, b, c, d, e, ogpain, falldamage;
-		Double hearts, pain2, i;
-		CVar dynpain, drophealth, falldam;
+		Bool drop, leech;
+		Int a, b, c, d, e, falldamage;
+		Double hearts, i;
+		CVar drophealth, falldam;
 		
-		DynPain = CVar.FindCVar("Blood_DynamicPainChance");
-		DropHealth = CVar.FindCVar("Blood_DropHealth");
-		FallDam = CVar.FindCVar("Blood_MonsterFallDamage");
+		DropHealth = CVar.FindCVar("Ratburg_DropHealth");
+		FallDam = CVar.FindCVar("Ratburg_MonsterFallDamage");
 		
 		If(!Init)
 		{
-			ogpain = Owner.PainChance;
 			hearts = Owner.GetSpawnHealth() * 0.005;
 			Init = True;
 			Drop = True;
@@ -67,33 +65,6 @@ Class ThisMonsterIsBloody : Inventory
 		If(Init)
 		{
 			If(Owner.Health > 0) Ticker = 0;
-			
-			If(HealthTicker >= 1)
-			{
-				CurHP = Owner.Health;
-				If(CurHP > PrevHP && HealCD <= 0)
-				{
-					Actor aura = Spawn("HealAura", Owner.Pos);
-					If(aura)
-					{
-						aura.Master = Owner;
-						HealCD = 18;
-					}
-				}
-				HealthTicker = 0;
-			}
-		
-			If(HealthTicker == 0) { PrevHP = Owner.Health; HealthTicker++; }
-			
-			/*If(DynPain.GetBool())
-			{
-				pain2 = (Owner.Health * 100) / Owner.GetSpawnHealth();
-				pain2 = 100 - pain2;
-				pain2 *= 0.02;
-				pain2 = Clamp(pain2, 0.25, 2.0);
-				Owner.PainChance = OGPain * Pain2;
-			}
-			Else Owner.PainChance = OGPain;*/
 			
 			If(FallDam.GetBool() && Owner.Health > 0 && !Owner.bFLOAT && !Owner.bNOGRAVITY)
 			{
@@ -135,7 +106,7 @@ Class ThisMonsterIsBloody : Inventory
 					
 					FallDamage = Floor(FallDamage);
 					If(FallDamage > 0 && GetCVar("SV_FallingDamage") != 0)
-						Owner.DamageMObj(Owner, Owner, FallDamage*2, 'Falling', DMG_THRUSTLESS, 0);
+						Owner.DamageMObj(Owner, Owner, FallDamage*2, 'Extreme', DMG_THRUSTLESS, 0);
 					Owner.A_SetInventory("QueuedFall", 0);
 				}
 			}
@@ -172,70 +143,14 @@ Class ThisMonsterIsBloody : Inventory
 				
 				If(Leech)
 				{
-					a = Owner.GetSpawnHealth() * 0.075;
-					If(a > 26) a = 26;
-					d = 204 * (ACS_ScriptCall("BLUD_CheckSkill") * 0.2);
-					For(a; a > 0; a--)
-					{
-						If(Random(0, 255) <= d) Drop("LeechDrop");
-					}
+					a = Owner.GetSpawnHealth() / 100.;
+					b = Owner.GetSpawnHealth() - (a * 100.);
+					For(a; a > 0; a--) Drop("LeechDrop");
+					If(b > 0 && Random[Blood](0, 100) <= b)) Drop("LeechDrop");
 				}*/
 			}
 			
-			/*If(!(Owner is 'BloodyInnocent') && Level.Time % 7 == 0 && Owner.Health > 0 && !Owner.bBOSS)
-			{
-				ThinkerIterator Civs = ThinkerIterator.Create();
-				Actor mo;
-				While(mo = Actor(Civs.Next()))
-				{
-					If(	!mo || mo.Health <= 0 || !mo.bISMONSTER || 
-						!mo.bSHOOTABLE || mo.Distance2D(Owner) > 512 || 
-						!mo.CheckSight(Owner,SF_IGNOREVISIBILITY))
-							Continue;
-				
-					If(	mo && mo.Health > 0 && mo.Distance2D(Owner) <= 512 && 
-						mo.bISMONSTER && mo.bSHOOTABLE && mo.CheckSight(Owner,SF_IGNOREVISIBILITY) && 
-						mo is 'BloodyInnocent')
-						{
-							Owner.Target = mo;
-							If(Owner.InStateSequence(CurState, ResolveState("Spawn")) || Owner.InStateSequence(CurState, ResolveState("Idle")))
-								Owner.SetState(ResolveState("See"));
-							Break;
-						}
-				}
-			}
-			
-			If(Owner.Target) 
-			{
-				If(Owner.Target is 'BloodyInnocent')
-					ChasingInnocent = True;
-				
-				Else ChasingInnocent = False;
-			}
-			
-			If(!Owner.Target && ChasingInnocent) Owner.A_LookEx(0, 0, 0, 0, 360, "See");
-			
-			If(Level.Time % 7 == 0 && Owner.CountInv("MightAura") && bAuraEnchanted && Owner.Health > 0)
-			{
-				ThinkerIterator minions = ThinkerIterator.Create();
-				Actor mi;
-				While(mi = Actor(Minions.Next()))
-				{
-					If(	!mi || mi.Health <= 0 || !mi.bISMONSTER || 
-						!mi.bSHOOTABLE || mi.Distance2D(Owner) > 512 || 
-						!mi.CheckSight(Owner, SF_IGNOREVISIBILITY))
-							Continue;
-					
-					If(	mi && mi.Health > 0 && mi.bISMONSTER && mi.bSHOOTABLE && 
-						mi.Distance2D(Owner) > 512 && mi.CheckSight(Owner, SF_IGNOREVISIBILITY))
-						{
-							mi.A_GiveInventory("MightAura", 70);
-						}
-				}
-			}*/
-			
 			If(Owner.Health <= 0) Ticker++;
-			HealCD--;
 		}
 	}
 }

@@ -7,8 +7,8 @@ Class BloodyDynamite_Prox : BloodyThrowable
 		Obituary "%o stood too close to %k's proximity bomb.";
 		Weapon.SlotNumber 6;
 		Weapon.SelectionOrder 3;
-		Weapon.AmmoType "RocketAmmo";
-		Weapon.AmmoType2 "RocketAmmo";
+		Weapon.AmmoType "DynamiteAmmo_Prox";
+		Weapon.AmmoType2 "DynamiteAmmo_Prox";
 		Weapon.AmmoUse 1;
 		Weapon.AmmoGive 1;
 		Weapon.AmmoUse2 1;
@@ -16,7 +16,7 @@ Class BloodyDynamite_Prox : BloodyThrowable
 	}
 	States
 	{
-	Spawn: TNT1 A 1; Stop;
+	Spawn: TNTP C 0; Goto SpawnLoop;
 	Select: TNTD A 0 Overlay(RightFX1, "Radar"); Goto SelectLoop;
 	Deselect: TNTD A 0; Goto DeselectLoop;
 	Ready:
@@ -42,12 +42,20 @@ Class BloodyDynamite_Prox : BloodyThrowable
 		Goto Throw;
 	Flash:
 		TNT1 A 4 { ClearOverlay(RightFX1); ClearOverlay(RightGlow1); }
-		TNTD A 0 ThrowDynamite("ProximityBombProj");
+		TNTD A 0 { ThrowDynamite("ProximityBombProj"); A_TakeInventory("DynamiteAmmo_Prox", 1, TIF_NOTAKEINFINITE); }
 		Stop;
 	BringBack:
 		TNTD A 0 Overlay(RightFX1, "Radar");
 		Goto BringBack_Raise;
-	
+	AltFire:
+		TNTD A 1 A_WeaponReady2(WRF_DISABLE, 5, 10);
+		TNTD A 1 A_WeaponReady2(WRF_DISABLE, 16, 32);
+		TNTD A 1 A_WeaponReady2(WRF_DISABLE, 32, 56);
+		TNTD A 1 A_WeaponReady2(WRF_DISABLE, 44, 72);
+		TNT1 A 8 { ClearOverlay(RightFX1); ClearOverlay(RightGlow1); }
+		TNTD A 0 { ThrowDynamite("ProximityBombProj", True, True); A_TakeInventory("DynamiteAmmo_Prox", 1, TIF_NOTAKEINFINITE); }
+		Goto BringBack;
+		
 	Radar:
 		TNT1 A 0 Overlay(RightGlow1, "RadarGlow", 0.75);
 		TNTD BBBCCCDDDEEEFFFBBBBBB 1 OverlayOffset(RightFX1, (0, 0));
@@ -58,12 +66,23 @@ Class BloodyDynamite_Prox : BloodyThrowable
 	}
 }
 
+Class DynamiteAmmo_Prox : Ammo
+{
+	Default
+	{
+		Inventory.Amount 1;
+		Inventory.MaxAmount 50;
+		Ammo.BackpackAmount 5;
+		Ammo.BackpackMaxAmount 100;
+	}
+}
+
 Class ProximityBombProj : DynamiteBase 
 {
 	Override void PostBeginPlay()
 	{
 		Super.PostBeginPlay();
-		If(bAMBUSH) Timer = 35;
+		Timer = bAMBUSH ? 9 : -9;
 	}
 	
 	bool armed, done, hastened;
@@ -71,7 +90,7 @@ Class ProximityBombProj : DynamiteBase
 	{
 		If(Invoker.Armed && !Invoker.Done)
 		{
-			BlockThingsIterator bi = BlockThingsIterator.Create(Self, 64);
+			BlockThingsIterator bi = BlockThingsIterator.Create(Self, 72);
 			While(bi.Next())
 			{
 				Actor a = bi.Thing;
@@ -83,13 +102,13 @@ Class ProximityBombProj : DynamiteBase
 					(a && (a is 'RatburgerBloodChunk1b')) ||
 					(a && (a is 'RatburgerCorpseHitbox')) ||					// Not on gore objects
 					(a && (a.Health <= 0)) ||
-					(self.Distance3D(a) > 64) )									// Too far
+					(self.Distance3D(a) > 72) )									// Too far
 						Continue;
 				
 				If(a.bSHOOTABLE)
 				{
-					A_StartSound("ProximityAlarm", CHAN_WEAPON, CHANF_OVERLAP, 1.0, 0.9);
-					Invoker.Timer = Invoker.Hastened?0:10;
+					A_StartSound("ProximityAlarm", CHAN_WEAPON, CHANF_OVERLAP, 1.0, 0.9, 1.0);
+					Invoker.Timer = Invoker.Hastened?0:18;
 					Invoker.Done = True;
 					If(Invoker.Hastened) SetStateLabel("Explode");
 					Break;
@@ -129,7 +148,7 @@ Class ProximityBombProj : DynamiteBase
 		TNTY FGHIJKLM 4 { If(Invoker.Armed && !Invoker.Done) ProximityRadar(); }
 		Loop;
 	Death:
-		TNTY A 0 { Scale = (.8, .8); A_ChangeVelocity(invoker.prevspeed.x * 1.25, invoker.prevspeed.y * 1.25, 0, 0); A_StartSound("TNTBounce", CHAN_BODY, CHANF_OVERLAP, 1.0); }
+		TNTY A 0 { Scale = (.6, .6); A_ChangeVelocity(invoker.prevspeed.x * 1.25, invoker.prevspeed.y * 1.25, 0, 0); A_StartSound("TNTBounce", CHAN_BODY, CHANF_OVERLAP, 1.0); }
 		TNTY AAAABBBBCCCCDDDDEEEE 1
 		{
 			If(Self.Pos.Z <= FloorZ) Vel *= 0.99;

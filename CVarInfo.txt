@@ -22,3 +22,5 @@ server	int		Ratburg_Gore_GibDuration	= 4;			// Duration of giblets x4
 server	bool	Ratburg_Gore_GibBosses		= False;		// Wether or not you can gib +BOSS monsters
 server 	float	Ratburg_Gore_CarcassHP		= 0.75;			// % of the base HP of the monster to be given to the corpse
 server	bool	Ratburg_Gore_GibCorpses		= True;			// Wether or not you can gib corpses
+
+server	bool	Ratburg_HQ					= True;			// Enhanced particle fx switch. False for Blood's original FX.

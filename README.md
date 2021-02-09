@@ -24,8 +24,13 @@ This mod aims to recreate Blood's gameplay in GZDoom using the voodoo arts of ZS
 - Bloodbath (Beast transformation)
 ### Stuff that will most likely not be included
 - Blood's monsters
+	- Might do an addon later.
 - Also its armor system
 	- It's way too complex and it would be impossible to make it compatible with every custom damagetype out there.
+- Damage kickback physics
+	- Also too complex and not that necessary imo, the growing explosion splash is in the mod tho.
+### Currently known issues
+- Resurrecting after dying with the Akimbo Guns powerup on makes the weapon repeat the deselect animation over and over, manually selecting other weapons solves this.
 ### Credits
 - Sprites mostly from Monolith.
 - Sounds too.

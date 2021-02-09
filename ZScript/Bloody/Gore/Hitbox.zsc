@@ -13,6 +13,7 @@ Class RatburgerCorpseHitbox : Actor
 		Gravity 0.5;
 		Species "RatburgerCorpseHitbox";
 		Tag "Carcass";
+		Renderstyle "Stencil";
 	}
 	
 	Bool Chunk, Ready; Int cnt;
@@ -23,13 +24,25 @@ Class RatburgerCorpseHitbox : Actor
 		
 		If(!Master) { Destroy(); Return; }
 		
-		If(Master is 'RatburgerBloodChunk1') Chunk = True;
+		If(	Master is 'RatburgerBloodChunk1' ||
+			Master is 'RatburgerBloodChunk1b' ||
+			Master is 'RatburgerCorpseHitbox' ||
+			Master is 'PlayerLegGibL' ||
+			Master is 'PlayerLegGibR' ||
+			Master is 'PlayerHandGibL' ||
+			Master is 'PlayerHandGibR' ||
+			Master is 'PlayerHeadGib') 
+				Chunk = True;
+		
+		If(Master is 'PlayerHeadGib') Master.Tracer = Self;
 		
 		A_SetSize(Master.Radius, Master.Height); 
 		
 		Health = Master.GetSpawnHealth() * Ratburg_Gore_CarcassHP;
-		Mass = Master.Mass * 0.5;
+		Mass = Master.Mass * 0.75;
 		bNOBLOOD = Master.Default.bNOBLOOD;
+		CopyBloodColor(Master);
+		SetShade(Master.BloodColor);
 	}
 	
 	Override void Tick()
@@ -49,7 +62,7 @@ Class RatburgerCorpseHitbox : Actor
 		If(Ready == False || (Master.bBOSS && !Ratburg_Gore_GibBosses) || bNOBLOOD || !Ratburg_Gore_GibCorpses)
 			Health = Master.GetSpawnHealth() * Ratburg_Gore_CarcassHP;
 		
-		If(!Ready && (Master.Tics <= -1 || (cnt++ >= 18 && !Master.bBOSS)))
+		If(!Ready && (Master.Tics <= -1 || (((!Chunk && cnt++ >= 18) || (Chunk && cnt++ >= 9)) && !Master.bBOSS)))
 		{
 			Ready = True;
 			If(!Chunk)
@@ -79,6 +92,7 @@ Class RatburgerCorpseHitbox : Actor
 					If(Random[Blood](0, 255) < Ratburg_Gore_TrailChance * 32)
 						a.Destroy();
 					
+					a.Translation = Translation;
 					a.Vel.X = (Self.Vel.X * 0.5) + FRandom[Blood](-6, 6);
 					a.Vel.Y = (Self.Vel.Y * 0.5) + FRandom[Blood](-6, 6);
 					a.Vel.Z = (Self.Vel.Z * 0.5) + FRandom[Blood](4, 12);
@@ -90,9 +104,16 @@ Class RatburgerCorpseHitbox : Actor
 		
 		Else
 		{
-			Actor g = Master.Spawn("RatburgerGibber", Master.Pos);
-			g.Master = Master;
-			g.Translation = Translation;
+			Actor g = Spawn("RatburgerGibber", Master.Pos);
+			If(g)
+			{
+				g.SetShade(Master.BloodColor);
+				g.CopyBloodColor(Master);
+				g.Translation = Translation;
+				g.Master = Self;
+				g.Target = Master;
+				g.bCORPSE = Chunk;
+			}
 		}
 	}
 	
@@ -128,6 +149,9 @@ Class RatburgerCorpseHitbox : Actor
 			
 			If(Other && Other is 'RatburgerCorpseHitbox')
 				Return False;
+			
+			If(Other && Other is 'PlayerHeadGib')
+				Return False;
 				
 			If(Other && Other.GetSpecies() == 'RatburgerCorpseHitbox')
 				Return False;
@@ -152,6 +176,9 @@ Class RatburgerCorpseHitbox : Actor
 			
 			If(Other && Other is 'RatburgerCorpseHitbox')
 				Return False;
+			
+			If(Other && Other is 'PlayerHeadGib')
+				Return False;
 				
 			If(Other && Other.GetSpecies() == 'RatburgerCorpseHitbox')
 				Return False;
@@ -167,7 +194,7 @@ Class RatburgerCorpseHitbox : Actor
 		Loop;
 	Death:
 		TNT1 A 1;
-		TNT1 A 1 { Master.SetStateLabel("Null"); }
+		TNT1 A 1 { If(Master) Master.SetStateLabel("Null"); }
 		Stop;
 	}
 }

@@ -24,6 +24,7 @@ Class AxeZombie : BloodyMonster replaces Demon
 		DeathSound "ZombieDeath";
 		ActiveSound "ZombieRoam";
 		GibHealth 120;
+		BloodColor "Yellow";
 	}
 	
 	int odd;

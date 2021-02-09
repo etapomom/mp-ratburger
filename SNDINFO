@@ -75,6 +75,7 @@ TeslaAlt				TESALTFR
 TeslaHitWall			TESSNGHT
 TeslaSpray				TESLASPR
 TeslaFly				ELCLOOP1
+TeslaStart				WAND4
 TeslaHit				TESALTHT
 $RANDOM TelsaHitThing { tthing1 tthing2 }
 tthing1					TESLAFL1
@@ -88,6 +89,7 @@ $Limit TeslaHitWall 0
 $Limit TeslaHitThing 0
 $Limit TeslaSpray 0
 $Limit TeslaFly 0
+$Limit TeslaStart 0
 $RollOff TeslaCannon 768 1768
 $RollOff TeslaCharge 512 1800
 $RollOff TeslaAlt 1024 2800
@@ -127,8 +129,14 @@ TNTBounce1				FFDIRT1
 TNTBounce2				FFDIRT2
 ProximityArmed			PROXARM
 ProximityAlarm			LSRBMBWN
+RemoteDetonate			REMDET
+RemoteAlarm				REMARM
 DynamiteHit				TNTBOOM
+DynamiteMIRV			TNTMIRVT
+DynamiteMIRVHit			TNTMIRVX
 $Limit DynamiteHit 0
+$Limit DynamiteMIRV 0
+$Limit DynamiteMIRVHit 0
 
 LifeLeech				LALTFR1
 LeechBall				LLSPIT
@@ -161,6 +169,7 @@ $RollOff VoodooHit 256 1500
 $Limit PitchforkWall 0
 $Limit PitchforkFlesh 0
 
+TNTPing					TNTFULL
 TNTFuse					TNTFUSE
 ThrowTNT				TNTTOSS
 Explosion				EXPLODCL

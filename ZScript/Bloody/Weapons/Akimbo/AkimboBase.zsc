@@ -1,0 +1,200 @@
+Extend Class BloodWeapon
+{
+	bool raised;
+	
+	Action void A_AkimboFX(int id = -10, double alpha = 1.0, double wx = 0, double wy = 0)
+	{
+		A_AkimboOffset2(id, wx, wy);
+		A_OverlayAlpha(id, alpha);
+	}
+	
+	States
+	{
+	LeftRaise:
+		"####" "#" 1 A_AkimboOffset(-10, 39, 48);
+		"####" "#" 1 A_AkimboOffset(-10, 27, 36);
+		"####" "#" 1 A_AkimboOffset(-10, 21, 28);
+		"####" "#" 1 A_AkimboOffset(-10, 15, 20);
+		"####" "#" 1 A_AkimboOffset(-10, 9, 12);
+		"####" "#" 1 A_AkimboOffset(-10, 3, 3);
+		"####" "#" 1 A_AkimboOffset(-10, 2, 2);
+		"####" "#" 1 A_AkimboOffset(-10, 1.5, 1.5);
+		"####" "#" 1 A_AkimboOffset(-10, 1, 1);
+		"####" "#" 1 A_AkimboOffset(-10, 0.5, 0.5);
+		"####" "#" 1 A_AkimboOffset(-10, 0.25, 0.25);
+		"####" "#" 0 A_Jump(256, "Akimbo_Ready");
+		Stop;
+	LeftLower:
+		"####" "#" 1 A_AkimboOffset(-10, 3, 3);
+		"####" "#" 1 A_AkimboOffset(-10, 9, 12);
+		"####" "#" 1 A_AkimboOffset(-10, 15, 20);
+		"####" "#" 1 A_AkimboOffset(-10, 21, 28);
+		"####" "#" 1 A_AkimboOffset(-10, 27, 36);
+		"####" "#" 1 A_AkimboOffset(-10, 39, 48);
+		Stop;
+	Akimbo_Handler:
+		// Sync all layers to off-hand
+		TNT1 A 1
+		{
+			A_AkimboOffset2(-101, 0, 0);
+			A_AkimboOffset2(70, 0, 0);
+			A_AkimboOffset2(200, 0, 0);
+			A_AkimboOffset2(201, 0, 0);
+			A_AkimboOffset2(202, 0, 0);
+			A_AkimboOffset2(203, 0, 0);
+			A_AkimboOffset2(204, 0, 0);
+		}
+		Loop;
+	}
+}
+
+Class Power_Akimbo : Inventory
+{
+	Default 
+	{ 
+		Inventory.MaxAmount 1;
+		+NOTIMEFREEZE
+	}
+	
+	bool init;
+	int timer;
+	
+	Override Void DoEffect()
+	{
+		Super.DoEffect();
+		
+		If(!Owner){ Destroy(); Return; }
+		
+		If(!Init)
+		{
+			Init = True;
+			Timer = 1050;
+			//Actor s = Spawn("AkimboSound", Owner.Pos);
+			//If(s) s.Target = Owner;
+			Owner.A_SetBlend("Red", 1.0, 20);
+			Owner.GiveInventory("AkimboScreen",1);
+			//Owner.A_SpawnItemEx("AkimboRadiusLight",0,0,32,0,0,0,0,SXF_NOCHECKPOSITION|SXF_ORIGINATOR|SXF_SETMASTER,0);
+		}
+		
+		If(Owner.CountInv("AkimboPicker")) { Owner.A_TakeInventory("AkimboPicker",1); Timer = 1050; }
+		
+		If(Owner.CountInv("AkimboReset"))
+		{
+			Owner.TakeInventory("AkimboReset",1);
+			If(GetCVar("Ratburg_AkimboReset"))
+			{
+				Timer += 35;
+				Owner.A_PlaySound("AkimboReset", CHAN_AUTO, 1.0, 0, ATTN_NORM, 1);
+				Owner.A_SetBlend("Red", 1.0, 10);
+				//Actor aura = Spawn("AkimboAura", Owner.Pos);
+				//If(aura) aura.Master = Owner;
+			}
+		}
+		
+		Timer--;
+		
+		If(Timer <= 0 || (Owner.Health <= 0 || !Owner.Player))
+		{
+			If(Timer > 0) Timer = 0;
+			Init = False;
+			Owner.TakeInventory("AkimboReset",1);
+			Owner.TakeInventory("AkimboScreen",1);
+			Owner.A_PlaySound("PowerupEnd",CHAN_AUTO);
+			Owner.A_SetBlend("Red", 0, 2);
+			PrintPickupMessage(True,"Guns Akimbo has worn off.");
+			Owner.TakeInventory("Power_Akimbo",1);
+			Destroy();
+		}
+	}
+}
+
+Class AkimboAura : HealAura { Default { Translation "0:255=%[0.0,0.0,0.0]:[2.01,0.0,0.0]"; } }
+
+Class AkimboPickup : CustomInventory replaces Berserk
+{
+	Default 
+	{ 
+		Inventory.MaxAmount 1; 
+		Inventory.Amount 1;
+		Inventory.PickupSound "GotPowerup";
+		Inventory.PickupMessage "Picked up Guns Akimbo!";
+		Scale 0.6;
+		+COUNTITEM
+		+INVENTORY.ALWAYSPICKUP
+		+INVENTORY.AUTOACTIVATE
+		+FORCEXYBILLBOARD
+	}
+	
+	bool rotdir;
+	Override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		If(Owner) Return;
+		Angle = frandom[Blood](0, 359);
+		RotDir = random[Blood](0, 1);
+	}
+	
+	States
+	{
+	Spawn:
+		PWUP B 1 A_Turn(invoker.rotdir ? -4. : 4.);
+		Loop;
+	Pickup:
+	Use:
+		TNT1 A 0;
+		TNT1 A 0 HealThing(100,0);
+		TNT1 A 0 A_GiveInventory("Power_Akimbo",1);
+		TNT1 A 0 A_GiveInventory("AkimboPicker",1);
+		TNT1 A 0 A_TakeInventory("ShotgunCount",2);
+		Fail;
+	}
+}
+
+Class AkimboSound : Actor
+{
+	Default { +NOINTERACTION }
+	
+	Override void PostBeginPlay() 
+	{ 
+		Super.PostBeginPlay(); 
+		A_PlaySound("AkimboLoop", CHAN_7, 2.0, 1); 
+		A_PlaySound("Akimbo", CHAN_6, 2.0);
+	}
+	
+	Override void Tick()
+	{
+		Super.Tick();
+		If(!Target || (Target && !Target.CountInv("Power_Akimbo"))) { Destroy(); Return; }
+		SetOrigin(Target.Pos,1);
+	}
+}
+
+Class AkimboReset : Inventory { Default { Inventory.MaxAmount 1; } }
+Class AkimboPicker : AkimboReset {}
+
+Class AkimboScreen : PowerWeaponLevel2
+{
+	Default
+	{
+		Powerup.Duration -65536;
+		Powerup.Color "255 00 00", 0.33;
+	}
+}
+
+Class AkimboRadiusLight : DynamicLight
+{ 
+	Default
+	{
+		DynamicLight.Type "Point";
+		args 255,0,0,0;
+	}
+	
+	Override void Tick()
+	{
+		Super.Tick();
+		If(!Master || (Master && !Master.CountInv("Power_Akimbo")))
+		{ Destroy(); Return; }
+		SetOrigin(master.pos,true);
+		args[LIGHT_INTENSITY] = 56 * (frandom(1.0,1.05));
+	}
+}

@@ -7,85 +7,126 @@ Class BloodyDynamite : BloodyThrowable
 		Obituary "%o caught %k's TNT Bundle.";
 		Weapon.SlotNumber 6;
 		Weapon.SelectionOrder 3;
-		Weapon.AmmoType "RocketAmmo";
-		Weapon.AmmoType2 "RocketAmmo";
+		Weapon.AmmoType "DynamiteAmmo";
+		Weapon.AmmoType2 "DynamiteAmmo";
 		Weapon.AmmoUse 1;
 		Weapon.AmmoGive 1;
 		Weapon.AmmoUse2 1;
 		-WEAPON.CHEATNOTWEAPON
+		Scale 0.8;
 	}
 	
-	Override void DoEffect()
+	/*Override void DoEffect()
 	{
 		Super.DoEffect();
 		If(!Owner || !Owner.Player || !(Owner.Player.ReadyWeapon == Self)) Return;
 		
-		/*If(CheckWater())
+		If(CheckWater()) //&& !Holstered)
 		{
 			A_SetInventory("ThrowableForce", 0);
 			If(Timer)
 			{
-				double a, b, c, d;
-				[a, b, c, d] = GetThrowInfo();
-				
+				ThrowDynamite("DynamiteProj", true);
 				Timer = 0;
 			}
-		}*/
+			SetStateLabel("Holster");
+			//Holstered = True;
+		}
+	}*/
+	
+	Action State DynamiteReady(int flags = 0, double x = 0, double y = 0, bool canlower = true)
+	{
+		A_WeaponReady2(flags, x, y);
+		If(CanLower && (Invoker.Owner.Health <= 0 && (Flags & WRF_NOSWITCH) != WRF_NOSWITCH)) Return A_Jump(256, "Deselect"); 
+		If(CheckWater() && CanLower) 
+		{
+			A_GiveInventory("DynamiteHolster", 1);
+			A_SetInventory("ThrowableForce", 0);
+			ClearOverlay(RightFX1); 
+			ClearOverlay(RightGlow1);
+			A_StopSound(CHAN_WEAPON);
+			Overlay(Right, "Dynamite_Lower");
+			Return A_Jump(256, "Holster");
+		}
+		Return ResolveState(Null);
 	}
 	
 	States
 	{
-	Spawn: TNT1 A 1; Stop;
-	Select: TNTB A 0 Overlay(Left, "Lighter_Raise"); Goto SelectLoop;
-	Deselect: TNTB A 0 Overlay(Left, "Lighter_Lower"); Goto DeselectLoop;
+	Spawn: TNTP F 0; Goto SpawnLoop;
+	Select: TNTB A 0 { If(CheckWater()) Return ResolveState("SelectWater"); Else Overlay(Left, "Lighter_Raise"); Return ResolveState(Null); } Goto SelectLoop;
+	Deselect:
+		TNT1 A 0 A_JumpIf(CountInv("DynamiteHolster") == 1, "HolsterDeselect");
+		TNTB A 0 { If(!CheckWater()) Overlay(Left, "Lighter_Lower"); } 
+		Goto DeselectLoop;
 	Ready:
-		TNTB A 1 A_WeaponReady2();
+		TNT1 A 0 A_JumpIf(CountInv("DynamiteHolster") == 1, "Holster");
+		TNTB A 1 DynamiteReady();
 		Loop;
 	Fire:
 		TNTB A 0 Overlay(Left, "Lighter_Move_Up");
-		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -2, -1);
-		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -4, -2);
-		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -8, -4);
-		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -12, -6);
-		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -14, -7);
-		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -16, -8);
-		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -17, -8.5);
-		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -18, -9);
-		TNTB A 1 A_WeaponReady2(WRF_DISABLE, -19, -9.5);
+		TNTB A 1 DynamiteReady(WRF_DISABLE, -2, -1);
+		TNTB A 1 DynamiteReady(WRF_DISABLE, -4, -2);
+		TNTB A 1 DynamiteReady(WRF_DISABLE, -8, -4);
+		TNTB A 1 DynamiteReady(WRF_DISABLE, -12, -6);
+		TNTB A 1 DynamiteReady(WRF_DISABLE, -14, -7);
+		TNTB A 1 DynamiteReady(WRF_DISABLE, -16, -8);
+		TNTB A 1 DynamiteReady(WRF_DISABLE, -17, -8.5);
+		TNTB A 1 DynamiteReady(WRF_DISABLE, -18, -9);
+		TNTB A 1 DynamiteReady(WRF_DISABLE, -19, -9.5);
 	LightTheFuse:
 		TNTB A 0 { Overlay(RightFX1, "FuseSparks"); Invoker.SparkCycles = 0; Invoker.SparkY = 0; A_StartSound("TNTFuse", CHAN_WEAPON, CHANF_OVERLAP|CHANF_LOOP, 1.0, 1.25); }
-		TNTB AA 1 {A_WeaponReady2(WRF_DISABLE, -20, -10);	ThrowableCharge(); }
-		TNTB A 1 { A_WeaponReady2(WRF_DISABLE, -18, -8);	ThrowableCharge(); }
-		TNTB A 1 { A_WeaponReady2(WRF_DISABLE, -12, -2);	ThrowableCharge(); }
-		TNTB A 1 { A_WeaponReady2(WRF_DISABLE, -4, 6);		ThrowableCharge(); }
-		TNTB A 1 { A_WeaponReady2(WRF_DISABLE, 2, 16);		ThrowableCharge(); }
-		TNTB A 1 { A_WeaponReady2(WRF_DISABLE, 8, 24);		ThrowableCharge(); }
-		TNTB A 1 { A_WeaponReady2(WRF_DISABLE, 10, 30); 	ThrowableCharge(); }
-		TNTB A 1 { A_WeaponReady2(WRF_DISABLE, 12, 34); 	ThrowableCharge(); }
-		TNTB A 1 { A_WeaponReady2(WRF_DISABLE, 13, 36); 	ThrowableCharge(); }
-		TNTB A 1 { A_WeaponReady2(WRF_DISABLE, 13.5, 38); 	ThrowableCharge(); }
+		TNTB AA 1 {DynamiteReady(WRF_DISABLE, -20, -10, false);	ThrowableCharge(); }
+		TNTB A 1 { DynamiteReady(WRF_DISABLE, -18, -8, false);	ThrowableCharge(); }
+		TNTB A 1 { DynamiteReady(WRF_DISABLE, -12, -2, false);	ThrowableCharge(); }
+		TNTB A 1 { DynamiteReady(WRF_DISABLE, -4, 6, false);	ThrowableCharge(); }
+		TNTB A 1 { DynamiteReady(WRF_DISABLE, 2, 16, false);	ThrowableCharge(); }
+		TNTB A 1 { DynamiteReady(WRF_DISABLE, 8, 24, false);	ThrowableCharge(); }
+		TNTB A 1 { DynamiteReady(WRF_DISABLE, 10, 30, false); 	ThrowableCharge(); }
+		TNTB A 1 { DynamiteReady(WRF_DISABLE, 12, 34, false); 	ThrowableCharge(); }
+		TNTB A 1 { DynamiteReady(WRF_DISABLE, 13, 36, false); 	ThrowableCharge(); }
+		TNTB A 1 { DynamiteReady(WRF_DISABLE, 13.5, 38, false); ThrowableCharge(); }
 	Hold:
 		TNTB A 0 A_JumpIf(Invoker.Timer >= 175, "ReleaseTheButton");
 		TNTB A 1 
 		{ 
-			A_WeaponReady2(WRF_DISABLE, 14, 40); 	
+			DynamiteReady(WRF_DISABLE, 14, 40, false); 	
 			ThrowableCharge();
 		}
 		TNTB A 0 
 		{
+			If(CheckWater()) Return ResolveState("Release");
 			If(Invoker.Owner.Health > 0) A_ReFire("Hold");
 			Else Return ResolveState("Hold");
 			Return ResolveState(Null);
 		}
 		Goto Release;
 	Release:
-		TNTB A 1 A_WeaponReady2(WRF_DISABLE, 14.25, 56);
-		TNTB A 1 A_WeaponReady2(WRF_DISABLE, 14.5, 72);
-		TNTD A 0 A_GunFlash();
-		Goto Throw;
+		TNTB A 1 DynamiteReady(WRF_DISABLE, 14.25, 56, false);
+		TNTB A 1 DynamiteReady(WRF_DISABLE, 14.5, 72, false);
+		TNTD A 0
+		{
+			If(!CheckWater())
+			{
+				A_GunFlash();
+				Return ResolveState("Throw");
+			}
+			
+			Else
+			{
+				A_SetInventory("ThrowableForce", 0);
+				ClearOverlay(RightFX1); 
+				ClearOverlay(RightGlow1);
+				ThrowDynamite("DynamiteProj", True);
+				A_StopSound(CHAN_WEAPON);
+				Return ResolveState("Holster");
+			}
+			Return ResolveState(Null);
+		}
+		Goto Holster;
 	Flash:
 		TNT1 A 4 { ClearOverlay(RightFX1); ClearOverlay(RightGlow1); }
-		TNTD A 0 { ThrowDynamite("DynamiteProj"); A_StopSound(CHAN_WEAPON); }
+		TNTD A 0 { ThrowDynamite("DynamiteProj"); A_TakeInventory("DynamiteAmmo", 1, TIF_NOTAKEINFINITE); A_StopSound(CHAN_WEAPON); }
 		Stop;
 	BringBack:
 		TNTB A 0 Overlay(Left, "Lighter_Move_Reset");
@@ -113,10 +154,56 @@ Class BloodyDynamite : BloodyThrowable
 	FuseGlow:
 		TNTB A 1 BRIGHT;
 		Stop;
+	Dynamite_Lower:
+		TNTB A 1 OverlayOffset(Right, (3, 3));
+		TNTB A 1 OverlayOffset(Right, (9, 12));
+		TNTB A 1 OverlayOffset(Right, (15, 20));
+		TNTB A 1 OverlayOffset(Right, (21, 28));
+		TNTB A 1 OverlayOffset(Right, (27, 36));
+		TNTB A 1 OverlayOffset(Right, (39, 48));
+		Stop;
 	}
 	
 	int SparkCycles;
 	double SparkY;
+}
+
+Class DynamiteAmmo : Ammo
+{
+	Default
+	{
+		Inventory.Amount 1;
+		Inventory.MaxAmount 50;
+		Ammo.BackpackAmount 5;
+		Ammo.BackpackMaxAmount 100;
+	}
+}
+
+Class DynamiteBox : DynamiteAmmo
+{
+	Default
+	{
+		Radius 12;
+		Height 12;
+		Inventory.PickupSound "GotAmmo";
+		Inventory.PickupMessage "Picked up a box of TNT.";
+		Inventory.Amount 5;
+		Scale 0.575;
+	}
+	
+	bool RotDir;
+	Override void PostBeginPlay()
+	{
+		Angle = frandom[Blood](0, 359);
+		RotDir = random[Blood](0, 1);
+	}
+	
+	States
+	{
+	Spawn:
+		TNTP B 1 NoDelay A_Turn(bDROPPED ? Invoker.RotDir ? -4. : 4. : 0);
+		Loop;
+	}
 }
 
 Class DynamiteProj : DynamiteBase
@@ -146,6 +233,8 @@ Class DynamiteProj : DynamiteBase
 	{
 		If((Tracer && !(Tracer is 'RatburgerBloodChunk1') && !(Tracer is 'RatburgerBloodChunk1b') && !(Tracer is 'RatburgerCorpseHitbox')) || !bAMBUSH)
 			Invoker.Timer = 0;
+		
+		Else If(Invoker.Timer > 0) A_StartSound("TNTBounce", CHAN_BODY, CHANF_OVERLAP, 1.0);
 	}
 	
 	States
@@ -153,7 +242,7 @@ Class DynamiteProj : DynamiteBase
 	Bounce.Actor:
 		TNT1 A 0 DynamiteBounce();
 	Bounce:
-		TNT1 A 0 { DynamiteBounce(); A_StartSound("TNTBounce", CHAN_BODY, CHANF_OVERLAP, 1.0); }
+		TNT1 A 0 DynamiteBounce();
 	Spawn:
 		TNT1 A 0 NoDelay A_Jump(8, 1, 2, 3, 4, 5, 6, 7, 8);
 		Loop;
@@ -162,7 +251,7 @@ Class DynamiteProj : DynamiteBase
 		Loop;
 	Death:
 		TNTX A 0 DynamiteBounce();
-		TNTY A 0 { A_ChangeVelocity(invoker.prevspeed.x * 1.25, invoker.prevspeed.y * 1.25, 0, 0); A_StartSound("TNTBounce", CHAN_BODY, CHANF_OVERLAP, 1.0); }
+		TNTY A 0 A_ChangeVelocity(invoker.prevspeed.x * 1.25, invoker.prevspeed.y * 1.25, 0, 0);
 		TNTX ABC 4 BRIGHT
 		{
 			If(Self.Pos.Z <= FloorZ) Vel *= 0.99;

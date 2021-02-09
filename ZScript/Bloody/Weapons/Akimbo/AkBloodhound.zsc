@@ -1,0 +1,154 @@
+Class AkBloodHound : BloodhoundRevolver
+{	
+	Default
+	{
+		Tag "Twin Bloodhounds";
+		Weapon.SisterWeapon "BloodhoundRevolver";
+		+WEAPON.POWERED_UP
+		BloodWeapon.XOff 28.;
+	}
+	
+	States
+	{
+	Select:
+		SAAG A 0
+		{
+			A_Akimbo(-10, "Akimbo_Select"); 
+			A_Akimbo(-666, "Akimbo_Handler"); 
+			Invoker.Raised = True; 
+		} 
+		Goto SelectLoop;
+	Deselect: SAAG A 0 { A_Akimbo(-10, "Akimbo_Deselect"); Invoker.Raised = False; } 
+	Goto DeselectLoop;
+	Ready: 
+		SAAG A 0 A_JumpIf(Invoker.Raised == 0 && CountInv("Power_Akimbo"), "Select");
+		SAAG A 1 A_WeaponReady2();
+		Loop;
+	Akimbo_Deselect: SAAG A 0; Goto LeftLower;
+	Akimbo_Select: SAAG A 0; Goto LeftRaise;
+	Akimbo_Ready: SAAG AA 1 A_AkimboOffset(-10, 0, 0); Loop;
+	
+	AltFire:
+	Fire:
+		SAAG N 1
+		{
+			A_BloodhoundFire();		
+			A_Overlay(10, "Glow");
+			A_Overlay(-9, "MuzzleFlash_R"); 
+			A_WeaponReady2(WRF_DISABLE, 3, 3);
+			A_TakeInventory("SilverBullets",1,TIF_NOTAKEINFINITE);
+			A_GunFlash("Flash");
+			A_SpawnItemEx("LightShotgun",0,0,0,0,0,0,0,SXF_NOCHECKPOSITION|SXF_SETMASTER,0); 
+		}
+		SAAG N 1 A_WeaponReady2(WRF_DISABLE, 1.5, 1.5);
+		SAAG C 1 A_WeaponReady2(WRF_DISABLE, 0, 0, 0, 0);
+		SAAG C 1 A_WeaponReady2(WRF_DISABLE, 2, -2);
+		SAAG D 1 A_WeaponReady2(WRF_DISABLE, 0, 0, 0, 0);
+		SAAG D 1 A_WeaponReady2(WRF_DISABLE, 0.5, -0.5);
+		SAAG E 1 { A_WeaponReady2(WRF_DISABLE, 0, 0, 0, 0); A_PlaySound("SAAPull",CHAN_AUTO); }
+		SAAG E 1 A_WeaponReady2(WRF_DISABLE, 0.5, -0.5);
+		SAAG F 1 A_WeaponReady2(WRF_DISABLE, 0, 0, 0, 0);
+		SAAG F 1 A_WeaponReady2(WRF_DISABLE, -0.5, 0.5);
+		TNT1 A 0 A_Akimbo(-10, "Akimbo_Fire");
+		SAAG G 1 A_WeaponReady2(WRF_DISABLE, 0, 0, 0, 0);
+		SAAG G 1 A_WeaponReady2(WRF_DISABLE, -2, 2);
+		SAAG H 1 A_WeaponReady2(WRF_DISABLE, 0, 0, 0, 0);
+		SAAG H 1 A_WeaponReady2(WRF_DISABLE, -2, 2);
+		SAAG H 1 A_WeaponReady2(WRF_DISABLE, -3, 3);
+		SAAG A 1 A_WeaponReady2(WRF_DISABLE, 1, -1, 0, 0);
+		SAAG AAA 1 A_WeaponReady2(0, 0, 0);
+		SAAG A 1 { A_WeaponReady2(0, 0, 0); A_ReFire("Fire"); }
+		Goto Ready;
+	
+	Akimbo_Fire:
+		SAAG N 1
+		{
+			A_BloodhoundFire();	
+			A_AkimboOffset(-10, 3, 3);
+			A_Akimbo(11, "Akimbo_Glow", PSPF_RENDERSTYLE|PSPF_ALPHA, 0.75, STYLE_Translucent);
+			A_Akimbo(-11, "MuzzleFlash_L", PSPF_RENDERSTYLE|PSPF_ALPHA, 1.0, STYLE_Translucent); 
+			A_TakeInventory("SilverBullets",1,TIF_NOTAKEINFINITE);
+			A_GunFlash("Flash");
+			A_SpawnItemEx("LightShotgun",0,0,0,0,0,0,0,SXF_NOCHECKPOSITION|SXF_SETMASTER,0); 
+		}
+		SAAG N 1 A_AkimboOffset(-10, 1.5, 1.5);
+		SAAG C 1 A_AkimboOffset(-10, 0, 0, 0, 0);
+		SAAG C 1 A_AkimboOffset(-10, 2, -2);
+		SAAG D 1 A_AkimboOffset(-10, 0, 0, 0, 0);
+		SAAG D 1 A_AkimboOffset(-10, 0.5, -0.5);
+		SAAG E 1 { A_AkimboOffset(-10, 0, 0, 0, 0); A_PlaySound("SAAPull",CHAN_AUTO); }
+		SAAG E 1 A_AkimboOffset(-10, 0.5, -0.5);
+		SAAG F 1 A_AkimboOffset(-10, 0, 0, 0, 0);
+		SAAG F 1 A_AkimboOffset(-10, -0.5, 0.5);
+		SAAG G 1 A_AkimboOffset(-10, 0, 0, 0, 0);
+		SAAG G 1 A_AkimboOffset(-10, -2, 2);
+		SAAG H 1 A_AkimboOffset(-10, 0, 0, 0, 0);
+		SAAG H 1 A_AkimboOffset(-10, -2, 2);
+		SAAG H 1 A_AkimboOffset(-10, -3, 3);
+		SAAG A 1 A_AkimboOffset(-10, 1, -1, 0, 0);
+		Goto Akimbo_Ready;
+	
+	Glow:
+		SAAG B 1 BRIGHT 
+		{
+			A_OverlayFlags(10, PSPF_RENDERSTYLE|PSPF_ALPHA, 1);
+			A_OverlayRenderStyle(10, STYLE_TRANSLUCENT);
+			A_OverlayAlpha(10, 0.75);
+		}
+		SAAG B 1 BRIGHT A_OverlayAlpha(10, 0.725);
+		SAAG C 1 BRIGHT A_OverlayAlpha(10, 0.75);
+		SAAG C 1 BRIGHT A_OverlayAlpha(10, 0.675);
+		SAAG D 1 BRIGHT A_OverlayAlpha(10, 0.65);
+		SAAG D 1 BRIGHT A_OverlayAlpha(10, 0.625);
+		SAAG E 1 BRIGHT A_OverlayAlpha(10, 0.6);
+		SAAG E 1 BRIGHT A_OverlayAlpha(10, 0.5);
+		SAAG F 1 BRIGHT A_OverlayAlpha(10, 0.4);
+		SAAG F 1 BRIGHT A_OverlayAlpha(10, 0.3);
+		SAAG G 1 BRIGHT A_OverlayAlpha(10, 0.2);
+		SAAG G 1 BRIGHT A_OverlayAlpha(10, 0.1);
+		Stop;
+	Akimbo_Glow:
+		SAAG B 1 BRIGHT A_AkimboOffset2(11, 0, 0);
+		SAAG B 1 BRIGHT A_AkimboFX(11, 0.725);
+		SAAG C 1 BRIGHT A_AkimboFX(11, 0.75);
+		SAAG C 1 BRIGHT A_AkimboFX(11, 0.675);
+		SAAG D 1 BRIGHT A_AkimboFX(11, 0.65);
+		SAAG D 1 BRIGHT A_AkimboFX(11, 0.625);
+		SAAG E 1 BRIGHT A_AkimboFX(11, 0.6);
+		SAAG E 1 BRIGHT A_AkimboFX(11, 0.5);
+		SAAG F 1 BRIGHT A_AkimboFX(11, 0.4);
+		SAAG F 1 BRIGHT A_AkimboFX(11, 0.3);
+		SAAG G 1 BRIGHT A_AkimboFX(11, 0.2);
+		SAAG G 1 BRIGHT A_AkimboFX(11, 0.1);
+		Stop;
+	
+	MuzzleFlash_L: 
+		SAAG O 1 BRIGHT A_AkimboOffset2(-11, 0, 0);
+		SAAG O 1 BRIGHT A_AkimboFX(-11, 0.75);
+		SAAG O 1 BRIGHT A_AkimboFX(-11, 0.5);
+		SAAG O 1 BRIGHT A_AkimboFX(-11, 0.25);
+		SAAG O 1 BRIGHT A_AkimboFX(-11, 0.1);
+		Stop;
+	
+	MuzzleFlash_R: 
+		SAAG O 1 BRIGHT
+		{
+			A_OverlayFlags(-9, PSPF_RENDERSTYLE|PSPF_ALPHA, 1);
+			A_OverlayRenderStyle(-9, STYLE_ADD);
+			A_OverlayFlags(-9, PSPF_ADDWEAPON, 0);
+			A_OverlayOffset(-9, 24, 24);
+		}
+		SAAG O 1 BRIGHT A_OverlayAlpha(-9, 0.75);
+		SAAG O 1 BRIGHT A_OverlayAlpha(-9, 0.5);
+		SAAG O 1 BRIGHT A_OverlayAlpha(-9, 0.25);
+		SAAG O 1 BRIGHT A_OverlayAlpha(-9, 0.1);
+		Stop;
+	
+	Flash:
+		TNT1 A 1 A_Light(6);
+		TNT1 A 1 A_Light(4);
+		TNT1 A 1 A_Light(2);
+		TNT1 A 1 A_Light(1);
+		Goto LightDone;
+	}
+}

@@ -1,229 +1,49 @@
-Class ArmorPickupBase : CustomInventory
+Class NormalArmorPickup : GreenArmor replaces GreenArmor
 {
-	Default
-	{
+	Default 
+	{ 
+		Inventory.PickupMessage "Picked up Basic Armor.";
+		Inventory.Icon "SHLDE0";
 		Inventory.PickupSound "GotArmor";
-		Inventory.MaxAmount 0;
-		Inventory.Amount 1;
-		Radius 24;
-		Height 16;
-		Scale 0.8;
-		+INVENTORY.AUTOACTIVATE;
-		+INVENTORY.UNTOSSABLE;
-		-INVENTORY.KEEPDEPLETED;
-		+INVENTORY.ALWAYSPICKUP;
-	}
-	States
-	{
-	FailPickup:
-		TNT1 A 0;
-		Fail;
-	}
-}
-
-Class ArmorSpawner : RandomSpawner
-{
-	Default
-	{
-		DropItem "Nothing", 255, 100;
-		DropItem "HealthPouch", 255, 50;
-		DropItem "BodyArmorPickup", 255, 25;
-		DropItem "FireArmorPickup", 255, 25;
-		DropItem "ShockArmorPickup", 255, 25;
-	}
-}
-
-Class FireArmorPickup : ArmorPickupBase
-{
-	Default { Inventory.PickupMessage "Picked up a Fire Armor."; }
-	States
-	{
-	Spawn:
-		SHLD A -1;
-		Loop;
-	Pickup:
-		TNT1 A 0 A_JumpIfInventory("FireArmor",100,"FailPickup");
-		TNT1 A 0 A_GiveInventory("FireArmor",100);
-		Stop;
-	}
-}
-
-Class BodyArmorPickup : ArmorPickupBase
-{
-	Default { Inventory.PickupMessage "Picked up a Body Armor."; }
-	States
-	{
-	Spawn:
-		SHLD B -1;
-		Loop;
-	Pickup:
-		TNT1 A 0 A_JumpIfInventory("BodyArmor",100,"FailPickup");
-		TNT1 A 0 A_GiveInventory("BodyArmor",100);
-		Stop;
-	}
-}
-
-Class ShockArmorPickup : ArmorPickupBase
-{
-	Default { Inventory.PickupMessage "Picked up a Spiritual Armor."; }
-	States
-	{
-	Spawn:
-		SHLD D -1;
-		Loop;
-	Pickup:
-		TNT1 A 0 A_JumpIfInventory("ShockArmor",100,"FailPickup");
-		TNT1 A 0 A_GiveInventory("ShockArmor",100);
-		Stop;
-	}
-}
-
-Class NormalArmorPickup : ArmorPickupBase replaces GreenArmor
-{
-	Default { Inventory.PickupMessage "Picked up Basic Armor."; }
-	States
-	{
-	Spawn:
-		SHLD E -1;
-		Loop;
-	Pickup:
-		TNT1 A 0
-		{
-			If(CountInv("FireArmor") < 50)  { Return ResolveState("Give"); }
-			If(CountInv("BodyArmor") < 50)  { Return ResolveState("Give"); }
-			If(CountInv("ShockArmor") < 50) { Return ResolveState("Give"); }
-			Return ResolveState(Null);
-		}
-		Goto Super::FailPickup;
-	Give:
-		TNT1 A 0
-		{
-			A_GiveInventory("FireArmor",50);
-			A_GiveInventory("BodyArmor",50);
-			A_GiveInventory("ShockArmor",50);
-		}
-		Stop;
-	}
-}
-
-Class SuperArmorPickup : ArmorPickupBase replaces BlueArmor
-{
-	Default { Inventory.PickupMessage "Picked up Super Armor."; }
-	States
-	{
-	Spawn:
-		SHLD C -1;
-		Loop;
-	Pickup:
-		TNT1 A 0
-		{
-			If(CountInv("FireArmor") < 200)  { Return ResolveState("Give"); }
-			If(CountInv("BodyArmor") < 200)  { Return ResolveState("Give"); }
-			If(CountInv("ShockArmor") < 200) { Return ResolveState("Give"); }
-			Return ResolveState(Null);
-		}
-		Goto Super::FailPickup;
-	Give:
-		TNT1 A 0
-		{
-			A_GiveInventory("FireArmor",200);
-			A_GiveInventory("BodyArmor",200);
-			A_GiveInventory("ShockArmor",200);
-		}
-		Stop;
-	}
-}
-
-Class BloodyArmor : Inventory
-{
-	Default
-	{
-		Inventory.Amount 1;
-		Inventory.MaxAmount 200;
-		Inventory.InterHubAmount 200;
-		+INVENTORY.AUTOACTIVATE;
-		+INVENTORY.UNTOSSABLE;
-		-INVENTORY.KEEPDEPLETED;
-		+INVENTORY.ALWAYSPICKUP;
+		Tag "Basic";
 	}
 	
-	int absorb; bool go;
-	Override void AbsorbDamage(int Damage, Name damageType, out int newdamage)
+	bool RotDir;
+	Override void PostBeginPlay()
 	{
-		int saved, saved2;
-		if((amount > 0) && !DamageTypeDefinition.IgnoreArmor(damageType) && go)
-		{
-			If(DamageType != 'Fire' || Damage > 1)
-			{
-				absorb = Clamp(Amount*0.5, 50, 95);
-				saved = int(damage*absorb/100.0);
-				saved2 = Clamp(saved, saved, damage * 0.5);
-				if(amount <= saved) saved = amount;
-				newdamage -= saved;
-				amount -= saved2;
-				damage = newdamage;
-			}
-			
-			Else If(DamageType == 'Fire' && Damage == 1)
-			{
-				newdamage--;
-				amount--;
-				damage = newdamage;
-			}
-		}
-		if(damage > 0) 
-		{
-			newdamage = ApplyDamageFactors(GetClass(),damageType,damage,damage);
-			//If(go) Console.Printf("%s absorbs %d %s damage",GetTag(),saved,damagetype);
-		}
+		Angle = frandom[Blood](0, 359);
+		RotDir = random[Blood](0, 1);
+	}
+	
+	States
+	{
+	Spawn:
+		SHLD E 1 NoDelay A_Turn(Invoker.RotDir ? -4. : 4.);
+		Loop;
 	}
 }
 
-Class FireArmor : BloodyArmor 
-{ 
-	Default { Tag "Fire Armor"; }
-	
-	Override void AbsorbDamage(int Damage, Name DamageType, out int NewDamage)
-	{
-		Go = False;
-		If(	DamageType == 'Fire' || DamageType == 'RadiusFire' ||
-			DamageType == 'Explosive' || DamageType == 'RadiusExplosive' ||
-			DamageType == 'Burning' || DamageType == 'Lava')
-				Go = True;
-		
-		Super.AbsorbDamage(Damage, DamageType, NewDamage);
+Class SuperArmorPickup : BlueArmor replaces BlueArmor
+{
+	Default 
+	{ 
+		Inventory.PickupMessage "Picked up Super Armor."; 
+		Inventory.Icon "SHLDC0";
+		Inventory.PickupSound "GotArmor";
+		Tag "Super";
 	}
-}
-
-Class BodyArmor : BloodyArmor 
-{ 
-	Default { Tag "Body Armor"; }
 	
-	Override void AbsorbDamage(int Damage, Name DamageType, out int NewDamage)
+	bool RotDir;
+	Override void PostBeginPlay()
 	{
-		Go = False;
-		If(	DamageType == 'Normal' || DamageType == 'Melee' ||
-			DamageType == 'Falling' || DamageType == 'Crush' || 
-			DamageType == 'Hitscan' || DamageType == 'Default' ||
-			DamageType == 'None' || DamageType == 'Null')
-				Go = True;
-		
-		Super.AbsorbDamage(Damage, DamageType, NewDamage);
+		Angle = frandom[Blood](0, 359);
+		RotDir = random[Blood](0, 1);
 	}
-}
-
-Class ShockArmor : BloodyArmor 
-{ 
-	Default { Tag "Spiritual Armor"; }
 	
-	Override void AbsorbDamage(int Damage, Name DamageType, out int NewDamage)
+	States
 	{
-		Go = False;
-		If(	DamageType == 'Spirit' || DamageType == 'RadiusSpirit' ||
-			DamageType == 'Shock' || DamageType == 'RadiusShock' ||
-			DamageType == 'Slime')
-				Go = True;
-		
-		Super.AbsorbDamage(Damage, DamageType, NewDamage);
+	Spawn:
+		SHLD C 1 NoDelay A_Turn(Invoker.RotDir ? -4. : 4.);
+		Loop;
 	}
 }

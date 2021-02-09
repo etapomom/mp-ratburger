@@ -132,6 +132,26 @@ Class BloodyHandler : EventHandler
 		Return (1 - T) * V0 + T * V1;
 	}
 	
+	Static Double GetRelativeX(Actor source, Double Mul = 1)
+	{
+		If(Mul == 0) { Return 0; }
+		double vx, vy;
+		vx = source.vel.x;
+		vy = source.vel.y;
+		double vxa = (vx * (cos(source.angle))) - (vy * (sin(source.angle)));
+		Return vxa;
+	}
+	
+	Static Double GetRelativeY(Actor source, Double Mul = 1)
+	{
+		If(Mul == 0) { Return 0; }
+		double vx, vy;
+		vx = source.vel.x * mul;
+		vy = source.vel.y * mul;
+		double vya = (vx * (sin(source.angle))) + (vy * (cos(source.angle)));
+		Return vya;
+	}
+	
 	Override Void WorldThingSpawned(WorldEvent e)
 	{
 		If(!e.Thing || (e.Thing && !e.Thing.bISMONSTER))
@@ -146,7 +166,11 @@ Class BloodyHandler : EventHandler
 	{
 		If(	e.Thing && e.DamageSource && e.DamageSource.Player && e.DamageSource != e.Thing &&
 			!(e.Thing is 'RatburgerBloodChunk1') && !(e.Thing is 'RatburgerBloodChunk1b') && !(e.Thing is 'RatburgerCorpseHitbox'))
-				e.DamageSource.A_GiveInventory("BeastMeter", e.Damage);
+			{
+				e.DamageSource.A_GiveInventory("BeastMeter", e.Damage * 0.25);
+				If(e.Thing.Health <= 0 && e.DamageSource.CountInv("Power_Akimbo"))
+					e.DamageSource.A_GiveInventory("AkimboReset");
+			}
 	}
 }
 

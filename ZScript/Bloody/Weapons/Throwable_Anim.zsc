@@ -16,6 +16,12 @@ Extend Class BloodyThrowable
 		LeftFXGlow2		= 110,
 		LeftFXGlow3		= 111,
 		LeftFXGlow4		= 112,
+		LeftFX5			= 113,
+		LeftGlow5		= 114,
+		LeftFXGlow5		= 115,
+		LeftFX6			= 116,
+		LeftGlow6		= 117,
+		LeftFXGlow6		= 118,
 		
 		// Right side
 		Right 			= 200,
@@ -59,7 +65,7 @@ Extend Class BloodyThrowable
 		TNTA C 1 OverlayOffset(Left, (-0.25, 0.25));
 		NULL A 0 { Overlay(LeftFX1, "Lighter_Spark"); A_StartSound("ZippoStrike", CHAN_WEAPON, CHANF_OVERLAP, 1.0, 2.0); }
 	Lighter_Idle:
-		TNTA D 1;
+		TNTA D 1 A_JumpIf(CheckWater(), "Lighter_Lower");
 		Loop;
 	Lighter_Lower:
 		TNTA L 1 { OverlayOffset(Left, (-3, 3)); Overlay(LeftFX2, "Lighter_Fire_Stop"); }
@@ -93,6 +99,7 @@ Extend Class BloodyThrowable
 		TNTA D 1 OverlayOffset(Left, (-13, 36));
 		TNTA D 1 OverlayOffset(Left, (-13.5, 38));
 	Lighter_Hold_Down:
+		TNTA D 0 A_JumpIf(CheckWater(), "Lighter_Hold_Lower");
 		TNTA D 1 OverlayOffset(Left, (-14, 40));
 		Loop;
 	Lighter_Move_Reset:
@@ -103,6 +110,14 @@ Extend Class BloodyThrowable
 		TNTA D 1 OverlayOffset(Left, (-5, 12));
 		TNTA D 1 OverlayOffset(Left, (-3, 3));
 		Goto Lighter_Idle;
+	Lighter_Hold_Lower:
+		TNTA L 1 OverlayOffset(Left, (-17, 43));
+		TNTA L 1 OverlayOffset(Left, (-23, 52));
+		TNTA M 1 OverlayOffset(Left, (-29, 60));
+		TNTA M 1 OverlayOffset(Left, (-35, 68));
+		TNTA N 1 OverlayOffset(Left, (-41, 76));
+		TNTA N 1 OverlayOffset(Left, (-53, 88));
+		Stop;
 		/*TNTA D 1 OverlayOffset(Left, (20, -10));
 		TNTA D 1 OverlayOffset(Left, (18, -9));
 		TNTA D 1 OverlayOffset(Left, (16, -8));
@@ -119,16 +134,16 @@ Extend Class BloodyThrowable
 		TNTA E 1 BRIGHT A_OverlayAlpha(LeftFX1, .25);
 		Stop;
 	Lighter_Fire:
-		TNTA FFFGGG 1 BRIGHT 		{ If(Random[Blood](0, 255) < 156) Overlay(LeftGlow1, "Lighter_Glow", frandom[Blood](.05, .25)); }
-		TNTA HHHIIIJJJKKK 1 BRIGHT	{ If(Random[Blood](0, 255) < 156) Overlay(LeftGlow1, "Lighter_Glow", frandom[Blood](.05, .25)); }
+		TNTA FFFGGG 1 BRIGHT 		{ If(Random[Blood](0, 255) < 156) Overlay(LeftGlow1, "Lighter_Glow", frandom[Blood](.05, .25)); If(CheckWater()) ClearOverlay(LeftFX2); }
+		TNTA HHHIIIJJJKKK 1 BRIGHT	{ If(Random[Blood](0, 255) < 156) Overlay(LeftGlow1, "Lighter_Glow", frandom[Blood](.05, .25)); If(CheckWater()) ClearOverlay(LeftFX2); }
 		Goto Lighter_Fire+6;
 	Lighter_Fire_Stop:
-		TNTA G 1 BRIGHT A_OverlayAlpha(LeftFX2, .84);
-		TNTA G 1 BRIGHT A_OverlayAlpha(LeftFX2, .68);
-		TNTA G 1 BRIGHT A_OverlayAlpha(LeftFX2, .52);
-		TNTA F 1 BRIGHT A_OverlayAlpha(LeftFX2, .36);
-		TNTA F 1 BRIGHT A_OverlayAlpha(LeftFX2, .2);
-		TNTA F 1 BRIGHT A_OverlayAlpha(LeftFX2, .04);
+		TNTA G 1 BRIGHT { A_OverlayAlpha(LeftFX2, .84); If(CheckWater()) ClearOverlay(LeftFX2); }
+		TNTA G 1 BRIGHT { A_OverlayAlpha(LeftFX2, .68); If(CheckWater()) ClearOverlay(LeftFX2); }
+		TNTA G 1 BRIGHT { A_OverlayAlpha(LeftFX2, .52); If(CheckWater()) ClearOverlay(LeftFX2); }
+		TNTA F 1 BRIGHT { A_OverlayAlpha(LeftFX2, .36); If(CheckWater()) ClearOverlay(LeftFX2); }
+		TNTA F 1 BRIGHT { A_OverlayAlpha(LeftFX2, .20); If(CheckWater()) ClearOverlay(LeftFX2); }
+		TNTA F 1 BRIGHT { A_OverlayAlpha(LeftFX2, .04); If(CheckWater()) ClearOverlay(LeftFX2); }
 		Stop;
 	Lighter_Glow:
 		TNTA D 1 BRIGHT;
@@ -203,13 +218,24 @@ Extend Class BloodyThrowable
 		"####" "#" 1 A_WeaponReady2(WRF_DISABLE, 3, 3);
 		"####" "#" 0 A_Jump(256, "Ready");
 		Goto Ready;
+	SelectWater:
+		TNT1 A 0 A_GiveInventory("DynamiteHolster", 1);
+		TNT1 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 0 A_Raise();
+		Wait;
 	Holster:
-		TNT1 A 1 { A_WeaponReady(WRF_NOFIRE); ClearOverlay(Left); }
-		Loop;
+		TNT1 A 6 A_GiveInventory("DynamiteHolster", 1);
+		TNT1 A 1 A_WeaponReady(WRF_NOFIRE);
+		Goto Holster+1;
+	HolsterDeselect:
+		TNT1 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 0 A_Lower();
+		TNT1 A 0 A_TakeInventory("DynamiteHolster", 1);
+		Goto DeselectLoop+9;
 	
 	ClearLayer: TNT1 A 1; Stop;
 	}
 }
+
+Class DynamiteHolster : inventory { Default { Inventory.MaxAmount 1; } }
 
 Class DynamiteExplosion : Actor
 {
@@ -261,8 +287,18 @@ Class DynamiteExplosionDamage : SplashFunc
 	Default
 	{
 		DamageType "Explosive";
-		SplashFunc.Setup 156, 128, 10, True;
-		SplashFunc.Multipliers .85, True;
+		SplashFunc.Setup 160, 156, 10, True;
+		SplashFunc.Multipliers .8, True;
+	}
+}
+
+Class DynamiteMIRVDamage : SplashFunc
+{
+	Default
+	{
+		DamageType "Explosive";
+		SplashFunc.Setup 40, 128, 10, True;
+		SplashFunc.Multipliers .5, True;
 	}
 }
 
@@ -274,7 +310,13 @@ Class DynamiteSmoke : SmokeFX
 		Scale 0.3;
 		SmokeFX.Changer 0.018, 0.005, 70;
 		Renderstyle "Translucent";
-		Translation "0:255=%[0.00,0.00,0.00]:[0.5,0.5,0.5]";
+		//Translation "0:255=%[0.00,0.00,0.00]:[0.5,0.5,0.5]";
+	}
+	
+	Override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		SetShade("FFFFFF");
 	}
 }
 
@@ -295,6 +337,43 @@ Class DynamiteShockwave : ShockwaveBase
 
 Class DynamiteExplosionFX : ExplosionFX5 { Default { Scale 1.33; } }
 Class DynamiteExplosionAdd : ExplosionFX1 { Default { Scale 1.5; } }
+
+Class DynamiteMIRVExplosion : Actor
+{
+	Default { +NOINTERACTION }
+	States
+	{
+	Spawn:
+		TNT1 A 5 NoDelay
+		{
+			A_RemoveMaster(RMVF_EVERYTHING);
+			
+			Let l = Spawn("DynamiteMIRVHitLight", Self.Pos);
+			l.Master = Self;
+			
+			A_SpawnItemEx("DynamiteMIRVExplosionFX", flags: SXF_NOCHECKPOSITION);
+			A_SpawnItemEx("DynamiteMIRVExplosionFX", flags: SXF_NOCHECKPOSITION);
+			
+			For(int a = 0; a < 2; a++) 
+				A_SpawnItemEx("DynamiteMIRVShockwave", flags: SXF_NOCHECKPOSITION);
+			
+			A_StartSound("DynamiteMIRVHit", CHAN_WEAPON, CHANF_OVERLAP, 1.0, 0.5);
+			A_AlertMonsters();
+			A_Stop();
+			
+			For(int i = 0; i < 4; i++)
+				A_SpawnItemEx("DynamiteMIRVSmoke", 0,0,0, frandom[Rocket](-0.33, 0.33), 0, frandom[Rocket](-0.33, 0.33), frandom[Rocket](0, 359), SXF_NOCHECKPOSITION, 8);
+			
+			Actor x = Spawn("DynamiteMIRVDamage", Self.Pos);
+			If(x) x.Target = Target;
+		}
+		Stop;
+	}
+}
+
+Class DynamiteMIRVExplosionFX : ExplosionFX3 { Default { Scale 0.6; } }
+Class DynamiteMIRVShockwave : DynamiteShockwave { Default { Scale 0.3; } }
+Class DynamiteMIRVSmoke : DynamiteSmoke { Default { Scale 0.15; SmokeFX.Changer 0.018, 0.005, 70; } }
 
 Class DynamiteLight : DynamicLight
 {
@@ -329,6 +408,30 @@ Class DynamiteHitLight : DynamicLight
 		If(master) SetOrigin(master.pos,true);
 		If(IsFrozen()) Return;
 		args[LIGHT_INTENSITY] += (12 - cnt);
+		If(cnt > 8)
+		{
+			args[LIGHT_RED] *= 0.8;
+			args[LIGHT_GREEN] *= 0.8;
+			args[LIGHT_BLUE] *= 0.8;
+		}
+		If(cnt++ > 35) Destroy();
+	}
+}
+
+Class DynamiteMIRVHitLight : DynamicLight
+{
+	int cnt;
+	Default
+	{
+		DynamicLight.Type "Point";
+		args 255,192,128,32;
+	}
+	override void Tick()
+	{
+		Super.Tick();
+		If(master) SetOrigin(master.pos,true);
+		If(IsFrozen()) Return;
+		args[LIGHT_INTENSITY] += (6 - cnt);
 		If(cnt > 8)
 		{
 			args[LIGHT_RED] *= 0.8;

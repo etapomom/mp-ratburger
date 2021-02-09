@@ -30,7 +30,7 @@ Class SawnOffShotgun : BloodWeapon replaces Shotgun
 		Goto DeselectLoop;
 	Ready: WP01 "#" 1 A_WeaponReady2(); Loop;
 	Fire:
-		WP01 B 1
+		WP01 B 0
 		{
 			If(CountInv("ShotgunCount") == 2) Return ResolveState("Reload");
 			If(CountInv("ShotgunCount") == 1) Return ResolveState("FireRight");
@@ -55,6 +55,7 @@ Class SawnOffShotgun : BloodWeapon replaces Shotgun
 			A_WeaponReady2(WRF_NOFIRE,15,8);
 			Return ResolveState(null); 
 		}
+		WP01 B 1 A_WeaponReady2(WRF_NOFIRE,15,8);
 		WP01 B 1 A_WeaponReady2(WRF_DISABLE,18,11);
 		WP01 B 1 A_WeaponReady2(WRF_DISABLE,19,12);
 		WP01 C 1 A_WeaponReady2(WRF_DISABLE,18,11);
@@ -72,7 +73,7 @@ Class SawnOffShotgun : BloodWeapon replaces Shotgun
 		}
 		Goto Ready;
 	FireRight:
-		WP01 D 1
+		WP01 D 0
 		{
 			If(CountInv("ShotgunCount") == 2) Return ResolveState("Reload");
 			
@@ -96,6 +97,7 @@ Class SawnOffShotgun : BloodWeapon replaces Shotgun
 			A_WeaponReady2(WRF_NOFIRE,15,8);
 			Return ResolveState(null); 
 		}
+		WP01 D 1 A_WeaponReady2(WRF_NOFIRE,15,8);
 		WP01 D 1 A_WeaponReady2(WRF_DISABLE,18,11);
 		WP01 D 1 A_WeaponReady2(WRF_DISABLE,19,12);
 		WP01 E 1 A_WeaponReady2(WRF_DISABLE,18,11);
@@ -113,7 +115,7 @@ Class SawnOffShotgun : BloodWeapon replaces Shotgun
 		}
 		Goto Ready;
 	AltFire:
-		WP01 D 1
+		WP01 D 0
 		{
 			If(CountInv("Shells") == 1) { Return ResolveState("Fire"); }
 			If(CountInv("ShotgunCount") == 2) { Return ResolveState("Reload"); }
@@ -139,6 +141,7 @@ Class SawnOffShotgun : BloodWeapon replaces Shotgun
 			A_WeaponReady2(WRF_NOFIRE,15,8);
 			Return ResolveState(null); 
 		}
+		WP01 D 1 A_WeaponReady2(WRF_NOFIRE,15,8);
 		WP01 D 1 A_WeaponReady2(WRF_DISABLE,18,11);
 		WP01 D 1 A_WeaponReady2(WRF_DISABLE,21,14);
 		WP01 D 1 A_WeaponReady2(WRF_DISABLE,22,15);
@@ -163,12 +166,12 @@ Class SawnOffShotgun : BloodWeapon replaces Shotgun
 	BigMuzzle: SWF2 AABBC 1 BRIGHT; Stop;
 	Glow1: WP01 BBBCCCCCCCCCCCCCCCCCCCCCCCC 1 BRIGHT; Stop;
 	Glow2: 
-		WP01 DDDEEEEEE 1 BRIGHT;
+		WP01 DDDDEEEEE 1 BRIGHT;
 		TNT1 A 0 A_JumpIf(CountInv("Shells") > 0, "Glow2Alt");
 		WP01 EEEEEEEEEEEEEEEEE 1 BRIGHT;
 		Stop;
 	Glow2Alt:
-		WP01 FFGHIKLMNOPQRSTUA 1 BRIGHT; 
+		WP01 FFGHIKLMNOPRSTUA 1 BRIGHT; 
 		Stop;
 	Glow:
 		TNT1 A 1 BRIGHT
@@ -213,10 +216,10 @@ Class SawnOffShotgun : BloodWeapon replaces Shotgun
 	
 	action void A_ShotgunFire()
 	{
-		A_QuakeEx(1,1,1,8,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:0.5);
+		A_QuakeEx(1,1,1,8,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:0.25);
 		A_StartSound("Shotgun", CHAN_WEAPON, CHANF_OVERLAP);
 		A_AlertMonsters();
-		A_FireWeapon(random[Blood](4,6), 10, 0.08, 'Normal', -4);
+		A_FireBullets(5, 5, 8, random[Blood](4, 6), "BulletPuff");
 	}
 	
 	action void A_ShotgunFireAlt()
@@ -224,7 +227,7 @@ Class SawnOffShotgun : BloodWeapon replaces Shotgun
 		A_QuakeEx(4,4,4,12,0,1,"",QF_RELATIVE|QF_SCALEDOWN,rollIntensity:2);
 		A_StartSound("ShotgunAlt", CHAN_WEAPON, CHANF_OVERLAP);
 		A_AlertMonsters();
-		A_FireWeapon(random[Blood](4,6), 20, 0.14, 'Normal', -4);
+		A_FireBullets(10, 10, 16, random[Blood](4, 6), "BulletPuff");
 	}
 }
 
@@ -244,10 +247,18 @@ Class Shells : Ammo replaces Shell
 		Inventory.Icon "SHLLA0";
 		+DONTSPLASH
 	}
+	
+	bool RotDir;
+	Override void PostBeginPlay()
+	{
+		Angle = frandom[Blood](0, 359);
+		RotDir = random[Blood](0, 1);
+	}
+	
 	States
 	{
 	Spawn:
-		SHLL A -1;
+		SHLL A 1 NoDelay A_Turn(bDROPPED ? Invoker.RotDir ? -4. : 4. : 0);
 		Loop;
 	}
 }

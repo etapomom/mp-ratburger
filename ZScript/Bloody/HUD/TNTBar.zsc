@@ -1,0 +1,22 @@
+Extend Class BloodyStatusBar
+{
+	Private void DrawTNTForce()
+	{
+		DrawImage("SKBAR6", (0, -TNTY - 12), DI_BOTTOMCENTER);
+		DrawBar("FORCEBAG", "FORCEBAX", ThrowForce.GetValue(), 70, (-26, -TNTY - 21.75), 0, SHADER_HORZ|SHADER_REVERSE, DI_BOTTOMCENTER, .4);
+		DrawBar("FORCEBAG", "FORCEBAX", ThrowForce.GetValue(), 70, ( 26, -TNTY - 21.75), 0, SHADER_HORZ, DI_BOTTOMCENTER, .4);
+		DrawBar("FORCEBAR", "FORCEBAX", ThrowForce.GetValue(), 70, (-26, -TNTY - 22.5), 0, SHADER_HORZ|SHADER_REVERSE, DI_BOTTOMCENTER);
+		DrawBar("FORCEBAR", "FORCEBAX", ThrowForce.GetValue(), 70, ( 26, -TNTY - 22.5), 0, SHADER_HORZ, DI_BOTTOMCENTER);
+	}
+	
+	Private void DrawTNTCounters()
+	{
+		DrawImage("TNTPG0", (-22 - CurX, -27), DI_BOTTOMRIGHT, Scale: (.25, .25));
+		DrawImage("TNTPH0", (-22 - CurX, -21), DI_BOTTOMRIGHT, Scale: (.25, .25));
+		DrawImage("TNTPI0", (-22 - CurX, -15), DI_BOTTOMRIGHT, Scale: (.25, .25));
+		
+		DrawString(SmallFont, FormatNumber(GetAmountOnly("DynamiteAmmo"), 0, 3), (-32 - CurX, -30.5), DI_TEXT_ALIGN_RIGHT|DI_BOTTOMRIGHT, Font.CR_ORANGE, Scale: (.5, .5));
+		DrawString(SmallFont, FormatNumber(GetAmountOnly("DynamiteAmmo_Prox"), 0, 3), (-32 - CurX, -24.5), DI_TEXT_ALIGN_RIGHT|DI_BOTTOMRIGHT, Font.CR_GREEN, Scale: (.5, .5));
+		DrawString(SmallFont, FormatNumber(GetAmountOnly("DynamiteAmmo_Remote"), 0, 3), (-32 - CurX, -18.5), DI_TEXT_ALIGN_RIGHT|DI_BOTTOMRIGHT, Font.CR_RED, Scale: (.5, .5));
+	}
+}

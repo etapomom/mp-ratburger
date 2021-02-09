@@ -7,12 +7,16 @@ Extend Class BloodyStatusBar
 		DrawImage("HUD1C", (0 + CurX, 0), DI_BOTTOMLEFT);
 		DrawImage("HUD2C", (0 - CurX, 0), DI_BOTTOMRIGHT);
 		
+		DrawString(SmallFont, "v1.0-pre", (-1 - CurX, -41), DI_TEXT_ALIGN_RIGHT|DI_BOTTOMRIGHT, Font.CR_GRAY, .45, Scale: (.5, .5));
+		
 		DrawHealthBar(HealthNumber.GetValue());
 		DrawAmmo();
-		//DrawArmorBar();
+		DrawArmorBar();
 		DrawKeys();
 		DrawBeastMeter();
 		DrawBeastHUD();
+		DrawTNTForce();
+		DrawTNTCounters();
 	}
 	
 	Private void DrawHealthBar(int Health)
@@ -49,28 +53,16 @@ Extend Class BloodyStatusBar
 	
 	Private void DrawArmorBar()
 	{
-		Let Armor = CPlayer.mo.FindInventory("BodyArmor");
+		Let Armor = CPlayer.mo.FindInventory("BasicArmor");
 		If(Armor)
 		{
-			DrawString(BigFont, FormatNumber(Armor.Amount, 1, 3), (180, -120), DI_TEXT_ALIGN_RIGHT|DI_BOTTOMLEFT, Font.CR_GREEN, Scale: (2, 2));
-			DrawBar("BLUEBAR", "NULLA0", Armor.Amount, 100, (80, -54), 0, 0, DI_BOTTOMLEFT);
-			If(Armor.Amount > 100) DrawBar("BLUEBA2", "NULLA0", Armor.Amount - 100, 100, (80, -54), 0, 0, DI_BOTTOMLEFT);
-		}
-		
-		Armor = CPlayer.mo.FindInventory("FireArmor");
-		If(Armor)
-		{
-			//DrawString(BigFont, FormatNumber(Armor.Amount, 1, 3), (180, -120), DI_TEXT_ALIGN_RIGHT|DI_BOTTOMLEFT, Font.CR_GREEN, Scale: (2, 2));
-			DrawBar("REDABAR", "NULLA0", Armor.Amount, 100, (80, -89), 0, 0, DI_BOTTOMLEFT);
-			If(Armor.Amount > 100) DrawBar("REDABA2", "NULLA0", Armor.Amount - 100, 100, (80, -54), 0, 0, DI_BOTTOMLEFT);
-		}
-		
-		Armor = CPlayer.mo.FindInventory("ShockArmor");
-		If(Armor)
-		{
-			//DrawString(BigFont, FormatNumber(Armor.Amount, 1, 3), (180, -120), DI_TEXT_ALIGN_RIGHT|DI_BOTTOMLEFT, Font.CR_GREEN, Scale: (2, 2));
-			DrawBar("GRENBAR", "NULLA0", Armor.Amount, 100, (80, -19), 0, 0, DI_BOTTOMLEFT);
-			If(Armor.Amount > 100) DrawBar("GRENBA2", "NULLA0", Armor.Amount - 100, 100, (80, -54), 0, 0, DI_BOTTOMLEFT);
+			If(Armor.Amount > 0)
+			{
+				DrawString(BigFont, FormatNumber(ArmorNumber.GetValue(), 1, 3), (38.5 + CurX, -23), DI_TEXT_ALIGN_RIGHT|DI_BOTTOMLEFT, ArmorNumber.GetValue() > 100 ? Font.CR_SAPPHIRE : Font.CR_DARKGREEN, Scale: (.67, .67));
+				//DrawString(SmallFont, Armor.GetTag("Basic"), (36 + CurX, -26), DI_TEXT_ALIGN_RIGHT|DI_BOTTOMLEFT, Font.CR_DARKGRAY, Scale: (.5, .5));
+			}
+			DrawBar("GRENBAR", "NOARBAR", ArmorNumber.GetValue(), 100, (19 + CurX, -3.5), 0, 0, DI_BOTTOMLEFT);
+			If(ArmorNumber.GetValue() > 100) DrawBar("BLUEBAR", "NOARBAR", ArmorNumber.GetValue() - 100, 100, (19 + CurX, -3.5), 0, 0, DI_BOTTOMLEFT);
 		}
 	}
 	

@@ -1,1 +1,261 @@
-Class BloodyDynamite_Remote : TempWeapon {}
+Class BloodyDynamite_Remote : BloodyThrowable 
+{
+	Default
+	{
+		Tag "TNT Bundle (Detonator)";
+		Inventory.PickupMessage "Picked up a Remote Detonator.";
+		Obituary "%o caught %k's TNT Bundle.";
+		Weapon.SlotNumber 6;
+		Weapon.SelectionOrder 3;
+		Weapon.AmmoType "DynamiteAmmo_Remote";
+		Weapon.AmmoType2 "DynamiteAmmo_Remote";
+		Weapon.AmmoUse 1;
+		Weapon.AmmoGive 1;
+		Weapon.AmmoUse2 1;
+		-WEAPON.CHEATNOTWEAPON
+		Inventory.Icon "TNTPE0";
+	}
+	
+	bool bDETONATING;
+	
+	States
+	{
+	Spawn: TNTP D 0; Goto SpawnLoop;
+	Select: TNTE A 0 { Overlay(Left, "Detonator_Raise"); Overlay(RightFX1, "RedBlink"); } Goto SelectLoop;
+	Deselect: TNTE A 0 Overlay(Left, "Detonator_Lower"); Goto DeselectLoop;
+	Ready: TNTE A 1 A_WeaponReady2(Invoker.bDETONATING ? WRF_NOPRIMARY|WRF_NOSWITCH : 0); Loop;
+	Fire:
+		TNTE A 0 { If(CountInv("RemoteDeployed")) { Overlay(Left, "Detonate"); Return ResolveState("Ready"); } Return ResolveState(Null); }
+		TNTE A 1 { A_WeaponReady2(WRF_DISABLE, 5, 10);		ThrowableCharge(); }
+		TNTE A 1 { A_WeaponReady2(WRF_DISABLE, 9, 18); 		ThrowableCharge(); }
+		TNTE A 1 { A_WeaponReady2(WRF_DISABLE, 16, 32); 	ThrowableCharge(); }
+		TNTE A 1 { A_WeaponReady2(WRF_DISABLE, 19, 38); 	ThrowableCharge(); }
+	Hold:
+		TNTE A 1 
+		{ 
+			A_WeaponReady2(WRF_DISABLE, 20, 40); 	
+			ThrowableCharge();
+		}
+		TNTE A 0 A_ReFire("Hold");
+		Goto Release;
+	Release:
+		TNTE A 1 A_WeaponReady2(WRF_DISABLE, 28, 56);
+		TNTE A 1 A_WeaponReady2(WRF_DISABLE, 36, 72);
+		TNTE A 0 A_GunFlash();
+		Goto Throw;
+	Flash:
+		TNT1 A 4 { ClearOverlay(RightFX1); ClearOverlay(RightGlow1); }
+		TNTE A 0 { ThrowDynamite("RemoteBombProj"); A_TakeInventory("DynamiteAmmo_Remote", 1, TIF_NOTAKEINFINITE); }
+		Stop;
+	BringBack:
+		TNTE A 0 Overlay(RightFX1, "RedBlink");
+		Goto BringBack_Raise;
+	AltFire:
+		TNTE A 1 A_WeaponReady2(WRF_DISABLE, 5, 10);
+		TNTE A 1 A_WeaponReady2(WRF_DISABLE, 16, 32);
+		TNTE A 1 A_WeaponReady2(WRF_DISABLE, 32, 56);
+		TNTE A 1 A_WeaponReady2(WRF_DISABLE, 44, 72);
+		TNT1 A 8 { ClearOverlay(RightFX1); ClearOverlay(RightGlow1); }
+		TNTE A 0 { ThrowDynamite("RemoteBombProj", True, True); A_TakeInventory("DynamiteAmmo_Remote", 1, TIF_NOTAKEINFINITE); }
+		Goto BringBack;
+	
+	Detonate:
+		TNT1 A 0 { Invoker.bDETONATING = True; }
+		TNTE C 1 OverlayOffset(Left, (1, 0));
+		TNTE C 1 OverlayOffset(Left, (2, 1));
+		TNTE C 1 OverlayOffset(Left, (3.5, 2.5));
+		TNTE C 1 OverlayOffset(Left, (5.5, 4.5));
+		TNTE C 1 OverlayOffset(Left, (8, 7));
+		TNTE C 1 OverlayOffset(Left, (11.5, 10.5));
+		TNT1 A 0
+		{
+			ClearOverlay(LeftFX1); ClearOverlay(LeftFX2); ClearOverlay(LeftFX3);
+			ClearOverlay(LeftFX4); ClearOverlay(LeftFX5);
+			
+			A_GiveInventory("RemoteDetonate");
+			A_StartSound("RemoteDetonate", CHAN_WEAPON, CHANF_OVERLAP, 1.0, 1.5, 1.0);
+			A_AlertMonsters();
+		}
+		TNTE D 1 OverlayOffset(Left, (14.5, 13.5));
+		TNTE D 1 OverlayOffset(Left, (16.5, 15.5));
+		TNTE D 1 OverlayOffset(Left, (17.5, 16.5));
+		TNTE D 1 OverlayOffset(Left, (18, 17));
+		TNTE D 1 OverlayOffset(Left, (18.25, 17.25));
+		TNTE D 1 OverlayOffset(Left, (18.25, 17.25));
+		TNTE D 1 OverlayOffset(Left, (18, 17));
+		TNTE D 1 OverlayOffset(Left, (17.5, 16.5));
+		TNTE D 1 OverlayOffset(Left, (16.5, 15.5));
+		TNTE D 1 OverlayOffset(Left, (14.5, 13.5));
+		TNT1 A 0 Overlay(LeftFX1, "Detonator_LightHandler");
+		TNTE C 1 OverlayOffset(Left, (11.5, 10.5));
+		TNTE C 1 OverlayOffset(Left, (8, 7));
+		TNTE C 1 OverlayOffset(Left, (5.5, 4.5));
+		TNTE C 1 OverlayOffset(Left, (5.5, 4.5));
+		TNTE C 1 OverlayOffset(Left, (3.5, 2.5));
+		TNTE C 1 OverlayOffset(Left, (2, 1));
+		TNTE C 1 OverlayOffset(Left, (1, 0));
+		TNTE C 0 
+		{
+			A_TakeInventory("RemoteDetonate");
+			Invoker.bDETONATING = False;
+		}
+		Goto Detonator_Idle;
+	
+	Detonator_Raise:
+		TNTE C 0 { Overlay(LeftFX1, "Detonator_LightHandler"); OverlayOffset(Left, (-39, 48), 0); }
+		TNTE C 1 OverlayOffset(Left, (-39, 48), 0);
+		TNTE C 1 OverlayOffset(Left, (-27, 36));
+		TNTE C 1 OverlayOffset(Left, (-21, 28));
+		TNTE C 1 OverlayOffset(Left, (-15, 20));
+		TNTE C 1 OverlayOffset(Left, (-9, 12));
+		TNTE C 1 OverlayOffset(Left, (-3, 3));
+		TNTE C 1 OverlayOffset(Left, (-2, 2));
+		TNTE C 1 OverlayOffset(Left, (-1.5, 1.5));
+		TNTE C 1 OverlayOffset(Left, (-1, 1));
+		TNTE C 1 OverlayOffset(Left, (-0.5, 0.5));
+		TNTE C 1 OverlayOffset(Left, (-0.25, 0.25));
+	Detonator_Idle: TNTE C 1 OverlayOffset(Left, (0, 0)); Loop;
+	Detonator_Lower:
+		TNTE C 1 OverlayOffset(Left, (-3, 3));
+		TNTE C 1 OverlayOffset(Left, (-9, 12));
+		TNTE C 1 OverlayOffset(Left, (-15, 20));
+		TNTE C 1 OverlayOffset(Left, (-21, 28));
+		TNTE C 1 OverlayOffset(Left, (-27, 36));
+		TNTE C 1 OverlayOffset(Left, (-39, 48));
+		Stop;
+	
+	Detonator_LightHandler:
+		TNT1 A 4 { Overlay(LeftFX2, "Detonator_Light1"); OverlayOffset(LeftFX2, (0, 0)); }
+		TNT1 A 4 { Overlay(LeftFX3, "Detonator_Light2"); OverlayOffset(LeftFX3, (4, 0)); }
+		TNT1 A 4 { Overlay(LeftFX4, "Detonator_Light3"); OverlayOffset(LeftFX4, (8, 0)); }
+		TNT1 A 4 { Overlay(LeftFX5, "Detonator_Light4"); OverlayOffset(LeftFX5, (12, 0)); }
+		TNT1 A 4 { Overlay(LeftFX4, "Detonator_Light3"); OverlayOffset(LeftFX4, (8, 0)); }
+		TNT1 A 4 { Overlay(LeftFX3, "Detonator_Light2"); OverlayOffset(LeftFX3, (4, 0)); }
+		//TNT1 A 3 { Overlay(LeftFX2, "Detonator_Light1"); OverlayOffset(LeftFX2, (0, 0)); }
+		Loop;
+		
+	Detonator_Light1:
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX2, 1.);		OverlayOffset(LeftFX2, (0, 0)); }
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX2, .9);		OverlayOffset(LeftFX2, (0, 0)); }
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX2, .8);		OverlayOffset(LeftFX2, (0, 0)); }
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX2, .7);		OverlayOffset(LeftFX2, (0, 0)); }
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX2, .6);		OverlayOffset(LeftFX2, (0, 0)); }
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX2, .5);		OverlayOffset(LeftFX2, (0, 0)); }
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX2, .4);		OverlayOffset(LeftFX2, (0, 0)); }
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX2, .3);		OverlayOffset(LeftFX2, (0, 0)); }
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX2, .2);		OverlayOffset(LeftFX2, (0, 0)); }
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX2, .1);		OverlayOffset(LeftFX2, (0, 0)); }
+		Stop;
+	Detonator_Light2:
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX3, 1.);		OverlayOffset(LeftFX3, (4, 0)); }
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX3, .9);		OverlayOffset(LeftFX3, (4, 0)); }
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX3, .8);		OverlayOffset(LeftFX3, (4, 0)); }
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX3, .7);		OverlayOffset(LeftFX3, (4, 0)); }
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX3, .6);		OverlayOffset(LeftFX3, (4, 0)); }
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX3, .5);		OverlayOffset(LeftFX3, (4, 0)); }
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX3, .4);		OverlayOffset(LeftFX3, (4, 0)); }
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX3, .3);		OverlayOffset(LeftFX3, (4, 0)); }
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX3, .2);		OverlayOffset(LeftFX3, (4, 0)); }
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX3, .1);		OverlayOffset(LeftFX3, (4, 0)); }
+		Stop;
+	Detonator_Light3:
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX4, 1.);		OverlayOffset(LeftFX4, (8, 0)); }
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX4, .9);		OverlayOffset(LeftFX4, (8, 0)); }
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX4, .8);		OverlayOffset(LeftFX4, (8, 0)); }
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX4, .7);		OverlayOffset(LeftFX4, (8, 0)); }
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX4, .6);		OverlayOffset(LeftFX4, (8, 0)); }
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX4, .5);		OverlayOffset(LeftFX4, (8, 0)); }
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX4, .4);		OverlayOffset(LeftFX4, (8, 0)); }
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX4, .3);		OverlayOffset(LeftFX4, (8, 0)); }
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX4, .2);		OverlayOffset(LeftFX4, (8, 0)); }
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX4, .1);		OverlayOffset(LeftFX4, (8, 0)); }
+		Stop;
+	Detonator_Light4:
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX5, 1.);		OverlayOffset(LeftFX5, (12, 0)); }
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX5, .9);		OverlayOffset(LeftFX5, (12, 0)); }
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX5, .8);		OverlayOffset(LeftFX5, (12, 0)); }
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX5, .7);		OverlayOffset(LeftFX5, (12, 0)); }
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX5, .6);		OverlayOffset(LeftFX5, (12, 0)); }
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX5, .5);		OverlayOffset(LeftFX5, (12, 0)); }
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX5, .4);		OverlayOffset(LeftFX5, (12, 0)); }
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX5, .3);		OverlayOffset(LeftFX5, (12, 0)); }
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX5, .2);		OverlayOffset(LeftFX5, (12, 0)); }
+		TNTE E 1 BRIGHT { A_OverlayAlpha(LeftFX5, .1);		OverlayOffset(LeftFX5, (12, 0)); }
+		Stop;
+		
+	RedBlink:
+		TNTE B 1 BRIGHT { A_OverlayAlpha(RightFX1, 1.); 	OverlayOffset(RightFX1, (0, 0)); }
+		TNTE B 1 BRIGHT { A_OverlayAlpha(RightFX1, .8); 	OverlayOffset(RightFX1, (0, 0)); }
+		TNTE B 1 BRIGHT { A_OverlayAlpha(RightFX1, .6);		OverlayOffset(RightFX1, (0, 0)); }
+		TNTE B 1 BRIGHT { A_OverlayAlpha(RightFX1, .4); 	OverlayOffset(RightFX1, (0, 0)); }
+		TNTE B 1 BRIGHT { A_OverlayAlpha(RightFX1, .2); 	OverlayOffset(RightFX1, (0, 0)); }
+		TNT1 AAAAAAAAAAAA 1 OverlayOffset(RightFX1, (0, 0));
+		Loop;
+	}
+}
+
+Class DynamiteAmmo_Remote : Ammo
+{
+	Default
+	{
+		Inventory.Amount 1;
+		Inventory.MaxAmount 50;
+		Ammo.BackpackAmount 5;
+		Ammo.BackpackMaxAmount 100;
+	}
+}
+
+Class RemoteDeployed : Inventory { Default { Inventory.MaxAmount 1; } }
+Class RemoteDetonate : Inventory { Default { Inventory.MaxAmount 1; } }
+Class RemoteBombProj : DynamiteBase 
+{
+	Override void PostBeginPlay()
+	{
+		Super.PostBeginPlay();
+		If(Target) Target.A_GiveInventory("RemoteDeployed");
+	}
+	
+	bool done;
+	Action void DetonatorWait()
+	{
+		If(Target && Target.CountInv("RemoteDetonate") && !Invoker.Done)
+		{
+			A_StartSound("RemoteAlarm", CHAN_WEAPON, CHANF_OVERLAP, 1.0, 1.25, 1.0);
+			Invoker.Timer = random[Blood](-8, -1);
+			Invoker.Done = True;
+		}
+		
+		If(!Target) { Invoker.Timer = -7; Invoker.Done = True; }
+		If(Invoker.Done && Invoker.Timer++ >= 0) 
+		{ 
+			If(Target) { Target.A_TakeInventory("RemoteDetonate"); Target.A_TakeInventory("RemoteDeployed"); } 
+			SetStateLabel("Explode");
+		}
+	}
+	
+	Override void Tick()
+	{
+		super.Tick();
+		If(!IsFrozen()) DynamiteTrail("Red");
+	}
+	
+	States
+	{
+	Bounce:
+		TNT1 A 0 A_StartSound("TNTBounce", CHAN_BODY, CHANF_OVERLAP, 1.0);
+	Spawn:
+		TNT1 A 0 NoDelay A_Jump(8, 1, 2, 3, 4, 5, 6, 7, 8);
+		Loop;
+	See:
+		TNTZ CCCCDDDDEEEEFFFFGGGGHHHHIIIIJJJJ 1 DetonatorWait();
+		Loop;
+	Death:
+		TNTZ A 0 { Scale = (.6, .6); A_ChangeVelocity(invoker.prevspeed.x * 1.25, invoker.prevspeed.y * 1.25, 0, 0); A_StartSound("TNTBounce", CHAN_BODY, CHANF_OVERLAP, 1.0); }
+		TNTZ AAAAAABBBBBB 1
+		{
+			If(Self.Pos.Z <= FloorZ) Vel *= 0.99;
+			DetonatorWait();
+		}
+		Goto Death+1;
+	}
+}
